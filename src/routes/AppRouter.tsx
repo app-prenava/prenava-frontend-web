@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '@/features/auth/LoginPage';
 import Protected from './Protected';
+import SideBar from '@/component/UI/SideBar';
 
 export default function AppRouter() {
   return (
@@ -11,14 +12,16 @@ export default function AppRouter() {
           path="/dashboard"
           element={
             <Protected>
-              <div className="p-8">
-                <h1 className="text-2xl font-semibold">Dashboard</h1>
-                <p className="text-gray-600 mt-2">Welcome to your dashboard</p>
-              </div>
+              <SideBar>
+                <div className="p-8">
+                  <h1 className="text-2xl font-semibold">Dashboard</h1>
+                  <p className="text-gray-600 mt-2">Welcome to your dashboard</p>
+                </div>  
+              </SideBar>
             </Protected>
           }
         />
-        <Route
+        <Route  
           path="/admin"
           element={
             <Protected>
