@@ -18,6 +18,25 @@ export const storage = {
     sessionStorage.removeItem('token');
   },
 
+  getRole: (): string | null => {
+    return localStorage.getItem('role') || sessionStorage.getItem('role');
+  },
+
+  setRole: (role: string, remember = true): void => {
+    if (remember) {
+      localStorage.setItem('role', role);
+      sessionStorage.removeItem('role');
+    } else {
+      sessionStorage.setItem('role', role);
+      localStorage.removeItem('role');
+    }
+  },
+
+  removeRole: (): void => {
+    localStorage.removeItem('role');
+    sessionStorage.removeItem('role');
+  },
+
   get: (key: string): string | null => {
     return localStorage.getItem(key);
   },
