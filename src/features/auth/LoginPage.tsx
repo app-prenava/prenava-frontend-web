@@ -24,10 +24,18 @@ export default function LoginPage() {
       storage.setRole(user.role, remember);
       
       // Redirect based on role
-      if (user.role === 'admin') {
-        nav('/admin');
-      } else {
-        nav('/dashboard');
+      switch (user.role) {
+        case 'admin':
+          nav('/admin');
+          break;
+        case 'bidan':
+          nav('/bidan');
+          break;
+        case 'dinkes':
+          nav('/dinkes');
+          break;
+        default:
+          nav('/dashboard');
       }
     } catch (e: any) {
       console.error('Login error:', e);

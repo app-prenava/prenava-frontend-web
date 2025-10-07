@@ -2,9 +2,13 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '@/features/auth/LoginPage';
 import Protected from './Protected';
 import ProtectedAdmin from './ProtectedAdmin';
+import ProtectedBidan from './ProtectedBidan';
+import ProtectedDinkes from './ProtectedDinkes';
 import AdminLayout from '@/features/admin/components/AdminLayout';
 import AdminDashboard from '@/features/admin/pages/AdminDashboard';
 import CreateAccountPage from '@/features/admin/pages/CreateAccountPage';
+import BidanDashboard from '@/features/bidan/BidanDashboard';
+import DinkesDashboard from '@/features/dinkes/DinkesDashboard';
 
 export default function AppRouter() {
   return (
@@ -46,7 +50,27 @@ export default function AppRouter() {
           }
         />
 
-        {/* Other Dashboard */}
+        {/* Bidan Route */}
+        <Route
+          path="/bidan"
+          element={
+            <ProtectedBidan>
+              <BidanDashboard />
+            </ProtectedBidan>
+          }
+        />
+
+        {/* Dinkes Route */}
+        <Route
+          path="/dinkes"
+          element={
+            <ProtectedDinkes>
+              <DinkesDashboard />
+            </ProtectedDinkes>
+          }
+        />
+
+        {/* Generic Dashboard */}
         <Route
           path="/dashboard"
           element={
