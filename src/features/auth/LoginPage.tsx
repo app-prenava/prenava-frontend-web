@@ -21,6 +21,7 @@ export default function LoginPage() {
       const res = await login({ email, password });
       const { authorization, user } = res;
       storage.setToken(authorization.token, remember);
+      storage.setRole(user.role, remember);
       
       // Redirect based on role
       if (user.role === 'admin') {
