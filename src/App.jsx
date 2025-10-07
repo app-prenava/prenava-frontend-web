@@ -3,6 +3,7 @@ export default function App() {
     <div>
       <h1>React + Vite + tailwindcss</h1>
     </div>
+    
   )
 }
 
