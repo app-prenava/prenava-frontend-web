@@ -7,6 +7,10 @@ import ProtectedDinkes from './ProtectedDinkes';
 import AdminLayout from '@/features/admin/components/AdminLayout';
 import AdminDashboard from '@/features/admin/pages/AdminDashboard';
 import CreateAccountPage from '@/features/admin/pages/CreateAccountPage';
+import CreateBidanPage from '@/features/admin/pages/CreateBidanPage';
+import CreateDinkesPage from '@/features/admin/pages/CreateDinkesPage';
+import BidanUsersPage from '@/features/admin/pages/BidanUsersPage';
+import AdminDinkesUsersPage from '@/features/admin/pages/DinkesUsersPage';
 import BidanDashboard from '@/features/bidan/BidanDashboard';
 import DinkesDashboard from '@/features/dinkes/DinkesDashboard';
 import DinkesUsersPage from '@/features/dinkes/pages/DinkesUsersPage';
@@ -39,13 +43,41 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/admin/users"
+          path="/admin/create-bidan"
           element={
             <ProtectedAdmin>
               <AdminLayout>
-                <div className="text-center py-12 text-gray-500">
-                  Halaman Daftar User (Coming Soon)
-                </div>
+                <CreateBidanPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/admin/create-dinkes"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <CreateDinkesPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/admin/bidan-users"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <BidanUsersPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/admin/dinkes-users"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <AdminDinkesUsersPage />
               </AdminLayout>
             </ProtectedAdmin>
           }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getUserList } from '../admin.api';
-import { UserListItem } from '../admin.types';
+import { getAllUsers } from '../admin.api';
+import { User } from '../admin.types';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -14,13 +14,13 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const result = await getUserList();
-        const users = result.users;
+        const result = await getAllUsers();
+        const users = result.data;
 
         setStats({
-          totalBidan: users.filter((u: UserListItem) => u.role === 'bidan').length,
-          totalDinkes: users.filter((u: UserListItem) => u.role === 'dinkes').length,
-          totalIbuHamil: users.filter((u: UserListItem) => u.role === 'ibu_hamil').length,
+          totalBidan: users.filter((u: User) => u.role === 'bidan').length,
+          totalDinkes: users.filter((u: User) => u.role === 'dinkes').length,
+          totalIbuHamil: users.filter((u: User) => u.role === 'ibu_hamil').length,
           totalUsers: users.length,
         });
       } catch (error) {
