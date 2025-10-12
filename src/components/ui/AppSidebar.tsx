@@ -1,7 +1,6 @@
-import { Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
-import type { MenuProps } from 'antd';
 import logoUrl from '@/assets/logo.png';
+import { SidebarItem } from './SidebarItem';
 
 export type MenuItem = {
   key: string;
@@ -24,36 +23,33 @@ export default function AppSidebar({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const antdMenuItems: MenuProps['items'] = menuItems.map((item) => ({
-    key: item.key,
-    icon: item.icon,
-    label: item.label,
-    onClick: () => navigate(item.path),
-  }));
-
   const selectedKey = menuItems.find((item) => item.path === location.pathname)?.key || menuItems[0]?.key;
 
   return (
     <div className="h-full bg-white">
       {/* Logo Section */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-200 bg-white">
-        <img src={logoUrl} alt={appName} className="w-10 h-10" />
+      <div className="flex items-start justify-start px-6 py-5 border-b border-gray-200 bg-white">
+        <img src={logoUrl} alt={appName} className="w-10 h-10 flex-shrink-0 mt-1" />
         {!collapsed && (
-          <div>
-            <h1 className="font-semibold text-lg" style={{ color: '#FA6978' }}>{appName}</h1>
+          <div className="ml-3 flex items-end h-10">
+            <h1 className="font-semibold text-lg leading-none m-0" style={{ color: '#FA6978' }}>{appName}</h1>
           </div>
         )}
       </div>
 
       {/* Menu */}
-      <Menu
-        theme="light"
-        mode="inline"
-        selectedKeys={[selectedKey]}
-        items={antdMenuItems}
-        style={{ borderRight: 0, backgroundColor: 'white' }}
-        className="bg-white"
-      />
+      <div className="px-4 py-2">
+        {menuItems.map((item) => (
+          <SidebarItem
+            key={item.key}
+            label={item.label}
+            icon={item.icon}
+            active={item.key === selectedKey}
+            onClick={() => navigate(item.path)}
+          />
+        ))}
+      </div>
+      
     </div>
   );
 }
