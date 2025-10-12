@@ -11,6 +11,7 @@ import BidanLayout from '@/features/bidan/components/BidanLayout';
 import BidanDashboardPage from '@/features/bidan/pages/BidanDashboardPage';
 import BidanUsersPage from '@/features/bidan/pages/BidanUsersPage';
 import DinkesDashboard from '@/features/dinkes/DinkesDashboard';
+import DinkesUsersPage from '@/features/dinkes/pages/DinkesUsersPage';
 
 export default function AppRouter() {
   return (
@@ -74,12 +75,20 @@ export default function AppRouter() {
           }
         />
 
-        {/* Dinkes Route */}
+        {/* Dinkes Routes */}
         <Route
           path="/dinkes"
           element={
             <ProtectedDinkes>
               <DinkesDashboard />
+            </ProtectedDinkes>
+          }
+        />
+        <Route
+          path="/dinkes/users"
+          element={
+            <ProtectedDinkes>
+              <DinkesUsersPage />
             </ProtectedDinkes>
           }
         />
