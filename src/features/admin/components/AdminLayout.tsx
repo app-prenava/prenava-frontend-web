@@ -2,7 +2,7 @@ import { ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { storage } from '@/lib/storage';
 import Sidebar from './Sidebar';
-import LogoutModal from './LogoutModal';
+import LogoutModal from '@/components/ui/LogoutModal';
 
 type AdminLayoutProps = {
   children: ReactNode;

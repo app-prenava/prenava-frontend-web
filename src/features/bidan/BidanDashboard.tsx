@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { storage } from '@/lib/storage';
+import LogoutModal from '@/components/ui/LogoutModal';
 
 export default function BidanDashboard() {
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = () => {
     storage.removeToken();
@@ -24,7 +27,7 @@ export default function BidanDashboard() {
               </p>
             </div>
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogoutConfirm(true)}
               className="px-6 py-2 rounded-lg text-white font-medium transition hover:opacity-90"
               style={{ backgroundColor: '#FA6978' }}
             >
@@ -49,6 +52,12 @@ export default function BidanDashboard() {
           </div>
         </div>
       </div>
+
+      <LogoutModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+      />
     </div>
   );
 }
