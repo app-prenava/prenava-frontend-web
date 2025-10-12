@@ -1,8 +1,9 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { storage } from '@/lib/storage';
 import AppLayout from '@/components/ui/AppLayout';
 import { MenuItem } from '@/components/ui/AppSidebar';
+import LogoutModal from '@/components/ui/LogoutModal';
 
 type DinkesLayoutProps = {
   children: ReactNode;
@@ -23,6 +24,7 @@ const UsersIcon = () => (
 
 export default function DinkesLayout({ children }: DinkesLayoutProps) {
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = () => {
     storage.removeToken();
@@ -52,15 +54,23 @@ export default function DinkesLayout({ children }: DinkesLayoutProps) {
   const userAvatar = undefined;
 
   return (
-    <AppLayout
-      menuItems={menuItems}
-      userName={userName}
-      userRole={userRole}
-      userAvatar={userAvatar}
-      onLogout={handleLogout}
-      appName="Prenava"
-    >
-      {children}
-    </AppLayout>
+    <>
+      <AppLayout
+        menuItems={menuItems}
+        userName={userName}
+        userRole={userRole}
+        userAvatar={userAvatar}
+        onLogout={() => setShowLogoutConfirm(true)}
+        appName="Prenava"
+      >
+        {children}
+      </AppLayout>
+
+      <LogoutModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+      />
+    </>
   );
 }
