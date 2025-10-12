@@ -9,6 +9,7 @@ import AdminDashboard from '@/features/admin/pages/AdminDashboard';
 import CreateAccountPage from '@/features/admin/pages/CreateAccountPage';
 import BidanDashboard from '@/features/bidan/BidanDashboard';
 import DinkesDashboard from '@/features/dinkes/DinkesDashboard';
+import DinkesUsersPage from '@/features/dinkes/pages/DinkesUsersPage';
 
 export default function AppRouter() {
   return (
@@ -60,12 +61,20 @@ export default function AppRouter() {
           }
         />
 
-        {/* Dinkes Route */}
+        {/* Dinkes Routes */}
         <Route
           path="/dinkes"
           element={
             <ProtectedDinkes>
               <DinkesDashboard />
+            </ProtectedDinkes>
+          }
+        />
+        <Route
+          path="/dinkes/users"
+          element={
+            <ProtectedDinkes>
+              <DinkesUsersPage />
             </ProtectedDinkes>
           }
         />
