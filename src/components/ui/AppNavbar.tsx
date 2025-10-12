@@ -48,13 +48,13 @@ export default function AppNavbar({
   ];
 
   return (
-    <div className="flex items-center justify-between px-6 h-16 bg-white border-b border-gray-200">
+    <div className="flex items-center justify-between px-6 h-21 bg-white border-b border-gray-200">
       {/* Toggle Button */}
       <Button
         type="text"
         icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
         onClick={onToggleCollapse}
-        style={{ fontSize: '16px', width: 48, height: 48 }}
+        style={{ fontSize: '18px', width: 56, height: 56 }}
       />
 
       {/* Right Section */}
@@ -63,7 +63,7 @@ export default function AppNavbar({
         <Button
           type="text"
           icon={<NotificationIcon />}
-          style={{ width: 40, height: 40 }}
+          style={{ width: 48, height: 48 }}
         />
 
         {/* User Dropdown */}
