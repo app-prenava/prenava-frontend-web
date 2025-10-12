@@ -37,6 +37,25 @@ export const storage = {
     sessionStorage.removeItem('role');
   },
 
+  getUserName: (): string | null => {
+    return localStorage.getItem('userName') || sessionStorage.getItem('userName');
+  },
+
+  setUserName: (userName: string, remember = true): void => {
+    if (remember) {
+      localStorage.setItem('userName', userName);
+      sessionStorage.removeItem('userName');
+    } else {
+      sessionStorage.setItem('userName', userName);
+      localStorage.removeItem('userName');
+    }
+  },
+
+  removeUserName: (): void => {
+    localStorage.removeItem('userName');
+    sessionStorage.removeItem('userName');
+  },
+
   get: (key: string): string | null => {
     return localStorage.getItem(key);
   },
