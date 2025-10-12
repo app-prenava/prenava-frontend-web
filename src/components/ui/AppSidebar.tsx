@@ -45,6 +45,7 @@ export default function AppSidebar({
             label={item.label}
             icon={item.icon}
             active={item.key === selectedKey}
+            collapsed={collapsed}
             onClick={() => navigate(item.path)}
           />
         ))}
