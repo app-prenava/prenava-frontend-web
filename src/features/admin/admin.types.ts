@@ -1,5 +1,21 @@
 export type UserRole = 'admin' | 'bidan' | 'dinkes' | 'ibu_hamil';
 
+export type User = {
+  user_id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+  is_active: number; // 1 for active, 0 for inactive
+  created_at: string;
+  updated_at: string;
+};
+
+export type GetAllUsersResponse = {
+  status: 'success';
+  message: string;
+  data: User[];
+};
+
 export type CreateAccountBody = {
   name: string;
   email: string;
@@ -18,18 +34,9 @@ export type CreateAccountResponse = {
   };
 };
 
-export type UserListItem = {
-  user_id: number;
-  name: string;
-  email: string;
-  role: UserRole;
-  created_at: string;
-};
-
-export type UserListResponse = {
-  status: string;
-  users: UserListItem[];
-};
+// Keep old types for backward compatibility
+export type UserListItem = User;
+export type UserListResponse = GetAllUsersResponse;
 
 export type ResetPasswordBody = {
   new_password: string;

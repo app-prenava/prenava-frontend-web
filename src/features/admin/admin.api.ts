@@ -2,7 +2,7 @@ import api from '@/lib/apiClient';
 import {
   CreateAccountBody,
   CreateAccountResponse,
-  UserListResponse,
+  GetAllUsersResponse,
   ResetPasswordBody,
   ResetPasswordResponse,
 } from './admin.types';
@@ -23,16 +23,39 @@ export const createDinkes = async (body: CreateAccountBody) => {
   return data;
 };
 
-export const getUserList = async (role?: string) => {
+export const getAllUsers = async (role?: string) => {
   const params = role ? { role } : {};
-  const { data } = await api.get<UserListResponse>('/api/admin/users', { params });
+  const { data } = await api.get<GetAllUsersResponse>('/api/admin/users', { params });
   return data;
 };
+
+export const getBidans = async () => {
+  const { data } = await api.get<GetAllUsersResponse>('/api/admin/users?role=bidan');
+  return data;
+};
+
+export const getDinkes = async () => {
+  const { data } = await api.get<GetAllUsersResponse>('/api/admin/users?role=dinkes');
+  return data;
+};
+
+// Keep old function for backward compatibility
+export const getUserList = getAllUsers;
 
 export const resetUserPassword = async (userId: number, body: ResetPasswordBody) => {
   const { data } = await api.post<ResetPasswordResponse>(
     `/api/admin/users/${userId}/reset-password`,
     body
   );
+  return data;
+};
+
+export const deactivateUser = async (userId: number) => {
+  const { data } = await api.post(`/api/admin/users/${userId}/deactivate`);
+  return data;
+};
+
+export const activateUser = async (userId: number) => {
+  const { data } = await api.post(`/api/admin/users/${userId}/activate`);
   return data;
 };
