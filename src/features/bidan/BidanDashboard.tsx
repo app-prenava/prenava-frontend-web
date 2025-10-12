@@ -39,7 +39,7 @@ export default function BidanDashboard() {
                 <h3 className="font-semibold text-lg mb-2">Role Anda</h3>
                 <p className="text-gray-600">Bidan</p>
               </div>
-              
+
               <div className="p-6 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="text-4xl mb-3">📊</div>
                 <h3 className="font-semibold text-lg mb-2">Status</h3>

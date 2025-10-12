@@ -7,7 +7,9 @@ import ProtectedDinkes from './ProtectedDinkes';
 import AdminLayout from '@/features/admin/components/AdminLayout';
 import AdminDashboard from '@/features/admin/pages/AdminDashboard';
 import CreateAccountPage from '@/features/admin/pages/CreateAccountPage';
-import BidanDashboard from '@/features/bidan/BidanDashboard';
+import BidanLayout from '@/features/bidan/components/BidanLayout';
+import BidanDashboardPage from '@/features/bidan/pages/BidanDashboardPage';
+import BidanUsersPage from '@/features/bidan/pages/BidanUsersPage';
 import DinkesDashboard from '@/features/dinkes/DinkesDashboard';
 
 export default function AppRouter() {
@@ -15,7 +17,7 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        
+
         {/* Admin Routes */}
         <Route
           path="/admin"
@@ -50,12 +52,24 @@ export default function AppRouter() {
           }
         />
 
-        {/* Bidan Route */}
+        {/* Bidan Routes */}
         <Route
           path="/bidan"
           element={
             <ProtectedBidan>
-              <BidanDashboard />
+              <BidanLayout>
+                <BidanDashboardPage />
+              </BidanLayout>
+            </ProtectedBidan>
+          }
+        />
+        <Route
+          path="/bidan/users"
+          element={
+            <ProtectedBidan>
+              <BidanLayout>
+                <BidanUsersPage />
+              </BidanLayout>
             </ProtectedBidan>
           }
         />
@@ -75,16 +89,14 @@ export default function AppRouter() {
           path="/dashboard"
           element={
             <Protected>
-              <SideBar>
-                <div className="p-8">
-                  <h1 className="text-2xl font-semibold">Dashboard</h1>
-                  <p className="text-gray-600 mt-2">Welcome to your dashboard</p>
-                </div>  
-              </SideBar>
+              <div className="p-8">
+                <h1 className="text-2xl font-semibold">Dashboard</h1>
+                <p className="text-gray-600 mt-2">Welcome to your dashboard</p>
+              </div>
             </Protected>
           }
         />
-        
+
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
