@@ -39,11 +39,17 @@ export default function CreateAccountPage() {
       setEmail('');
       setPassword('');
     } catch (e: any) {
-      const errorMsg =
+      let errorMsg =
         e?.response?.data?.message ||
         e?.response?.data?.error ||
         e?.message ||
         'Gagal membuat akun';
+
+      // Translate specific error messages
+      if (errorMsg.includes('Account is deactivated') || errorMsg.includes('Contact admin')) {
+        errorMsg = 'Akun dinonaktifkan. Hubungi Admin.';
+      }
+
       setError(errorMsg);
     } finally {
       setLoading(false);

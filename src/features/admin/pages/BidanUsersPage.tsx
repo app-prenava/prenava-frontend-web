@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Space, Table, Tag, Button, Input, Avatar, Switch } from 'antd';
-import { SearchOutlined, PlusOutlined, FilterOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { getBidans } from '../admin.api';
+import { SearchOutlined, PlusOutlined, FilterOutlined, EyeOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { getBidans, deactivateUser, activateUser } from '../admin.api';
 import { User } from '../admin.types';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const { Column } = Table;
 
@@ -10,11 +11,25 @@ interface DataType extends User {
   key: React.Key;
 }
 
+interface ConfirmDialogState {
+  isOpen: boolean;
+  userId: number;
+  userName: string;
+  action: 'activate' | 'deactivate';
+}
+
 export default function BidanUsersPage() {
   const [users, setUsers] = useState<DataType[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
+    isOpen: false,
+    userId: 0,
+    userName: '',
+    action: 'deactivate',
+  });
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     fetchBidanUsers();
@@ -57,17 +72,78 @@ export default function BidanUsersPage() {
     setSearchText(value);
   };
 
-  const handleStatusToggle = (userId: number, checked: boolean) => {
-    // TODO: Implement status toggle API call
-    console.log(`Toggle user ${userId} to ${checked ? 'active' : 'inactive'}`);
+  const handleStatusToggle = (userId: number, userName: string, currentStatus: number) => {
+    setConfirmDialog({
+      isOpen: true,
+      userId,
+      userName,
+      action: currentStatus === 1 ? 'deactivate' : 'activate',
+    });
   };
 
-  const getStatusColor = (isActive: boolean) => {
-    return isActive ? 'green' : 'red';
+  const confirmAction = async () => {
+    try {
+      setActionLoading(true);
+      
+      if (confirmDialog.action === 'deactivate') {
+        await deactivateUser(confirmDialog.userId);
+        // Update local state immediately
+        setUsers(prev => prev.map(user => 
+          user.user_id === confirmDialog.userId ? { ...user, is_active: 0 } : user
+        ));
+      } else {
+        await activateUser(confirmDialog.userId);
+        // Update local state immediately
+        setUsers(prev => prev.map(user => 
+          user.user_id === confirmDialog.userId ? { ...user, is_active: 1 } : user
+        ));
+      }
+      
+      // Close dialog
+      setConfirmDialog({
+        isOpen: false,
+        userId: 0,
+        userName: '',
+        action: 'deactivate',
+      });
+    } catch (error: any) {
+      console.error('Failed to change user status:', error);
+      let errorMsg = error?.response?.data?.message || `Gagal mengubah status user: ${error}`;
+      
+      // Translate specific error messages
+      if (errorMsg.includes('Account is deactivated') || errorMsg.includes('Contact admin')) {
+        errorMsg = 'Akun dinonaktifkan. Hubungi Admin.';
+      }
+      
+      alert(errorMsg);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const getStatusText = (isActive: boolean) => {
-    return isActive ? 'Active' : 'InActive';
+  const cancelAction = () => {
+    setConfirmDialog({
+      isOpen: false,
+      userId: 0,
+      userName: '',
+      action: 'deactivate',
+    });
+  };
+
+  const getStatusTag = (isActive: number) => {
+    if (isActive === 1) {
+      return (
+        <Tag icon={<CheckCircleOutlined />} color="success">
+          Active
+        </Tag>
+      );
+    } else {
+      return (
+        <Tag icon={<CloseCircleOutlined />} color="error">
+          InActive
+        </Tag>
+      );
+    }
   };
 
   return (
@@ -164,15 +240,15 @@ export default function BidanUsersPage() {
             title="Status"
             dataIndex="is_active"
             key="is_active"
-            render={(isActive: boolean, record: DataType) => (
+            render={(isActive: number, record: DataType) => (
               <div className="flex items-center gap-2">
-                <Tag color={getStatusColor(isActive)}>
-                  {getStatusText(isActive)}
-                </Tag>
+                {getStatusTag(isActive)}
                 <Switch
-                  checked={isActive}
-                  onChange={(checked) => handleStatusToggle(record.user_id, checked)}
+                  checked={isActive === 1}
+                  onChange={() => handleStatusToggle(record.user_id, record.name, isActive)}
                   size="small"
+                  loading={actionLoading && confirmDialog.userId === record.user_id}
+                  disabled={actionLoading}
                 />
               </div>
             )}
@@ -203,6 +279,19 @@ export default function BidanUsersPage() {
           />
         </Table>
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title="Konfirmasi"
+        message={`Apakah Anda yakin ingin ${confirmDialog.action === 'deactivate' ? 'menonaktifkan' : 'mengaktifkan'} user ${confirmDialog.userName}?`}
+        confirmText={confirmDialog.action === 'deactivate' ? 'Nonaktifkan' : 'Aktifkan'}
+        cancelText="Batal"
+        confirmButtonColor={confirmDialog.action === 'deactivate' ? 'red' : 'green'}
+        onConfirm={confirmAction}
+        onCancel={cancelAction}
+        loading={actionLoading}
+      />
     </div>
   );
 }

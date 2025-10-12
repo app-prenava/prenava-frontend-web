@@ -5,7 +5,7 @@ export type User = {
   name: string;
   email: string;
   role: UserRole;
-  is_active: boolean;
+  is_active: number; // 1 for active, 0 for inactive
   created_at: string;
   updated_at: string;
 };

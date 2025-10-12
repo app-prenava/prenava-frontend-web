@@ -26,7 +26,14 @@ export default function CreateBidanPage() {
       setEmail('');
       setPassword('');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Terjadi kesalahan saat membuat akun bidan');
+      let errorMsg = err.response?.data?.message || 'Terjadi kesalahan saat membuat akun bidan';
+      
+      // Translate specific error messages
+      if (errorMsg.includes('Account is deactivated') || errorMsg.includes('Contact admin')) {
+        errorMsg = 'Akun dinonaktifkan. Hubungi Admin.';
+      }
+      
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
