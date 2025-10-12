@@ -22,6 +22,7 @@ export default function LoginPage() {
       const { authorization, user } = res;
       storage.setToken(authorization.token, remember);
       storage.setRole(user.role, remember);
+      storage.setUserName(user.name, remember);
       
       // Redirect based on role
       switch (user.role) {

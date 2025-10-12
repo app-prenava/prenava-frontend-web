@@ -27,6 +27,7 @@ export default function DinkesLayout({ children }: DinkesLayoutProps) {
   const handleLogout = () => {
     storage.removeToken();
     storage.removeRole();
+    storage.removeUserName();
     navigate('/login');
   };
 
@@ -46,8 +47,8 @@ export default function DinkesLayout({ children }: DinkesLayoutProps) {
     },
   ];
 
-  const userName = 'Irdan';
-  const userRole = 'Dinkes';
+  const userName = storage.getUserName() || 'User';
+  const userRole = storage.getRole() || 'Dinkes';
   const userAvatar = undefined;
 
   return (
