@@ -29,6 +29,16 @@ export const getAllUsers = async (role?: string) => {
   return data;
 };
 
+export const getBidans = async () => {
+  const { data } = await api.get<GetAllUsersResponse>('/api/admin/users?role=bidan');
+  return data;
+};
+
+export const getDinkes = async () => {
+  const { data } = await api.get<GetAllUsersResponse>('/api/admin/users?role=dinkes');
+  return data;
+};
+
 // Keep old function for backward compatibility
 export const getUserList = getAllUsers;
 
