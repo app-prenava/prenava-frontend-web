@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Space, Table, Tag, Button, Input, Avatar, Switch } from 'antd';
 import { SearchOutlined, PlusOutlined, FilterOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { getAllUsers } from '../admin.api';
+import { getDinkes } from '../admin.api';
 import { User } from '../admin.types';
 
 const { Column } = Table;
@@ -27,7 +27,7 @@ export default function DinkesUsersPage() {
   const fetchDinkesUsers = async () => {
     try {
       setLoading(true);
-      const result = await getAllUsers('dinkes');
+      const result = await getDinkes();
       const usersWithKey = result.data.map((user) => ({
         ...user,
         key: user.user_id,
@@ -138,10 +138,10 @@ export default function DinkesUsersPage() {
           />
           <Column
             title="Alamat"
-            dataIndex="email"
+            dataIndex="address"
             key="address"
-            render={(email: string) => (
-              <span className="text-gray-600">345321231</span>
+            render={() => (
+              <span className="text-gray-400">-</span>
             )}
           />
           <Column
@@ -149,7 +149,7 @@ export default function DinkesUsersPage() {
             dataIndex="city"
             key="city"
             render={() => (
-              <span className="text-gray-600">Design</span>
+              <span className="text-gray-400">-</span>
             )}
           />
           <Column
@@ -157,7 +157,7 @@ export default function DinkesUsersPage() {
             dataIndex="specialization"
             key="specialization"
             render={() => (
-              <span className="text-gray-600">UI/UX Designer</span>
+              <span className="text-gray-400">-</span>
             )}
           />
           <Column
@@ -180,7 +180,7 @@ export default function DinkesUsersPage() {
           <Column
             title="Action"
             key="action"
-            render={(_, record: DataType) => (
+            render={() => (
               <Space size="middle">
                 <Button
                   type="text"
