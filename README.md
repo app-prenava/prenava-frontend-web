@@ -1,16 +1,53 @@
-# React + Vite
+# Prenava Frontend Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Built with [React](https://react.dev/) + [Vite](https://vitejs.dev/) + [TypeScript](https://www.typescriptlang.org/) + [Ant Design](https://ant.design/) + [Tailwind CSS](https://tailwindcss.com/)**
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Quickstart Guide
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **Install dependencies:**
+```bash
+npm install
+```
 
-## Expanding the ESLint configuration
+2. **Start development server:**
+```bash
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+3. **Build for production:**
+```bash
+npm run build
+```
+
+4. **Preview production build:**
+```bash
+npm run preview
+```
+
+5. **Run linting:**
+```bash
+npm run lint
+```
+
+---
+
+## Project Structure
+
+- **Frontend Framework:** React 19 with TypeScript
+- **Build Tool:** Vite with Rolldown (ultra-fast bundling)
+- **UI Library:** Ant Design 5.x
+- **Styling:** Tailwind CSS 4.x
+- **Routing:** React Router DOM 7.x
+- **HTTP Client:** Axios
+- **Code Quality:** ESLint
+
+---
+
+## Development
+
+The application will be available at `http://localhost:5173` after running `npm run dev`.
+
+**Note:** Make sure you have Node.js 18+ installed on your system.
