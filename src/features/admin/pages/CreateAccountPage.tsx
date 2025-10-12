@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { createBidan, createDinkes } from '../admin.api';
 import RoleToggle from '../components/RoleToggle';
 import FormInput from '../components/FormInput';
 import MessageAlert from '../components/MessageAlert';
 
 export default function CreateAccountPage() {
+  const [searchParams] = useSearchParams();
   const [role, setRole] = useState<'bidan' | 'dinkes'>('bidan');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -12,6 +14,14 @@ export default function CreateAccountPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Set initial role from URL parameter
+  useEffect(() => {
+    const roleParam = searchParams.get('role');
+    if (roleParam === 'bidan' || roleParam === 'dinkes') {
+      setRole(roleParam);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
