@@ -59,7 +59,7 @@ export default function CreateDinkesPage() {
             label="Nama Lengkap"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={setName}
             placeholder="Masukkan nama lengkap dinkes"
             required
           />
@@ -68,7 +68,7 @@ export default function CreateDinkesPage() {
             label="Email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={setEmail}
             placeholder="Masukkan email dinkes"
             required
           />
@@ -77,7 +77,7 @@ export default function CreateDinkesPage() {
             label="Password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             placeholder="Masukkan password"
             required
           />
