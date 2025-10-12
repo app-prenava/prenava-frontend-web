@@ -43,11 +43,15 @@ export default function LoginPage() {
       console.error('Response data:', e?.response?.data);
       
       // Try to get error message from various possible locations
-      const errorMsg = 
+      let errorMsg = 
         e?.response?.data?.message || 
         e?.response?.data?.error || 
         e?.message || 
         'Login gagal. Periksa email dan password Anda.';
+      
+      if (errorMsg.includes('Account is deactivated') || errorMsg.includes('Contact admin')) {
+        errorMsg = 'Akun dinonaktifkan. Hubungi Admin.';
+      }
       
       setErr(errorMsg);
     } finally {

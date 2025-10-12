@@ -49,3 +49,13 @@ export const resetUserPassword = async (userId: number, body: ResetPasswordBody)
   );
   return data;
 };
+
+export const deactivateUser = async (userId: number) => {
+  const { data } = await api.post(`/api/admin/users/${userId}/deactivate`);
+  return data;
+};
+
+export const activateUser = async (userId: number) => {
+  const { data } = await api.post(`/api/admin/users/${userId}/activate`);
+  return data;
+};
