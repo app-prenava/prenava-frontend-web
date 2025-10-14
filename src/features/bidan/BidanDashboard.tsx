@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { storage } from '@/lib/storage';
@@ -61,3 +62,6 @@ export default function BidanDashboard() {
     </div>
   );
 }
+=======
+export { default } from './pages/BidanDashboard';
+>>>>>>> 7d78440 (feat: bidan dashboard)
