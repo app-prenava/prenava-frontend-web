@@ -9,9 +9,10 @@ import AdminDashboard from '@/features/admin/pages/AdminDashboard';
 import CreateAccountPage from '@/features/admin/pages/CreateAccountPage';
 import CreateBidanPage from '@/features/admin/pages/CreateBidanPage';
 import CreateDinkesPage from '@/features/admin/pages/CreateDinkesPage';
-import BidanUsersPage from '@/features/admin/pages/BidanUsersPage';
+import AdminBidanUsersPage from '@/features/admin/pages/BidanUsersPage';
 import AdminDinkesUsersPage from '@/features/admin/pages/DinkesUsersPage';
 import BidanDashboard from '@/features/bidan/BidanDashboard';
+import BidanUsersPage from '@/features/bidan/pages/BidanUsersPage';
 import DinkesDashboard from '@/features/dinkes/DinkesDashboard';
 import DinkesUsersPage from '@/features/dinkes/pages/DinkesUsersPage';
 
@@ -67,7 +68,7 @@ export default function AppRouter() {
           element={
             <ProtectedAdmin>
               <AdminLayout>
-                <BidanUsersPage />
+                <AdminBidanUsersPage />
               </AdminLayout>
             </ProtectedAdmin>
           }
@@ -83,12 +84,20 @@ export default function AppRouter() {
           }
         />
 
-        {/* Bidan Route */}
+        {/* Bidan Routes */}
         <Route
           path="/bidan"
           element={
             <ProtectedBidan>
               <BidanDashboard />
+            </ProtectedBidan>
+          }
+        />
+        <Route
+          path="/bidan/users"
+          element={
+            <ProtectedBidan>
+              <BidanUsersPage />
             </ProtectedBidan>
           }
         />
