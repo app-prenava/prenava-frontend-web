@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { createBidan } from '../admin.api';
-import FormInput from '../components/FormInput';
 import MessageAlert from '../components/MessageAlert';
 
 export default function CreateBidanPage() {
@@ -27,12 +26,11 @@ export default function CreateBidanPage() {
       setPassword('');
     } catch (err: any) {
       let errorMsg = err.response?.data?.message || 'Terjadi kesalahan saat membuat akun bidan';
-      
-      // Translate specific error messages
+
       if (errorMsg.includes('Account is deactivated') || errorMsg.includes('Contact admin')) {
         errorMsg = 'Akun dinonaktifkan. Hubungi Admin.';
       }
-      
+
       setError(errorMsg);
     } finally {
       setLoading(false);
@@ -40,60 +38,85 @@ export default function CreateBidanPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-        <div className="mb-8">
+    <div className="w-full">
+      <div className="pt-[60px] pl-[58px] pb-[54px]">
           <h1 className="text-2xl font-semibold text-gray-900 mb-2">
             Buat Akun Bidan
           </h1>
           <p className="text-gray-600">
             Tambahkan akun bidan baru ke sistem
           </p>
+      </div>
+
+        <div className="-mt-4 md:-mt-6 mb-4">
+          {error && <MessageAlert type="error" message={error} />}
+          {success && <MessageAlert type="success" message={success} />}
         </div>
 
-        {error && <MessageAlert type="error" message={error} />}
-        {success && <MessageAlert type="success" message={success} />}
+        <form id="create-bidan-form" onSubmit={handleSubmit} className="space-y-6 max-w-none pl-[58px] pr-[99px]">
+          <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+            <label className="md:w-[180px] text-gray-800 font-medium text-base">
+              Nama Lengkap
+            </label>
+            <div className="md:flex-1">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Masukkan nama lengkap bidan"
+                className="w-full md:w-[1100px] rounded-lg border border-gray-300 px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                required
+              />
+            </div>
+          </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <FormInput
-            label="Nama Lengkap"
-            type="text"
-            value={name}
-            onChange={setName}
-            placeholder="Masukkan nama lengkap bidan"
-            required
-          />
+          <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+            <label className="md:w-[180px] text-gray-800 font-medium text-base">
+              Email
+            </label>
+            <div className="md:flex-1">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Masukkan email bidan"
+                className="w-full md:w-[1100px] rounded-lg border border-gray-300 px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                required
+              />
+            </div>
+          </div>
 
-          <FormInput
-            label="Email"
-            type="email"
-            value={email}
-            onChange={setEmail}
-            placeholder="Masukkan email bidan"
-            required
-          />
+          <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+            <label className="md:w-[180px] text-gray-800 font-medium text-base">
+              Password
+            </label>
+            <div className="md:flex-1">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Masukkan password"
+                className="w-full md:w-[1100px] rounded-lg border border-gray-300 px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                required
+              />
+            </div>
+          </div>
 
-          <FormInput
-            label="Password"
-            type="password"
-            value={password}
-            onChange={setPassword}
-            placeholder="Masukkan password"
-            required
-          />
-
-          <div className="flex gap-4 pt-4">
+          {/* Submit button bottom-right */}
+          <div className="flex justify-end pt-2">
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 rounded-lg text-white font-medium transition hover:opacity-90 disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-lg !text-white font-medium transition hover:opacity-90 disabled:opacity-50"
               style={{ backgroundColor: '#FA6978' }}
             >
-              {loading ? 'Membuat Akun...' : 'Buat Akun Bidan'}
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+              {loading ? 'Membuat Akun...' : 'Tambah Bidan'}
             </button>
           </div>
         </form>
-      </div>
     </div>
   );
 }
