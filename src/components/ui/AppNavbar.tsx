@@ -43,7 +43,7 @@ export default function AppNavbar({
   // Function to generate breadcrumb based on current path
   const getBreadcrumbItems = () => {
     const path = location.pathname;
-    
+    // Dinkes
     if (path === '/dinkes') {
       return [
         {
@@ -61,6 +61,34 @@ export default function AppNavbar({
         {
           title: 'Users',
         },
+      ];
+    }
+    // Admin create account pages (breadcrumbs per design)
+    if (path === '/admin/create-bidan') {
+      return [
+        { title: 'Pages' },
+        { title: 'Bidan' },
+        { title: 'Tambah Akun Bidan' },
+      ];
+    }
+    if (path === '/admin/create-dinkes') {
+      return [
+        { title: 'Pages' },
+        { title: 'Dinkes' },
+        { title: 'Tambah Akun Dinkes' },
+      ];
+    }
+    // Bidan
+    if (path === '/bidan') {
+      return [
+        { title: 'Pages' },
+        { title: 'Dashboard' },
+      ];
+    }
+    if (path === '/bidan/users') {
+      return [
+        { title: 'Pages' },
+        { title: 'Users' },
       ];
     }
     
