@@ -12,6 +12,7 @@ import CreateDinkesPage from '@/features/admin/pages/CreateDinkesPage';
 import AdminBidanUsersPage from '@/features/admin/pages/BidanUsersPage';
 import AdminDinkesUsersPage from '@/features/admin/pages/DinkesUsersPage';
 import BidanDashboard from '@/features/bidan/BidanDashboard';
+import BidanLayout from '@/features/bidan/components/BidanLayout';
 import BidanUsersPage from '@/features/bidan/pages/BidanUsersPage';
 import DinkesDashboard from '@/features/dinkes/DinkesDashboard';
 import DinkesUsersPage from '@/features/dinkes/pages/DinkesUsersPage';
@@ -21,7 +22,7 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        
+
         {/* Admin Routes */}
         <Route
           path="/admin"
@@ -97,7 +98,9 @@ export default function AppRouter() {
           path="/bidan/users"
           element={
             <ProtectedBidan>
-              <BidanUsersPage />
+              <BidanLayout>
+                <BidanUsersPage />
+              </BidanLayout>
             </ProtectedBidan>
           }
         />
@@ -132,7 +135,7 @@ export default function AppRouter() {
             </Protected>
           }
         />
-        
+
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
