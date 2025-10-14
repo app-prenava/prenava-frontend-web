@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Col, Row, Input, Button, Avatar, Tag, Spin } from 'antd';
 import { SearchOutlined, FilterOutlined, CheckCircleOutlined, CloseCircleOutlined, PhoneOutlined, MailOutlined } from '@ant-design/icons';
-import BidanLayout from '../components/BidanLayout';
 import { getIbuHamilUsers } from '../bidan.api';
 import { User } from '@/features/admin/admin.types';
 
@@ -82,8 +81,7 @@ export default function BidanUsersPage() {
   };
 
   return (
-    <BidanLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -188,6 +186,5 @@ export default function BidanUsersPage() {
           )}
         </div>
       </div>
-    </BidanLayout>
   );
 }
