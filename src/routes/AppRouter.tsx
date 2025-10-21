@@ -15,7 +15,12 @@ import BidanDashboard from '@/features/bidan/BidanDashboard';
 import BidanLayout from '@/features/bidan/components/BidanLayout';
 import BidanUsersPage from '@/features/bidan/pages/BidanUsersPage';
 import DinkesDashboard from '@/features/dinkes/DinkesDashboard';
+import DinkesLayout from '@/features/dinkes/components/DinkesLayout';
 import DinkesUsersPage from '@/features/dinkes/pages/DinkesUsersPage';
+import ViewProfilePage from '@/features/bidan/pages/ViewProfilePage';
+import EditProfilePage from '@/features/bidan/pages/EditProfilePage';
+import ViewDinkesProfilePage from '@/features/dinkes/pages/ViewDinkesProfilePage';
+import EditDinkesProfilePage from '@/features/dinkes/pages/EditDinkesProfilePage';
 
 export default function AppRouter() {
   return (
@@ -104,6 +109,26 @@ export default function AppRouter() {
             </ProtectedBidan>
           }
         />
+        <Route
+          path="/bidan/profile"
+          element={
+            <ProtectedBidan>
+              <BidanLayout>
+                <ViewProfilePage />
+              </BidanLayout>
+            </ProtectedBidan>
+          }
+        />
+        <Route
+          path="/bidan/edit-profile-data"
+          element={
+            <ProtectedBidan>
+              <BidanLayout>
+                <EditProfilePage />
+              </BidanLayout>
+            </ProtectedBidan>
+          }
+        />
 
         {/* Dinkes Routes */}
         <Route
@@ -118,7 +143,29 @@ export default function AppRouter() {
           path="/dinkes/users"
           element={
             <ProtectedDinkes>
-              <DinkesUsersPage />
+              <DinkesLayout>
+                <DinkesUsersPage />
+              </DinkesLayout>
+            </ProtectedDinkes>
+          }
+        />
+        <Route
+          path="/dinkes/profile"
+          element={
+            <ProtectedDinkes>
+              <DinkesLayout>
+                <ViewDinkesProfilePage />
+              </DinkesLayout>
+            </ProtectedDinkes>
+          }
+        />
+        <Route
+          path="/dinkes/edit-profile-data"
+          element={
+            <ProtectedDinkes>
+              <DinkesLayout>
+                <EditDinkesProfilePage />
+              </DinkesLayout>
             </ProtectedDinkes>
           }
         />
