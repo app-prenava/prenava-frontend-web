@@ -1,18 +1,18 @@
 import { Button, Dropdown, Avatar, Breadcrumb } from 'antd';
 import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // Custom Notification Icon
 const NotificationIcon = () => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    fill="none" 
-    viewBox="0 0 24 24" 
-    strokeWidth={1.5} 
-    stroke="currentColor" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
     className="w-5 h-5"
-    style={{ 
+    style={{
       display: 'block',
       margin: 'auto'
     }}
@@ -39,6 +39,7 @@ export default function AppNavbar({
   onLogout,
 }: AppNavbarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Function to generate breadcrumb based on current path
   const getBreadcrumbItems = () => {
@@ -91,7 +92,7 @@ export default function AppNavbar({
         { title: 'Users' },
       ];
     }
-    
+
     // Default breadcrumb
     return [
       {
@@ -116,6 +117,18 @@ export default function AppNavbar({
     {
       type: 'divider',
     },
+    // Quick links per role
+    userRole === 'bidan' ? {
+      key: 'bidan-profile',
+      label: 'Profile Saya',
+      onClick: () => navigate('/bidan/profile'),
+    } : null,
+    userRole === 'dinkes' ? {
+      key: 'dinkes-profile',
+      label: 'Profile Saya',
+      onClick: () => navigate('/dinkes/profile'),
+    } : null,
+    (userRole === 'bidan' || userRole === 'dinkes') ? { type: 'divider' as const } : null,
     {
       key: 'logout',
       label: 'Logout',
@@ -134,7 +147,7 @@ export default function AppNavbar({
           onClick={onToggleCollapse}
           style={{ fontSize: '18px', width: 56, height: 56 }}
         />
-        
+
         {/* Breadcrumb */}
         <Breadcrumb
           items={getBreadcrumbItems()}
@@ -148,8 +161,8 @@ export default function AppNavbar({
         <Button
           type="text"
           icon={<NotificationIcon />}
-          style={{ 
-            width: 48, 
+          style={{
+            width: 48,
             height: 48,
             display: 'flex',
             alignItems: 'center',

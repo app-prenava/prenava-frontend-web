@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Space, Table, Tag, Button, Input, Avatar, Switch } from 'antd';
+import { Space, Table, Tag, Button, Input, Avatar, Switch, Modal, Spin, Card } from 'antd';
 import { SearchOutlined, PlusOutlined, FilterOutlined, EyeOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import { getDinkes, deactivateUser, activateUser } from '../admin.api';
+import { getDinkes, deactivateUser, activateUser, getDinkesProfileByUserId } from '../admin.api';
 import { User } from '../admin.types';
 import ConfirmDialog from '../components/ConfirmDialog';
 
@@ -30,6 +30,9 @@ export default function DinkesUsersPage() {
     action: 'deactivate',
   });
   const [actionLoading, setActionLoading] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detail, setDetail] = useState<any>(null);
 
   useEffect(() => {
     fetchDinkesUsers();
@@ -81,24 +84,38 @@ export default function DinkesUsersPage() {
     });
   };
 
+  const openDetail = async (record: DataType) => {
+    setDetailOpen(true);
+    setDetailLoading(true);
+    try {
+      const p = await getDinkesProfileByUserId(record.user_id);
+      setDetail(p);
+    } catch (e) {
+      console.error('Failed to load dinkes detail:', e);
+      setDetail(null);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
   const confirmAction = async () => {
     try {
       setActionLoading(true);
-      
+
       if (confirmDialog.action === 'deactivate') {
         await deactivateUser(confirmDialog.userId);
         // Update local state immediately
-        setUsers(prev => prev.map(user => 
+        setUsers(prev => prev.map(user =>
           user.user_id === confirmDialog.userId ? { ...user, is_active: 0 } : user
         ));
       } else {
         await activateUser(confirmDialog.userId);
         // Update local state immediately
-        setUsers(prev => prev.map(user => 
+        setUsers(prev => prev.map(user =>
           user.user_id === confirmDialog.userId ? { ...user, is_active: 1 } : user
         ));
       }
-      
+
       // Close dialog
       setConfirmDialog({
         isOpen: false,
@@ -109,12 +126,12 @@ export default function DinkesUsersPage() {
     } catch (error: any) {
       console.error('Failed to change user status:', error);
       let errorMsg = error?.response?.data?.message || `Gagal mengubah status user: ${error}`;
-      
+
       // Translate specific error messages
       if (errorMsg.includes('Account is deactivated') || errorMsg.includes('Contact admin')) {
         errorMsg = 'Akun dinonaktifkan. Hubungi Admin.';
       }
-      
+
       alert(errorMsg);
     } finally {
       setActionLoading(false);
@@ -256,12 +273,13 @@ export default function DinkesUsersPage() {
           <Column
             title="Action"
             key="action"
-            render={() => (
+            render={(_, record: DataType) => (
               <Space size="middle">
                 <Button
                   type="text"
                   icon={<EyeOutlined />}
                   title="View Details"
+                  onClick={() => openDetail(record)}
                 />
                 <Button
                   type="text"
@@ -274,7 +292,7 @@ export default function DinkesUsersPage() {
                   icon={<DeleteOutlined />}
                   title="Delete User"
                 />
-                </Space>
+              </Space>
             )}
           />
         </Table>
@@ -292,6 +310,44 @@ export default function DinkesUsersPage() {
         onCancel={cancelAction}
         loading={actionLoading}
       />
+
+      <Modal
+        open={detailOpen}
+        onCancel={() => setDetailOpen(false)}
+        footer={null}
+        width={640}
+        title={<div className="font-semibold">Detail Info</div>}
+      >
+        {detailLoading ? (
+          <div className="flex justify-center items-center py-10">
+            <Spin />
+          </div>
+        ) : (
+          <div>
+            <div className="flex justify-center mb-6">
+              {detail?.photo ? (
+                <img
+                  src={`${import.meta.env.VITE_API_BASE}/storage/${detail.photo}`}
+                  className="w-40 h-40 rounded-full object-cover"
+                  alt="Foto Dinkes"
+                />
+              ) : (
+                <div className="w-40 h-40 rounded-full bg-gray-200" />)
+              }
+            </div>
+
+            <Card bordered>
+              <div className="grid grid-cols-3 gap-y-3">
+                <div className="col-span-1 text-gray-600">NIP</div>
+                <div className="col-span-2">: {detail?.nip || '-'}</div>
+
+                <div className="col-span-1 text-gray-600">Jabatan</div>
+                <div className="col-span-2">: {detail?.jabatan || '-'}</div>
+              </div>
+            </Card>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

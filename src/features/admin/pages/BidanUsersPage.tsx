@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Space, Table, Tag, Button, Input, Avatar, Switch } from 'antd';
+import { Space, Table, Tag, Button, Input, Avatar, Switch, Modal, Spin, Card } from 'antd';
 import { SearchOutlined, PlusOutlined, FilterOutlined, EyeOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import { getBidans, deactivateUser, activateUser } from '../admin.api';
+import { getBidans, deactivateUser, activateUser, getBidanProfileByUserId } from '../admin.api';
 import { User } from '../admin.types';
 import ConfirmDialog from '../components/ConfirmDialog';
 
@@ -30,6 +30,9 @@ export default function BidanUsersPage() {
     action: 'deactivate',
   });
   const [actionLoading, setActionLoading] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detail, setDetail] = useState<any>(null);
 
   useEffect(() => {
     fetchBidanUsers();
@@ -43,10 +46,24 @@ export default function BidanUsersPage() {
     try {
       setLoading(true);
       const result = await getBidans();
-      const usersWithKey = result.data.map((user) => ({
-        ...user,
-        key: user.user_id,
-      }));
+
+      // Debug logging
+      console.log('API Response:', result);
+      console.log('Users data:', result.data);
+
+      // Normalize the data structure to handle different API response formats
+      const usersWithKey = result.data.map((user) => {
+        const normalizedUser = {
+          ...user,
+          key: user.user_id,
+          // Handle both flat and nested profile structure
+          alamat_praktik: user.alamat_praktik || user.profile?.alamat_praktik || null,
+          kota_tempat_praktik: user.kota_tempat_praktik || user.profile?.kota_tempat_praktik || null,
+          spesialisasi: user.spesialisasi || user.profile?.spesialisasi || null,
+        };
+        console.log('Normalized user:', normalizedUser);
+        return normalizedUser;
+      });
       setUsers(usersWithKey);
     } catch (error) {
       console.error('Failed to fetch bidan users:', error);
@@ -81,24 +98,38 @@ export default function BidanUsersPage() {
     });
   };
 
+  const openDetail = async (record: DataType) => {
+    setDetailOpen(true);
+    setDetailLoading(true);
+    try {
+      const p = await getBidanProfileByUserId(record.user_id);
+      setDetail(p);
+    } catch (e) {
+      console.error('Failed to load bidan detail:', e);
+      setDetail(null);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
   const confirmAction = async () => {
     try {
       setActionLoading(true);
-      
+
       if (confirmDialog.action === 'deactivate') {
         await deactivateUser(confirmDialog.userId);
         // Update local state immediately
-        setUsers(prev => prev.map(user => 
+        setUsers(prev => prev.map(user =>
           user.user_id === confirmDialog.userId ? { ...user, is_active: 0 } : user
         ));
       } else {
         await activateUser(confirmDialog.userId);
         // Update local state immediately
-        setUsers(prev => prev.map(user => 
+        setUsers(prev => prev.map(user =>
           user.user_id === confirmDialog.userId ? { ...user, is_active: 1 } : user
         ));
       }
-      
+
       // Close dialog
       setConfirmDialog({
         isOpen: false,
@@ -109,12 +140,12 @@ export default function BidanUsersPage() {
     } catch (error: any) {
       console.error('Failed to change user status:', error);
       let errorMsg = error?.response?.data?.message || `Gagal mengubah status user: ${error}`;
-      
+
       // Translate specific error messages
       if (errorMsg.includes('Account is deactivated') || errorMsg.includes('Contact admin')) {
         errorMsg = 'Akun dinonaktifkan. Hubungi Admin.';
       }
-      
+
       alert(errorMsg);
     } finally {
       setActionLoading(false);
@@ -214,26 +245,32 @@ export default function BidanUsersPage() {
           />
           <Column
             title="Alamat"
-            dataIndex="address"
-            key="address"
-            render={() => (
-              <span className="text-gray-400">-</span>
+            dataIndex="alamat_praktik"
+            key="alamat_praktik"
+            render={(alamat: string | null) => (
+              <span className={alamat ? 'text-gray-900' : 'text-gray-400'}>
+                {alamat || '-'}
+              </span>
             )}
           />
           <Column
             title="Kota"
-            dataIndex="city"
-            key="city"
-            render={() => (
-              <span className="text-gray-400">-</span>
+            dataIndex="kota_tempat_praktik"
+            key="kota_tempat_praktik"
+            render={(kota: string | null) => (
+              <span className={kota ? 'text-gray-900' : 'text-gray-400'}>
+                {kota || '-'}
+              </span>
             )}
           />
           <Column
             title="Spesialisasi"
-            dataIndex="specialization"
-            key="specialization"
-            render={() => (
-              <span className="text-gray-400">-</span>
+            dataIndex="spesialisasi"
+            key="spesialisasi"
+            render={(spesialisasi: string | null) => (
+              <span className={spesialisasi ? 'text-gray-900' : 'text-gray-400'}>
+                {spesialisasi || '-'}
+              </span>
             )}
           />
           <Column
@@ -256,12 +293,13 @@ export default function BidanUsersPage() {
           <Column
             title="Action"
             key="action"
-            render={() => (
+            render={(_, record: DataType) => (
               <Space size="middle">
                 <Button
                   type="text"
                   icon={<EyeOutlined />}
                   title="View Details"
+                  onClick={() => openDetail(record)}
                 />
                 <Button
                   type="text"
@@ -292,6 +330,56 @@ export default function BidanUsersPage() {
         onCancel={cancelAction}
         loading={actionLoading}
       />
+
+      <Modal
+        open={detailOpen}
+        onCancel={() => setDetailOpen(false)}
+        footer={null}
+        width={720}
+        title={<div className="font-semibold">Detail Info</div>}
+      >
+        {detailLoading ? (
+          <div className="flex justify-center items-center py-10">
+            <Spin />
+          </div>
+        ) : (
+          <div>
+            <div className="flex justify-center mb-6">
+              {detail?.photo ? (
+                <img
+                  src={`${import.meta.env.VITE_API_BASE}/storage/${detail.photo}`}
+                  className="w-40 h-40 rounded-full object-cover"
+                  alt="Foto Bidan"
+                />
+              ) : (
+                <div className="w-40 h-40 rounded-full bg-gray-200" />)
+              }
+            </div>
+
+            <Card bordered>
+              <div className="grid grid-cols-3 gap-y-3">
+                <div className="col-span-1 text-gray-600">Tempat Praktik</div>
+                <div className="col-span-2">: {detail?.tempat_praktik || '-'}</div>
+
+                <div className="col-span-1 text-gray-600">Alamat Praktik</div>
+                <div className="col-span-2">: {detail?.alamat_praktik || '-'}</div>
+
+                <div className="col-span-1 text-gray-600">Kota</div>
+                <div className="col-span-2">: {detail?.kota_tempat_praktik || '-'}</div>
+
+                <div className="col-span-1 text-gray-600">Kecamatan</div>
+                <div className="col-span-2">: {detail?.kecamatan_tempat_praktik || '-'}</div>
+
+                <div className="col-span-1 text-gray-600">Telephone</div>
+                <div className="col-span-2">: {detail?.telepon_tempat_praktik || '-'}</div>
+
+                <div className="col-span-1 text-gray-600">Spesialisasi</div>
+                <div className="col-span-2">: {detail?.spesialisasi || '-'}</div>
+              </div>
+            </Card>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
