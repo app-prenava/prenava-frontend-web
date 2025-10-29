@@ -79,6 +79,12 @@ export default function AppNavbar({
         { title: 'Tambah Akun Dinkes' },
       ];
     }
+    if (path === '/admin/add-banner') {
+      return [
+        { title: 'Pages' },
+        { title: 'Add Banner' },
+      ];
+    }
     // Bidan
     if (path === '/bidan') {
       return [

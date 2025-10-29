@@ -5,6 +5,11 @@ import {
   GetAllUsersResponse,
   ResetPasswordBody,
   ResetPasswordResponse,
+  BannerResponse,
+  CreateBannerBody,
+  CreateBannerResponse,
+  UpdateBannerBody,
+  UpdateBannerResponse,
 } from './admin.types';
 
 // Lightweight types for admin detail views
@@ -125,4 +130,51 @@ export const getDinkesProfileByUserId = async (userId: number): Promise<AdminDin
     }
   }
   return null;
+};
+
+// Banner API functions
+export const getBanners = async () => {
+  const { data } = await api.get<BannerResponse>('/api/banner/show/all');
+  return data;
+};
+
+export const createBanner = async (body: CreateBannerBody) => {
+  const formData = new FormData();
+  formData.append('name', body.name);
+  formData.append('url', body.url);
+  formData.append('photo', body.image); // Changed from 'image' to 'photo' to match server expectation
+
+  const { data } = await api.post<CreateBannerResponse>('/api/banner/create', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return data;
+};
+
+export const updateBanner = async (bannerId: number, body: UpdateBannerBody) => {
+  const formData = new FormData();
+  if (body.name) formData.append('name', body.name);
+  if (body.image) formData.append('photo', body.image); // Changed from 'image' to 'photo'
+  if (body.url) formData.append('url', body.url);
+  if (body.is_active !== undefined) formData.append('is_active', body.is_active.toString());
+
+  const { data } = await api.put<UpdateBannerResponse>(`/api/banner/update/${bannerId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return data;
+};
+
+export const deleteBanner = async (bannerId: number) => {
+  const { data } = await api.delete(`/api/banner/delete/${bannerId}`);
+  return data;
+};
+
+export const toggleBannerStatus = async (bannerId: number, isActive: number) => {
+  const { data } = await api.post(`/api/banner/update/${bannerId}`, {
+    is_active: isActive,
+  });
+  return data;
 };

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createDinkes } from '../admin.api';
+import {PlusOutlined} from '@ant-design/icons'
 import MessageAlert from '../components/MessageAlert';
 
 export default function CreateDinkesPage() {
@@ -112,9 +113,7 @@ export default function CreateDinkesPage() {
               className="inline-flex items-center gap-2 px-5 py-3 rounded-lg !text-white font-medium transition hover:opacity-90 disabled:opacity-50"
               style={{ backgroundColor: '#FA6978' }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
+              {<PlusOutlined />}
               {loading ? 'Membuat Akun...' : 'Tambah Dinkes'}
             </button>
           </div>

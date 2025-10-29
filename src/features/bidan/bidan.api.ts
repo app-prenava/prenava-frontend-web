@@ -34,14 +34,14 @@ export type GetIbuHamilUsersResponse = {
 
 export const getIbuHamilUsers = async (): Promise<GetIbuHamilUsersResponse> => {
   // Ambil daftar pengguna role ibu_hamil dari endpoint baru yang Anda set
-  const res = await api.get('/api/profile/users', { params: { role: 'ibu_hamil' } });
+  const res = await api.get<GetIbuHamilUsersResponse>('/api//users?role=ibu_hamil');
 
   const raw = res?.data ?? {};
   // Normalisasi berbagai kemungkinan bentuk respons BE
   const list: IbuHamilUser[] = Array.isArray(raw?.data)
     ? raw.data
-    : Array.isArray(raw?.users)
-      ? raw.users
+    : Array.isArray(raw?.data)
+      ? raw.data
       : Array.isArray(raw)
         ? raw
         : [];

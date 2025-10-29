@@ -11,6 +11,8 @@ import CreateBidanPage from '@/features/admin/pages/CreateBidanPage';
 import CreateDinkesPage from '@/features/admin/pages/CreateDinkesPage';
 import AdminBidanUsersPage from '@/features/admin/pages/BidanUsersPage';
 import AdminDinkesUsersPage from '@/features/admin/pages/DinkesUsersPage';
+import AddBannerPage from '@/features/admin/pages/AddBannerPage';
+import CreateBannerPage from '@/features/admin/pages/CreateBannerPage';
 import BidanDashboard from '@/features/bidan/BidanDashboard';
 import BidanLayout from '@/features/bidan/components/BidanLayout';
 import BidanUsersPage from '@/features/bidan/pages/BidanUsersPage';
@@ -85,6 +87,26 @@ export default function AppRouter() {
             <ProtectedAdmin>
               <AdminLayout>
                 <AdminDinkesUsersPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/admin/add-banner"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <AddBannerPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/admin/create-banner"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <CreateBannerPage />
               </AdminLayout>
             </ProtectedAdmin>
           }

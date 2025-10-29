@@ -28,6 +28,12 @@ const UsersIcon = () => (
   </svg>
 );
 
+const AddBannerIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+  </svg>
+);
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -50,7 +56,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     {
       key: 'user-management',
       icon: <CreateAccountIcon />,
-      label: 'Kelola User',
+      label: 'Users',
       children: [
         {
           key: 'bidan-users',
@@ -65,6 +71,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           path: '/admin/dinkes-users',
         },
       ],
+    },
+    {
+      key: 'add-banner',
+      icon: <AddBannerIcon />,
+      label: 'Add Banner',
+      path: '/admin/add-banner',
     },
   ];
 
