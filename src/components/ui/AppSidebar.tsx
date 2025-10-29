@@ -37,8 +37,8 @@ export default function AppSidebar({
   const handleMenuClick = (item: MenuItem) => {
     if (item.children) {
       // Toggle submenu
-      setOpenKeys(prev => 
-        prev.includes(item.key) 
+      setOpenKeys(prev =>
+        prev.includes(item.key)
           ? prev.filter(key => key !== item.key)
           : [...prev, item.key]
       );
@@ -71,13 +71,13 @@ export default function AppSidebar({
             <SidebarItem
               label={item.label}
               icon={item.icon}
-              active={item.key === selectedKey || (item.children && item.children.some(child => child.path === location.pathname))}
+              active={item.key === selectedKey || (item.children && item.children.some(child => child.path === location.pathname)) || false}
               collapsed={collapsed}
               onClick={() => handleMenuClick(item)}
               hasChildren={!!item.children}
               isOpen={openKeys.includes(item.key)}
             />
-            
+
             {/* Submenu */}
             {item.children && !collapsed && openKeys.includes(item.key) && (
               <div className="ml-6 mt-1 space-y-1">
@@ -86,7 +86,7 @@ export default function AppSidebar({
                     key={child.key}
                     label={child.label}
                     icon={child.icon}
-                    active={child.path === location.pathname}
+                    active={child.path === location.pathname || false}
                     collapsed={false}
                     onClick={() => handleSubmenuClick(child.path!)}
                     isSubmenu={true}
@@ -97,7 +97,7 @@ export default function AppSidebar({
           </div>
         ))}
       </div>
-      
+
     </div>
   );
 }
