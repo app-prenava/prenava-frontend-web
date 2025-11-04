@@ -34,6 +34,12 @@ const AddBannerIcon = () => (
   </svg>
 );
 
+const ShopIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3a3 3 0 0 1 3-3m3 0a3 3 0 0 0-3-3m-3 3a3 3 0 0 1-3 3m3-3v1.5M9 9.75l6 6m-6-6v1.5m6-6v-1.5m-6 6h6" />
+  </svg>
+);
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -77,6 +83,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: <AddBannerIcon />,
       label: 'Add Banner',
       path: '/admin/add-banner',
+    },
+    {
+      key: 'shop',
+      icon: <ShopIcon />,
+      label: 'Shop',
+      path: '/admin/shop',
     },
   ];
 
