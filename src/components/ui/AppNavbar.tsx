@@ -65,6 +65,12 @@ export default function AppNavbar({
       ];
     }
     // Admin create account pages (breadcrumbs per design)
+    if (path === '/admin/shop') {
+      return [
+        { title: 'Pages' },
+        { title: 'Shop' },
+      ];
+    }
     if (path === '/admin/create-bidan') {
       return [
         { title: 'Pages' },

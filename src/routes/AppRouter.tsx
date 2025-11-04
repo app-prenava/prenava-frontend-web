@@ -19,6 +19,7 @@ import BidanUsersPage from '@/features/bidan/pages/BidanUsersPage';
 import DinkesDashboard from '@/features/dinkes/DinkesDashboard';
 import DinkesLayout from '@/features/dinkes/components/DinkesLayout';
 import DinkesUsersPage from '@/features/dinkes/pages/DinkesUsersPage';
+import AdminShopPage from '@/features/admin/pages/AdminShopPage';
 import ViewProfilePage from '@/features/bidan/pages/ViewProfilePage';
 import EditProfilePage from '@/features/bidan/pages/EditProfilePage';
 import ViewDinkesProfilePage from '@/features/dinkes/pages/ViewDinkesProfilePage';
@@ -108,6 +109,14 @@ export default function AppRouter() {
               <AdminLayout>
                 <CreateBannerPage />
               </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/admin/shop"
+          element={
+            <ProtectedAdmin>
+              <AdminShopPage />
             </ProtectedAdmin>
           }
         />
