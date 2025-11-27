@@ -11,18 +11,23 @@ export type IbuHamilUser = {
   created_at?: string;
   updated_at?: string;
   profile?: {
+    photo?: string | null;
     tanggal_lahir?: string | null;
     usia?: number | string | null;
     alamat?: string | null;
     no_telepon?: string | null;
+    pendidikan_terakhir?: string | null;
+    pekerjaan?: string | null;
     golongan_darah?: string | null;
-    photo?: string | null;
   } | null;
   // Some backends might flatten profile fields at top-level
+  photo?: string | null;
   tanggal_lahir?: string | null;
   usia?: number | string | null;
   alamat?: string | null;
   no_telepon?: string | null;
+  pendidikan_terakhir?: string | null;
+  pekerjaan?: string | null;
   golongan_darah?: string | null;
 };
 
@@ -34,7 +39,7 @@ export type GetIbuHamilUsersResponse = {
 
 export const getIbuHamilUsers = async (): Promise<GetIbuHamilUsersResponse> => {
   // Ambil daftar pengguna role ibu_hamil dari endpoint baru yang Anda set
-  const res = await api.get<GetIbuHamilUsersResponse>('/api//users?role=ibu_hamil');
+  const res = await api.get<GetIbuHamilUsersResponse>('/api/bidan/ibu-hamil');
 
   const raw = res?.data ?? {};
   // Normalisasi berbagai kemungkinan bentuk respons BE
@@ -61,6 +66,7 @@ export type BidanProfile = {
   kecamatan_tempat_praktik: string;
   telepon_tempat_praktik: string;
   spesialisasi: string;
+  photo?: string | null;
 };
 
 export type GetBidanProfileResponse = {

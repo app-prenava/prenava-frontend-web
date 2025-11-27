@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getBidanProfile, updateBidanProfile, createBidanProfile, BidanProfile } from '@/features/bidan/bidan.api';
 
 export default function EditProfilePage() {
+  const navigate = useNavigate();
   const [form, setForm] = useState<BidanProfile>({
     tempat_praktik: '',
     alamat_praktik: '',
@@ -130,6 +132,11 @@ export default function EditProfilePage() {
       console.log('Success response:', res);
       setSuccess(res?.message || 'Perubahan berhasil disimpan');
       setHasProfile(true);
+
+      // Redirect to profile page after 1.5 seconds to show success message
+      setTimeout(() => {
+        navigate('/bidan/profile', { state: { refresh: true } });
+      }, 1500);
     } catch (e: any) {
       console.error('Submit error:', e);
       setError(e?.response?.data?.message || e?.message || 'Gagal menyimpan profil');

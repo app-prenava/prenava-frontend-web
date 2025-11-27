@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getDinkesProfile, updateDinkesProfile, createDinkesProfile, DinkesProfile } from '@/features/dinkes/dinkes.api';
 
 export default function EditDinkesProfilePage() {
@@ -10,6 +11,7 @@ export default function EditDinkesProfilePage() {
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const navigate = useNavigate();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [hasProfile, setHasProfile] = useState<boolean>(true);
@@ -114,6 +116,9 @@ export default function EditDinkesProfilePage() {
             console.log('Success response:', res);
             setSuccess(res?.message || 'Perubahan berhasil disimpan');
             setHasProfile(true);
+            setTimeout(() => {
+        navigate('/bidan/profile', { state: { refresh: true } });
+      }, 1500);
         } catch (e: any) {
             console.error('Submit error:', e);
             setError(e?.response?.data?.message || e?.message || 'Gagal menyimpan profil');
