@@ -58,7 +58,7 @@ export default function ViewDinkesProfilePage() {
                         <div className="md:col-span-3 flex flex-col items-center gap-3">
                             <div className="h-28 w-28 rounded-full overflow-hidden border border-gray-200 bg-gray-50">
                                 {profile.photo ? (
-                                    <img src={import.meta.env.VITE_API_BASE ? `${import.meta.env.VITE_API_BASE}/storage/${profile.photo}` : `/storage/${profile.photo}`}
+                                    <img src={profile.photo}
                                         alt="Foto Profile" className="h-full w-full object-cover" />
                                 ) : (
                                     <div className="h-full w-full flex items-center justify-center text-gray-400 text-sm">Tidak ada foto</div>

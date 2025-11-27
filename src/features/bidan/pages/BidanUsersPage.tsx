@@ -79,10 +79,29 @@ export default function BidanUsersPage() {
       .slice(0, 2);
   };
 
-  const getFromProfile = (user: DataType, key: keyof Profile) => {
+  const getFromProfile = (user: DataType, key: string) => {
     const prof = user.profile as Profile | null | undefined;
-    if (prof && prof[key] !== undefined && prof[key] !== null) return prof[key];
-    return (user as unknown as Record<string, unknown>)[key as string] as unknown;
+    if (prof && (prof as Record<string, unknown>)[key] !== undefined && (prof as Record<string, unknown>)[key] !== null) {
+      return (prof as Record<string, unknown>)[key];
+    }
+    return (user as unknown as Record<string, unknown>)[key] as unknown;
+  };
+
+  const getPhotoUrl = (user: DataType): string | null => {
+    const photo = getFromProfile(user, 'photo');
+    if (photo && typeof photo === 'string' && photo.trim() !== '') {
+      // Jika sudah full URL, return langsung
+      if (photo.startsWith('http://') || photo.startsWith('https://')) {
+        return photo;
+      }
+      // Jika relative path, tambahkan base URL dan storage path
+      if (photo.startsWith('storage/') || photo.startsWith('/storage/')) {
+        return `${import.meta.env.VITE_API_BASE}/${photo.replace(/^\//, '')}`;
+      }
+      // Jika hanya nama file, tambahkan storage path
+      return `${import.meta.env.VITE_API_BASE}/storage/${photo}`;
+    }
+    return null;
   };
 
   const formatDate = (dateStr?: string | null) => {
@@ -137,14 +156,14 @@ export default function BidanUsersPage() {
               <Col xs={24} sm={12} md={8} lg={6} key={user.user_id}>
                 <Card
                   title=""
-                  variant="borderless"
-                  className="h-full"
+                  className="h-full border border-gray-200 shadow-md hover:shadow-lg transition-shadow"
                   bodyStyle={{ padding: '20px' }}
                 >
                   <div className="flex flex-col items-center text-center">
                     {/* Profile Picture */}
                     <Avatar
                       size={80}
+                      src={getPhotoUrl(user) || undefined}
                       style={{ backgroundColor: '#FA6978', marginBottom: '16px' }}
                     >
                       {getInitials(user.name)}
@@ -182,6 +201,14 @@ export default function BidanUsersPage() {
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-gray-500">No. Telepon</span>
                         <span className="font-medium">{toStr(getFromProfile(user, 'no_telepon'))}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">Pendidikan</span>
+                        <span className="font-medium">{toStr(getFromProfile(user, 'pendidikan_terakhir'))}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">Pekerjaan</span>
+                        <span className="font-medium">{toStr(getFromProfile(user, 'pekerjaan'))}</span>
                       </div>
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-gray-500">Gol. Darah</span>
