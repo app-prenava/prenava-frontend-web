@@ -40,6 +40,19 @@ const ShopIcon = () => (
   </svg>
 );
 
+const TipsIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+  </svg>
+);
+
+const CategoryIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6Z" />
+  </svg>
+);
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -89,6 +102,25 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: <ShopIcon />,
       label: 'Shop',
       path: '/admin/shop',
+    },
+    {
+      key: 'tips-management',
+      icon: <TipsIcon />,
+      label: 'Tips',
+      children: [
+        {
+          key: 'tip-categories',
+          icon: <CategoryIcon />,
+          label: 'Kategori Tips',
+          path: '/admin/tip-categories',
+        },
+        {
+          key: 'tips',
+          icon: <TipsIcon />,
+          label: 'Tips Kehamilan',
+          path: '/admin/tips',
+        },
+      ],
     },
   ];
 

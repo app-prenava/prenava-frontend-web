@@ -57,11 +57,17 @@ export const storage = {
   },
 
   get: (key: string): string | null => {
-    return localStorage.getItem(key);
+    return localStorage.getItem(key) || sessionStorage.getItem(key);
   },
 
-  set: (key: string, value: string): void => {
-    localStorage.setItem(key, value);
+  set: (key: string, value: string, remember = true): void => {
+    if (remember) {
+      localStorage.setItem(key, value);
+      sessionStorage.removeItem(key);
+    } else {
+      sessionStorage.setItem(key, value);
+      localStorage.removeItem(key);
+    }
   },
 
   remove: (key: string): void => {
