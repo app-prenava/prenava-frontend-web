@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/features/auth/LoginPage';
 import Protected from './Protected';
 import ProtectedAdmin from './ProtectedAdmin';
@@ -32,6 +33,7 @@ export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
 
         {/* Admin Routes */}
@@ -247,7 +249,7 @@ export default function AppRouter() {
           }
         />
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
