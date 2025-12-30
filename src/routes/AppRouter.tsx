@@ -24,6 +24,9 @@ import ViewProfilePage from '@/features/bidan/pages/ViewProfilePage';
 import EditProfilePage from '@/features/bidan/pages/EditProfilePage';
 import ViewDinkesProfilePage from '@/features/dinkes/pages/ViewDinkesProfilePage';
 import EditDinkesProfilePage from '@/features/dinkes/pages/EditDinkesProfilePage';
+import TipCategoryManagerPage from '@/features/admin/pages/TipCategoryManagerPage';
+import AdminTipManagerPage from '@/features/admin/pages/TipManagerPage';
+import BidanTipManagerPage from '@/features/bidan/pages/TipManagerPage';
 
 export default function AppRouter() {
   return (
@@ -120,6 +123,26 @@ export default function AppRouter() {
             </ProtectedAdmin>
           }
         />
+        <Route
+          path="/admin/tip-categories"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <TipCategoryManagerPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/admin/tips"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <AdminTipManagerPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
 
         {/* Bidan Routes */}
         <Route
@@ -156,6 +179,16 @@ export default function AppRouter() {
             <ProtectedBidan>
               <BidanLayout>
                 <EditProfilePage />
+              </BidanLayout>
+            </ProtectedBidan>
+          }
+        />
+        <Route
+          path="/bidan/tips"
+          element={
+            <ProtectedBidan>
+              <BidanLayout>
+                <BidanTipManagerPage />
               </BidanLayout>
             </ProtectedBidan>
           }

@@ -23,6 +23,7 @@ export default function LoginPage() {
       storage.setToken(authorization.token, remember);
       storage.setRole(user.role, remember);
       storage.setUserName(user.name, remember);
+      storage.set('userId', user.user_id.toString(), remember);
       
       // Redirect based on role
       switch (user.role) {
