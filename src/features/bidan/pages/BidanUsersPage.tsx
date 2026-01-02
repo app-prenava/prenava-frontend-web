@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Col, Row, Input, Button, Avatar, Tag, Spin } from 'antd';
+import { Card, Col, Row, Input, Button, Avatar, Tag, Spin, Pagination, Empty } from 'antd';
 import { SearchOutlined, FilterOutlined, CheckCircleOutlined, CloseCircleOutlined, MailOutlined } from '@ant-design/icons';
 import { getIbuHamilUsers, IbuHamilUser } from '../bidan.api';
 
 type DataType = IbuHamilUser & { key: React.Key };
 type Profile = NonNullable<IbuHamilUser['profile']>;
 
+const PAGE_SIZE = 10;
+
 export default function BidanUsersPage() {
   const [users, setUsers] = useState<DataType[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<DataType[]>([]);
+  const [paginatedUsers, setPaginatedUsers] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchIbuHamilUsers();
@@ -19,6 +23,10 @@ export default function BidanUsersPage() {
   useEffect(() => {
     filterUsers();
   }, [users, searchText]);
+
+  useEffect(() => {
+    paginateUsers();
+  }, [filteredUsers, currentPage]);
 
   const fetchIbuHamilUsers = async () => {
     try {
@@ -38,16 +46,28 @@ export default function BidanUsersPage() {
   };
 
   const filterUsers = () => {
-    let filtered = users;
+    let filtered = [...users];
 
-    // Filter by search text (name)
+    // Filter by search text (name, email, or other fields)
     if (searchText) {
+      const searchLower = searchText.toLowerCase();
       filtered = filtered.filter(user =>
-        user.name.toLowerCase().includes(searchText.toLowerCase())
+        user.name.toLowerCase().includes(searchLower) ||
+        user.email.toLowerCase().includes(searchLower) ||
+        (user.profile && typeof user.profile === 'object' && 
+          JSON.stringify(user.profile).toLowerCase().includes(searchLower))
       );
     }
 
     setFilteredUsers(filtered);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const paginateUsers = () => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    const endIndex = startIndex + PAGE_SIZE;
+    const paginated = filteredUsers.slice(startIndex, endIndex);
+    setPaginatedUsers(paginated);
   };
 
   const handleSearch = (value: string) => {
@@ -131,16 +151,13 @@ export default function BidanUsersPage() {
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <Input
-              placeholder="Search by name..."
+              placeholder="Cari user berdasarkan nama, email, atau informasi lainnya..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => handleSearch(e.target.value)}
               size="large"
             />
           </div>
-          <Button icon={<FilterOutlined />}>
-            Filter
-          </Button>
         </div>
       </div>
 
@@ -150,99 +167,115 @@ export default function BidanUsersPage() {
           <div className="flex justify-center items-center py-12">
             <Spin size="large" />
           </div>
+        ) : filteredUsers.length === 0 ? (
+          <Empty
+            description={
+              <span className="text-gray-600">
+                {searchText
+                  ? 'Tidak ada hasil pencarian'
+                  : 'Belum ada data ibu hamil yang terdaftar'}
+              </span>
+            }
+          />
         ) : (
-          <Row gutter={[16, 16]}>
-            {filteredUsers.map((user) => (
-              <Col xs={24} sm={12} md={8} lg={6} key={user.user_id}>
-                <Card
-                  title=""
-                  className="h-full border border-gray-200 shadow-md hover:shadow-lg transition-shadow"
-                  bodyStyle={{ padding: '20px' }}
-                >
-                  <div className="flex flex-col items-center text-center">
-                    {/* Profile Picture */}
-                    <Avatar
-                      size={80}
-                      src={getPhotoUrl(user) || undefined}
-                      style={{ backgroundColor: '#FA6978', marginBottom: '16px' }}
-                    >
-                      {getInitials(user.name)}
-                    </Avatar>
+          <>
+            <Row gutter={[16, 16]}>
+              {paginatedUsers.map((user) => (
+                <Col xs={24} sm={12} md={8} lg={6} key={user.user_id}>
+                  <Card
+                    title=""
+                    className="h-full border border-gray-200 shadow-md hover:shadow-lg transition-shadow"
+                    bodyStyle={{ padding: '20px' }}
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      {/* Profile Picture */}
+                      <Avatar
+                        size={80}
+                        src={getPhotoUrl(user) || undefined}
+                        style={{ backgroundColor: '#FA6978', marginBottom: '16px' }}
+                      >
+                        {getInitials(user.name)}
+                      </Avatar>
 
-                    {/* Name */}
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {user.name}
-                    </h3>
+                      {/* Name */}
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        {user.name}
+                      </h3>
 
-                    {/* Role */}
-                    <p className="text-sm text-gray-600 mb-3">
-                      Ibu Hamil
-                    </p>
-
-                    {/* Status */}
-                    <div className="mb-4">
-                      {getStatusTag(user.is_active)}
-                    </div>
-
-                    {/* Profile Fields from users_profile */}
-                    <div className="w-full space-y-2 text-sm text-gray-700">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">Tanggal Lahir</span>
-                        <span className="font-medium">{formatDate(getFromProfile(user, 'tanggal_lahir') as string | null)}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">Usia</span>
-                        <span className="font-medium">{toStr(getFromProfile(user, 'usia'))}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">Alamat</span>
-                        <span className="font-medium truncate" title={toStr(getFromProfile(user, 'alamat'))}>{toStr(getFromProfile(user, 'alamat'))}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">No. Telepon</span>
-                        <span className="font-medium">{toStr(getFromProfile(user, 'no_telepon'))}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">Pendidikan</span>
-                        <span className="font-medium">{toStr(getFromProfile(user, 'pendidikan_terakhir'))}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">Pekerjaan</span>
-                        <span className="font-medium">{toStr(getFromProfile(user, 'pekerjaan'))}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">Gol. Darah</span>
-                        <span className="font-medium">{toStr(getFromProfile(user, 'golongan_darah'))}</span>
-                      </div>
-                    </div>
-
-                    {/* Email & Created Date */}
-                    <div className="mt-4 pt-4 border-t border-gray-100 w-full space-y-1">
-                      <div className="flex items-center justify-center text-sm text-gray-600">
-                        <MailOutlined className="mr-2 text-pink-500" />
-                        <span className="truncate">{user.email}</span>
-                      </div>
-                      <p className="text-xs text-gray-500 text-center">
-                        Bergabung: {user.created_at ? new Date(user.created_at).toLocaleDateString('id-ID') : '-'}
+                      {/* Role */}
+                      <p className="text-sm text-gray-600 mb-3">
+                        Ibu Hamil
                       </p>
-                    </div>
-                  </div>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        )}
 
-        {!loading && filteredUsers.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">👥</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Tidak ada data ibu hamil
-            </h3>
-            <p className="text-gray-600">
-              {searchText ? 'Tidak ada hasil pencarian' : 'Belum ada data ibu hamil yang terdaftar'}
-            </p>
-          </div>
+                      {/* Status */}
+                      <div className="mb-4">
+                        {getStatusTag(user.is_active)}
+                      </div>
+
+                      {/* Profile Fields from users_profile */}
+                      <div className="w-full space-y-2 text-sm text-gray-700">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-gray-500">Tanggal Lahir</span>
+                          <span className="font-medium">{formatDate(getFromProfile(user, 'tanggal_lahir') as string | null)}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-gray-500">Usia</span>
+                          <span className="font-medium">{toStr(getFromProfile(user, 'usia'))}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-gray-500">Alamat</span>
+                          <span className="font-medium truncate" title={toStr(getFromProfile(user, 'alamat'))}>{toStr(getFromProfile(user, 'alamat'))}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-gray-500">No. Telepon</span>
+                          <span className="font-medium">{toStr(getFromProfile(user, 'no_telepon'))}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-gray-500">Pendidikan</span>
+                          <span className="font-medium">{toStr(getFromProfile(user, 'pendidikan_terakhir'))}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-gray-500">Pekerjaan</span>
+                          <span className="font-medium">{toStr(getFromProfile(user, 'pekerjaan'))}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-gray-500">Gol. Darah</span>
+                          <span className="font-medium">{toStr(getFromProfile(user, 'golongan_darah'))}</span>
+                        </div>
+                      </div>
+
+                      {/* Email & Created Date */}
+                      <div className="mt-4 pt-4 border-t border-gray-100 w-full space-y-1">
+                        <div className="flex items-center justify-center text-sm text-gray-600">
+                          <MailOutlined className="mr-2 text-pink-500" />
+                          <span className="truncate">{user.email}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 text-center">
+                          Bergabung: {user.created_at ? new Date(user.created_at).toLocaleDateString('id-ID') : '-'}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+
+            {/* Pagination */}
+            {filteredUsers.length > PAGE_SIZE && (
+              <div className="flex justify-center mt-8">
+                <Pagination
+                  current={currentPage}
+                  total={filteredUsers.length}
+                  pageSize={PAGE_SIZE}
+                  onChange={(page) => setCurrentPage(page)}
+                  showSizeChanger={false}
+                  showTotal={(total, range) =>
+                    `${range[0]}-${range[1]} dari ${total} user`
+                  }
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
