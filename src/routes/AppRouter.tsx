@@ -28,6 +28,8 @@ import EditDinkesProfilePage from '@/features/dinkes/pages/EditDinkesProfilePage
 import TipCategoryManagerPage from '@/features/admin/pages/TipCategoryManagerPage';
 import AdminTipManagerPage from '@/features/admin/pages/TipManagerPage';
 import BidanTipManagerPage from '@/features/bidan/pages/TipManagerPage';
+import CatatanKunjunganList from '@/features/bidan/pages/CatatanKunjunganList';
+import CatatanKunjunganDetail from '@/features/bidan/pages/CatatanKunjunganDetail';
 
 export default function AppRouter() {
   return (
@@ -191,6 +193,26 @@ export default function AppRouter() {
             <ProtectedBidan>
               <BidanLayout>
                 <BidanTipManagerPage />
+              </BidanLayout>
+            </ProtectedBidan>
+          }
+        />
+        <Route
+          path="/catatan-kunjungan"
+          element={
+            <ProtectedBidan>
+              <BidanLayout>
+                <CatatanKunjunganList />
+              </BidanLayout>
+            </ProtectedBidan>
+          }
+        />
+        <Route
+          path="/catatan-kunjungan/:catatan_id"
+          element={
+            <ProtectedBidan>
+              <BidanLayout>
+                <CatatanKunjunganDetail />
               </BidanLayout>
             </ProtectedBidan>
           }

@@ -4,6 +4,7 @@ import { storage } from '@/lib/storage';
 import AppLayout from '@/components/ui/AppLayout';
 import { MenuItem } from '@/components/ui/AppSidebar';
 import LogoutModal from '@/components/ui/LogoutModal';
+import catatanKunjunganIcon from '@/assets/catatankunjungan.png';
 
 type BidanLayoutProps = {
   children: ReactNode;
@@ -26,6 +27,14 @@ const TipsIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
   </svg>
+);
+
+const CatatanKunjunganIcon = () => (
+  <img 
+    src={catatanKunjunganIcon} 
+    alt="Catatan Kunjungan" 
+    className="w-6 h-6"
+  />
 );
 
 export default function BidanLayout({ children }: BidanLayoutProps) {
@@ -52,6 +61,12 @@ export default function BidanLayout({ children }: BidanLayoutProps) {
       icon: <UsersIcon />,
       label: 'Users',
       path: '/bidan/users',
+    },
+    {
+      key: 'catatan-kunjungan',
+      icon: <CatatanKunjunganIcon />,
+      label: 'Catatan Kunjungan',
+      path: '/catatan-kunjungan',
     },
     {
       key: 'tips',

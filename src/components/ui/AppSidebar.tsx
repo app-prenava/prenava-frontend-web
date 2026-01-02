@@ -27,9 +27,25 @@ export default function AppSidebar({
   const [openKeys, setOpenKeys] = useState<string[]>([]);
 
   const selectedKey = menuItems.find((item) => {
+    // Exact match
     if (item.path === location.pathname) return true;
+    
+    // Check if pathname starts with item.path (for routes with parameters)
+    // e.g., /catatan-kunjungan/11 should match /catatan-kunjungan
+    if (item.path && location.pathname.startsWith(item.path + '/')) {
+      return true;
+    }
+    
+    // Check children
     if (item.children) {
-      return item.children.some(child => child.path === location.pathname);
+      return item.children.some(child => {
+        if (child.path === location.pathname) return true;
+        // Also check if pathname starts with child.path for nested routes
+        if (child.path && location.pathname.startsWith(child.path + '/')) {
+          return true;
+        }
+        return false;
+      });
     }
     return false;
   })?.key || menuItems[0]?.key;
