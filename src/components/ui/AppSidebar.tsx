@@ -26,13 +26,60 @@ export default function AppSidebar({
   const location = useLocation();
   const [openKeys, setOpenKeys] = useState<string[]>([]);
 
-  const selectedKey = menuItems.find((item) => {
-    if (item.path === location.pathname) return true;
-    if (item.children) {
-      return item.children.some(child => child.path === location.pathname);
+  // Find the most specific matching menu item
+  // Priority: exact match > longest prefix match (for routes with parameters)
+  const selectedKey = (() => {
+    // Sort menu items by path length (longest first) to prioritize more specific paths
+    const sortedItems = [...menuItems].sort((a, b) => {
+      const aPath = a.path || '';
+      const bPath = b.path || '';
+      return bPath.length - aPath.length;
+    });
+    
+    // First, try exact match (checking longest paths first)
+    for (const item of sortedItems) {
+      if (item.path === location.pathname) {
+        return item.key;
+      }
+      if (item.children) {
+        for (const child of item.children) {
+          if (child.path === location.pathname) {
+            return item.key; // Return parent key for child matches
+          }
+        }
+      }
     }
-    return false;
-  })?.key || menuItems[0]?.key;
+    
+    // If no exact match, find the longest prefix match
+    // This handles routes with parameters like /catatan-kunjungan/:id
+    // Only match if pathname is longer than the menu path (indicating a parameter)
+    let bestMatch: MenuItem | null = null;
+    let bestMatchLength = 0;
+    
+    for (const item of sortedItems) {
+      if (item.path && location.pathname.startsWith(item.path + '/')) {
+        // Only match if pathname is actually longer (has a parameter)
+        if (location.pathname.length > item.path.length && item.path.length > bestMatchLength) {
+          bestMatch = item;
+          bestMatchLength = item.path.length;
+        }
+      }
+      
+      // Check children for prefix match
+      if (item.children) {
+        for (const child of item.children) {
+          if (child.path && location.pathname.startsWith(child.path + '/')) {
+            if (location.pathname.length > child.path.length && child.path.length > bestMatchLength) {
+              bestMatch = item; // Parent item should be active
+              bestMatchLength = child.path.length;
+            }
+          }
+        }
+      }
+    }
+    
+    return bestMatch?.key || menuItems[0]?.key;
+  })();
 
   const handleMenuClick = (item: MenuItem) => {
     if (item.children) {
