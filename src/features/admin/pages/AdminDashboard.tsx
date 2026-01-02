@@ -6,12 +6,11 @@ export default function AdminDashboard() {
         Visualisasi data Prenava.
       </p>
 
-      <div className="mt-2 w-full">
+      <div className="mt-2 w-full" style={{ height: '80vh' }}>
         <iframe
-          title="Prenava Analytics Dashboard"
           width="100%"
-          height="1100"
-          src="https://lookerstudio.google.com/embed/reporting/3c2a39c2-0598-4c6d-99c2-4183a9f30bbf/page/8VPiF"
+          height="100%"
+          src="https://lookerstudio.google.com/embed/reporting/cce62159-6f72-4a71-9564-d02a7a3b68b1/page/yX2jF"
           frameBorder="0"
           style={{ border: 0 }}
           allowFullScreen
