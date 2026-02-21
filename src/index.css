@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 html,
 body,
@@ -11,4 +12,9 @@ body {
   font-family: "Plus Jakarta Sans", sans-serif;
   background-color: #f9fafb;
   color: #111827;
+}
+
+/* Leaflet custom styles */
+.leaflet-container {
+  z-index: 1;
 }
