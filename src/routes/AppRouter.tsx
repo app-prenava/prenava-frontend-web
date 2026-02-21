@@ -30,6 +30,11 @@ import AdminTipManagerPage from '@/features/admin/pages/TipManagerPage';
 import BidanTipManagerPage from '@/features/bidan/pages/TipManagerPage';
 import CatatanKunjunganList from '@/features/bidan/pages/CatatanKunjunganList';
 import CatatanKunjunganDetail from '@/features/bidan/pages/CatatanKunjunganDetail';
+// New Bidan Management Pages
+import SubscriptionPlansPage from '@/features/admin/pages/SubscriptionPlansPage';
+import BidanApplicationsPage from '@/features/admin/pages/BidanApplicationsPage';
+import CreateBidanFromApplicationPage from '@/features/admin/pages/CreateBidanFromApplicationPage';
+import BidanLocationsPage from '@/features/admin/pages/BidanLocationsPage';
 
 export default function AppRouter() {
   return (
@@ -143,6 +148,47 @@ export default function AppRouter() {
             <ProtectedAdmin>
               <AdminLayout>
                 <AdminTipManagerPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        {/* New Bidan Management Routes */}
+        <Route
+          path="/admin/subscription-plans"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <SubscriptionPlansPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/admin/bidan-applications"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <BidanApplicationsPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/admin/create-bidan-from-application/:applicationId"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <CreateBidanFromApplicationPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/admin/bidan-locations"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <BidanLocationsPage />
               </AdminLayout>
             </ProtectedAdmin>
           }
