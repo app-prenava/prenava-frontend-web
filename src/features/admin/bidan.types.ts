@@ -151,8 +151,13 @@ export interface BidanLocation {
   id: number;
   bidan_id: number;
   bidan?: BidanAccount;
+<<<<<<< HEAD
   latitude: number;
   longitude: number;
+=======
+  lat: number;
+  lng: number;
+>>>>>>> af41c31 (feat: appointment bidan)
   address_label: string;
   full_address?: string;
   phone_override?: string;
@@ -174,8 +179,13 @@ export interface BidanLocationResponse {
 }
 
 export interface SetBidanLocationBody {
+<<<<<<< HEAD
   latitude: number;
   longitude: number;
+=======
+  lat: number;
+  lng: number;
+>>>>>>> af41c31 (feat: appointment bidan)
   address_label: string;
   full_address?: string;
   phone_override?: string;
