@@ -159,8 +159,8 @@ const BidanLocationsPage = () => {
       await setLocationMutation.mutateAsync({
         bidanId: selectedBidan.user_id, // Use user_id instead of id
         data: {
-          latitude: selectedPosition.lat,
-          longitude: selectedPosition.lng,
+          lat: selectedPosition.lat,
+          lng: selectedPosition.lng,
           address_label: addressLabel,
           phone_override: phoneOverride || undefined,
           notes: notes || undefined,

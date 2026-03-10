@@ -7,12 +7,16 @@ import type { Appointment, AppointmentsResponse, AppointmentResponse } from '@/f
 // =====================
 
 export const getBidanAppointments = async (): Promise<Appointment[]> => {
-  // Replace this URL when the backend endpoint is ready
   const { data } = await api.get<AppointmentsResponse>('/api/bidan/appointments');
-  return Array.isArray(data?.data) ? data.data : [];
+  const raw = data?.data;
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === 'object' && Array.isArray((raw as any).data)) {
+    return (raw as any).data;
+  }
+  return [];
 };
 
-export const acceptAppointment = async (id: number, data: { appointment_date: string; appointment_time: string; notes?: string }): Promise<Appointment> => {
+export const acceptAppointment = async (id: number, data: { confirmed_date: string; confirmed_time: string; notes?: string }): Promise<Appointment> => {
   const response = await api.patch<AppointmentResponse>(`/api/bidan/appointments/${id}/accept`, data);
   return response.data.data;
 };
@@ -41,7 +45,7 @@ export const useBidanAppointments = () => {
 export const useAcceptAppointment = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: { appointment_date: string; appointment_time: string; notes?: string } }) =>
+    mutationFn: ({ id, data }: { id: number; data: { confirmed_date: string; confirmed_time: string; notes?: string } }) =>
       acceptAppointment(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bidanAppointments'] });

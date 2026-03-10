@@ -112,8 +112,12 @@ export const toggleBidanStatus = async (id: number): Promise<BidanAccount> => {
 // =====================
 
 export const getBidanLocations = async (): Promise<BidanLocation[]> => {
-  const response = await apiClient.get<BidanLocationsResponse>('/api/admin/bidan-locations');
-  return response.data.data;
+  const response = await apiClient.get<any>('/api/admin/bidan-locations');
+  const outer = response.data;
+  const inner = outer?.data;
+  if (inner?.data && Array.isArray(inner.data)) return inner.data;
+  if (Array.isArray(inner)) return inner;
+  return [];
 };
 
 export const getBidanLocation = async (bidanId: number): Promise<BidanLocation> => {
@@ -140,10 +144,14 @@ export const deleteBidanLocation = async (bidanId: number): Promise<void> => {
 // =====================
 
 export const getBidansWithoutLocation = async (): Promise<BidanAccount[]> => {
-  const response = await apiClient.get<BidanAccountsResponse>('/api/admin/bidans', {
+  const response = await apiClient.get<any>('/api/admin/bidans', {
     params: { has_location: false },
   });
-  return response.data.data;
+  const outer = response.data;
+  const inner = outer?.data;
+  if (inner?.data && Array.isArray(inner.data)) return inner.data;
+  if (Array.isArray(inner)) return inner;
+  return [];
 };
 
 // =====================

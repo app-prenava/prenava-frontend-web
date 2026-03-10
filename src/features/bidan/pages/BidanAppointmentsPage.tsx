@@ -33,13 +33,11 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const statusConfig: Record<AppointmentStatus, { color: string; label: string }> = {
-  requested: { color: 'warning', label: 'Requested' },
-  accepted: { color: 'success', label: 'Accepted' },
-  scheduled: { color: 'processing', label: 'Scheduled' },
-  rejected: { color: 'error', label: 'Rejected' },
-  completed: { color: 'default', label: 'Completed' },
-  cancelled: { color: 'default', label: 'Cancelled' },
-  no_show: { color: 'default', label: 'No Show' },
+  requested: { color: 'warning', label: 'Menunggu' },
+  accepted: { color: 'success', label: 'Diterima' },
+  rejected: { color: 'error', label: 'Ditolak' },
+  completed: { color: 'default', label: 'Selesai' },
+  cancelled: { color: 'default', label: 'Dibatalkan' },
 };
 
 export default function BidanAppointmentsPage() {
@@ -59,10 +57,10 @@ export default function BidanAppointmentsPage() {
     setSelectedAppt(appt);
     setIsAcceptModalOpen(true);
     acceptForm.resetFields();
-    if (appt.appointment_date && appt.appointment_time) {
+    if (appt.preferred_date && appt.preferred_time) {
       acceptForm.setFieldsValue({
-        date: dayjs(appt.appointment_date),
-        time: dayjs(appt.appointment_time, 'HH:mm'),
+        date: dayjs(appt.preferred_date),
+        time: dayjs(appt.preferred_time, 'HH:mm'),
       });
     }
   };
@@ -77,22 +75,18 @@ export default function BidanAppointmentsPage() {
     if (!selectedAppt) return;
     try {
       await acceptMutation.mutateAsync({
-        id: selectedAppt.id,
+        id: selectedAppt.appointment_id,
         data: {
-          appointment_date: values.date.format('YYYY-MM-DD'),
-          appointment_time: values.time.format('HH:mm'),
+          confirmed_date: values.date.format('YYYY-MM-DD'),
+          confirmed_time: values.time.format('HH:mm'),
           notes: values.notes,
         },
       });
-      message.success('Appointment Accepted!');
+      message.success('Appointment berhasil diterima!');
       setIsAcceptModalOpen(false);
       setSelectedAppt(null);
     } catch (error: any) {
-      if (error.response?.status === 404) {
-        message.warning('API Endpoint is not implemented on the backend yet.');
-      } else {
-        message.error('Terjadi kesalahan saat menyimpan data.');
-      }
+      message.error(error?.response?.data?.message || 'Gagal menerima appointment.');
     }
   };
 
@@ -100,72 +94,77 @@ export default function BidanAppointmentsPage() {
     if (!selectedAppt) return;
     try {
       await rejectMutation.mutateAsync({
-        id: selectedAppt.id,
+        id: selectedAppt.appointment_id,
         data: {
           rejection_reason: values.reason,
         },
       });
-      message.success('Appointment Rejected.');
+      message.success('Appointment ditolak.');
       setIsRejectModalOpen(false);
       setSelectedAppt(null);
     } catch (error: any) {
-      if (error.response?.status === 404) {
-        message.warning('API Endpoint is not implemented on the backend yet.');
-      } else {
-        message.error('Terjadi kesalahan saat menyimpan data.');
-      }
+      message.error(error?.response?.data?.message || 'Gagal menolak appointment.');
     }
   };
 
   const handleComplete = async (appt: Appointment) => {
     Modal.confirm({
-      title: 'Sesaikan Konsultasi?',
+      title: 'Selesaikan Konsultasi?',
       content: 'Apakah Anda yakin konsultasi dengan pasien ini telah selesai?',
       okText: 'Ya, Selesai',
       cancelText: 'Batal',
       onOk: async () => {
         try {
-          await completeMutation.mutateAsync(appt.id);
+          await completeMutation.mutateAsync(appt.appointment_id);
           message.success('Konsultasi ditandai selesai.');
         } catch (error: any) {
-          if (error.response?.status === 404) {
-            message.warning('API Endpoint is not implemented on the backend yet.');
-          } else {
-            message.error('Gagal menyelesaikan konsultasi.');
-          }
+          message.error(error?.response?.data?.message || 'Gagal menyelesaikan konsultasi.');
         }
       },
     });
   };
 
+  const getPatientName = (record: Appointment): string => {
+    if (record.user_data && typeof record.user_data === 'object') {
+      return (record.user_data as any).name || 'Pasien';
+    }
+    return 'Pasien';
+  };
+
   const columns: ColumnsType<Appointment> = [
     {
       title: 'Nama Ibu Hamil',
-      dataIndex: 'patient_name',
       key: 'patient_name',
-      render: (text) => <div className="font-medium">{text}</div>,
+      render: (_, record) => <div className="font-medium">{getPatientName(record)}</div>,
     },
     {
       title: 'Waktu Diminta',
       key: 'time',
       render: (_, record) => {
-        const dateStr = record.appointment_date ? dayjs(record.appointment_date).format('DD MMM YYYY') : '-';
-        const timeStr = record.appointment_time || '-';
+        const dateStr = record.preferred_date ? dayjs(record.preferred_date).format('DD MMM YYYY') : '-';
+        const timeStr = record.preferred_time || '-';
         return <div>{dateStr} {timeStr !== '-' && `• ${timeStr}`}</div>;
       },
     },
     {
-      title: 'Tipe Konsultasi / Alasan',
-      dataIndex: 'reason',
-      key: 'reason',
-      render: (text) => <Text type="secondary">{text || '-'}</Text>,
+      title: 'Tipe Konsultasi',
+      dataIndex: 'consultation_type',
+      key: 'consultation_type',
+      render: (text) => {
+        const labels: Record<string, string> = {
+          visit: 'Kunjungan',
+          consultation: 'Konsultasi',
+          checkup: 'Pemeriksaan',
+        };
+        return <Text type="secondary">{labels[text] || text || '-'}</Text>;
+      },
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: AppointmentStatus) => {
-        const config = statusConfig[status || 'requested'] || { color: 'default', label: status };
+        const config = statusConfig[status] || { color: 'default', label: status };
         let icon = <ClockCircleOutlined />;
         if (status === 'accepted') icon = <CheckCircleOutlined />;
         if (status === 'rejected') icon = <CloseCircleOutlined />;
@@ -190,26 +189,26 @@ export default function BidanAppointmentsPage() {
                 style={{ backgroundColor: '#52c41a' }}
                 onClick={() => handleOpenAccept(record)}
               >
-                Accept
+                Terima
               </Button>
               <Button
                 danger
                 size="small"
                 onClick={() => handleOpenReject(record)}
               >
-                Reject
+                Tolak
               </Button>
             </Space>
           );
         }
-        if (record.status === 'accepted' || record.status === 'scheduled') {
+        if (record.status === 'accepted') {
           return (
             <Button
               type="default"
               size="small"
               onClick={() => handleComplete(record)}
             >
-              Mark as Complete
+              Tandai Selesai
             </Button>
           );
         }
@@ -229,7 +228,7 @@ export default function BidanAppointmentsPage() {
         <Table
           columns={columns}
           dataSource={appointments}
-          rowKey="id"
+          rowKey="appointment_id"
           loading={isLoading}
           pagination={{ pageSize: 15 }}
           locale={{ emptyText: 'Belum ada data appointment' }}
@@ -246,7 +245,7 @@ export default function BidanAppointmentsPage() {
         confirmLoading={acceptMutation.isPending}
       >
         <div className="mb-4 text-sm text-gray-500">
-          Atur tanggal dan jam konsultasi pasti untuk pasien <strong>{selectedAppt?.patient_name}</strong>.
+          Atur tanggal dan jam konsultasi pasti untuk pasien <strong>{selectedAppt ? getPatientName(selectedAppt) : ''}</strong>.
         </div>
         <Form form={acceptForm} layout="vertical" onFinish={submitAccept}>
           <div className="flex gap-4">
@@ -284,7 +283,7 @@ export default function BidanAppointmentsPage() {
         confirmLoading={rejectMutation.isPending}
       >
         <div className="mb-4 text-sm text-gray-500">
-          Anda akan menolak permintaan konsultasi dari <strong>{selectedAppt?.patient_name}</strong>.
+          Anda akan menolak permintaan konsultasi dari <strong>{selectedAppt ? getPatientName(selectedAppt) : ''}</strong>.
         </div>
         <Form form={rejectForm} layout="vertical" onFinish={submitReject}>
           <Form.Item

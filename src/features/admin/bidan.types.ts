@@ -1,6 +1,6 @@
 // Enums
 export type ApplicationStatus = 'pending' | 'approved' | 'rejected';
-export type AppointmentStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show';
+export type AppointmentStatus = 'requested' | 'accepted' | 'rejected' | 'completed' | 'cancelled';
 
 // Subscription Plan
 export interface SubscriptionPlan {
@@ -151,13 +151,8 @@ export interface BidanLocation {
   id: number;
   bidan_id: number;
   bidan?: BidanAccount;
-<<<<<<< HEAD
   latitude: number;
   longitude: number;
-=======
-  lat: number;
-  lng: number;
->>>>>>> af41c31 (feat: appointment bidan)
   address_label: string;
   full_address?: string;
   phone_override?: string;
@@ -179,13 +174,8 @@ export interface BidanLocationResponse {
 }
 
 export interface SetBidanLocationBody {
-<<<<<<< HEAD
-  latitude: number;
-  longitude: number;
-=======
   lat: number;
   lng: number;
->>>>>>> af41c31 (feat: appointment bidan)
   address_label: string;
   full_address?: string;
   phone_override?: string;
@@ -199,17 +189,26 @@ export interface UpdateBidanLocationBody extends Partial<SetBidanLocationBody> {
 
 // Appointment
 export interface Appointment {
+  appointment_id: number;
   id: number;
+  user_id: number;
   bidan_id: number;
-  bidan?: BidanAccount;
-  patient_id: number;
-  patient_name: string;
-  patient_phone: string;
-  appointment_date: string;
-  appointment_time: string;
-  reason: string;
-  notes?: string;
+  bidan_location_id?: number;
   status: AppointmentStatus;
+  preferred_date: string;
+  preferred_time: string;
+  confirmed_date?: string;
+  confirmed_time?: string;
+  notes?: string;
+  bidan_notes?: string;
+  rejection_reason?: string;
+  consultation_type: string;
+  user_data?: Record<string, any>;
+  location?: BidanLocation;
+  consent?: {
+    consent_id: number;
+    shared_fields: Record<string, boolean>;
+  };
   created_at: string;
   updated_at: string;
 }
