@@ -98,3 +98,78 @@ export type UpdateBannerResponse = {
   message: string;
   data: Banner;
 };
+
+// Rekomendasi Gerakan (Sport Recommendations) types
+export type RekomendasiGerakan = {
+  id: number;
+  activity: string;
+  video_link: string;
+  long_text: string;
+  picture_1: string | null;
+  picture_2: string | null;
+  picture_3: string | null;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type RekomendasiGerakanResponse = {
+  status: 'success';
+  message: string;
+  data: RekomendasiGerakan[];
+};
+
+export type SingleRekomendasiResponse = {
+  status: 'success';
+  message: string;
+  data: RekomendasiGerakan;
+};
+
+export type CreateRekomendasiBody = {
+  activity: string;
+  video_link: string;
+  long_text: string;
+  picture_1?: File;
+  picture_2?: File;
+  picture_3?: File;
+};
+
+export type UpdateRekomendasiBody = {
+  activity?: string;
+  video_link?: string;
+  long_text?: string;
+  picture_1?: File;
+  picture_2?: File;
+  picture_3?: File;
+  is_active?: number;
+};
+
+// History Log types
+export type HistoryLog = {
+  id: number;
+  user_id: number;
+  user_name?: string;
+  user_email?: string;
+  user_role?: string;
+  action: string;
+  activity_type?: string;
+  activity_label?: string;
+  description?: string;
+  ip_address?: string;
+  device?: string;
+  created_at: string;
+};
+
+export type HistoryLogResponse = {
+  status: 'success';
+  message: string;
+  data: HistoryLog[];
+};
+
+export type HistoryLogFilters = {
+  role?: string;
+  action?: string;
+  start_date?: string;
+  end_date?: string;
+  search?: string;
+};

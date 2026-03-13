@@ -72,6 +72,18 @@ const LocationIcon = () => (
   </svg>
 );
 
+const SportIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5ZM6.75 8.25l2.478-1.239a3.75 3.75 0 0 1 5.544 0L17.25 8.25M9 20.25l1.5-6.75L8.25 12h7.5l-2.25 1.5L15 20.25" />
+  </svg>
+);
+
+const HistoryLogIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  </svg>
+);
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -141,6 +153,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       path: '/admin/shop',
     },
     {
+      key: 'rekomendasi-olahraga',
+      icon: <SportIcon />,
+      label: 'Rekomendasi Olahraga',
+      path: '/admin/rekomendasi-olahraga',
+    },
+    {
       key: 'tips-management',
       icon: <TipsIcon />,
       label: 'Tips',
@@ -158,6 +176,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           path: '/admin/tips',
         },
       ],
+    },
+    {
+      key: 'history-log',
+      icon: <HistoryLogIcon />,
+      label: 'History Log',
+      path: '/admin/history-log',
     },
   ];
 

@@ -35,6 +35,10 @@ import SubscriptionPlansPage from '@/features/admin/pages/SubscriptionPlansPage'
 import BidanApplicationsPage from '@/features/admin/pages/BidanApplicationsPage';
 import CreateBidanFromApplicationPage from '@/features/admin/pages/CreateBidanFromApplicationPage';
 import BidanLocationsPage from '@/features/admin/pages/BidanLocationsPage';
+import RekomendasiOlahragaPage from '@/features/admin/pages/RekomendasiOlahragaPage';
+import CreateRekomendasiPage from '@/features/admin/pages/CreateRekomendasiPage';
+import EditRekomendasiPage from '@/features/admin/pages/EditRekomendasiPage';
+import HistoryLogPage from '@/features/admin/pages/HistoryLogPage';
 
 export default function AppRouter() {
   return (
@@ -189,6 +193,49 @@ export default function AppRouter() {
             <ProtectedAdmin>
               <AdminLayout>
                 <BidanLocationsPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        {/* Rekomendasi Olahraga Routes */}
+        <Route
+          path="/admin/rekomendasi-olahraga"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <RekomendasiOlahragaPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/admin/create-rekomendasi"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <CreateRekomendasiPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/admin/edit-rekomendasi/:id"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <EditRekomendasiPage />
+              </AdminLayout>
+            </ProtectedAdmin>
+          }
+        />
+
+        {/* History Log Route */}
+        <Route
+          path="/admin/history-log"
+          element={
+            <ProtectedAdmin>
+              <AdminLayout>
+                <HistoryLogPage />
               </AdminLayout>
             </ProtectedAdmin>
           }

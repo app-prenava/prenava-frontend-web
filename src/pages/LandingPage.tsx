@@ -2,10 +2,11 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Card, Tag, Skeleton, Empty, Modal, Button, Form, Input, message } from 'antd';
-import { CheckCircleOutlined, CloseOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, CloseOutlined, HeartOutlined, EnvironmentOutlined, SafetyOutlined } from '@ant-design/icons';
+import { HeartPulse, Droplets } from 'lucide-react';
 import logoUrl from '@/assets/logo.png';
 import mockupImage from '@/assets/mockup.png';
-import waveImage from '@/assets/Wave.png';
+import mockup2Image from '@/assets/mockup2.png';
 import { usePublicSubscriptionPlans } from '@/hooks/useBidanManagement';
 import { createSubscriptionApplication } from '@/features/admin/bidanService.api';
 import type { SubscriptionPlan } from '@/features/admin/bidan.types';
@@ -61,6 +62,45 @@ function TypewriterText({ text, highlightWord, highlightColor }: { text: string;
                 </motion.span>
             )}
         </motion.h1>
+    );
+}
+
+// Yoga Icon SVG Component
+function YogaIcon({ size = 28, color = 'currentColor', ...props }: { size?: number; color?: string;[key: string]: any }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <circle cx="12" cy="3.5" r="2" />
+            <path d="M7 21l3-7" />
+            <path d="M17 21l-3-7" />
+            <path d="M12 14l-4-4 2-3" />
+            <path d="M12 14l4-4-2-3" />
+            <path d="M4 11h4" />
+            <path d="M16 11h4" />
+        </svg>
+    );
+}
+
+// Feature Card Component
+function FeatureCard({ icon: Icon, title, description, delay }: { icon: any; title: string; description: string; delay: number }) {
+    return (
+        <motion.div
+            className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-100"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay }}
+            viewport={{ once: true }}
+            whileHover={{ y: -5 }}
+        >
+            <div className="flex items-start gap-4">
+                <div className="bg-gradient-to-br from-pink-100 to-pink-50 rounded-xl p-4 flex-shrink-0">
+                    <Icon size={28} className="text-3xl" style={{ color: '#F88A9D' }} />
+                </div>
+                <div>
+                    <h3 className="font-bold text-gray-900 mb-2 text-lg">{title}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
+                </div>
+            </div>
+        </motion.div>
     );
 }
 
@@ -199,41 +239,71 @@ export default function LandingPage() {
 
     return (
         <div className="min-h-screen bg-white">
+            {/* Navbar */}
+            <motion.nav
+                className="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50 border-b border-gray-100"
+                initial={{ y: -100 }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.5 }}
+            >
+                <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                    <Link
+                        to="/login"
+                        className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
+                    >
+                        <img src={logoUrl} alt="Prenava Logo" className="w-10 h-10" />
+                        <span className="text-xl font-bold" style={{ color: '#F88A9D' }}>
+                            Prenava
+                        </span>
+                    </Link>
+
+                    <div className="hidden md:flex items-center gap-8">
+                        <motion.a
+                            href="#about"
+                            className="text-gray-700 hover:text-pink-500 transition-colors font-medium"
+                            whileHover={{ y: -2 }}
+                        >
+                            About Us
+                        </motion.a>
+                        <motion.a
+                            href="#features"
+                            className="text-gray-700 hover:text-pink-500 transition-colors font-medium"
+                            whileHover={{ y: -2 }}
+                        >
+                            Features
+                        </motion.a>
+                        <motion.a
+                            href="#catalog"
+                            className="text-gray-700 hover:text-pink-500 transition-colors font-medium"
+                            whileHover={{ y: -2 }}
+                        >
+                            Catalog
+                        </motion.a>
+                    </div>
+                </div>
+            </motion.nav>
+
             {/* Hero Section */}
-            <section className="min-h-screen bg-white overflow-hidden relative">
-                {/* Wave Background - True background layer */}
-                <motion.img
-                    src={waveImage}
-                    alt="Wave Background"
-                    className="absolute bottom-0 right-0 w-full h-auto object-cover z-0"
-                    style={{
-                        objectPosition: 'bottom right',
-                        maxHeight: '100%'
-                    }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 1, ease: "easeOut" }}
+            <section className="min-h-screen bg-white overflow-hidden relative pt-20">
+                {/* Background Rectangle with Shadow */}
+                <motion.div
+                    className="absolute hidden md:block lg:block top-1/2 -translate-y-1/2 rounded-3xl shadow-2xl z-0 md:w-1/2 md:h-2/5 md:right-1/4 lg:w-[35%] lg:h-[50%] lg:right-64"
+                    style={{ backgroundColor: '#F88A9D' }}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
                 />
 
-                {/* Content Container - Sits on top of wave */}
-                <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-8 md:py-20">
+                {/* Content Container - Sits on top of background */}
+                <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-20">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         {/* Left Column - Content */}
-                        <div className="order-2 lg:order-1">
-                            {/* Logo - Link to /login */}
-                            <Link
-                                to="/login"
-                                className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity mb-8"
-                            >
-                                <img src={logoUrl} alt="Prenava Logo" className="w-10 h-10" />
-                                <span
-                                    className="text-2xl font-semibold"
-                                    style={{ color: '#F88A9D' }}
-                                >
-                                    Prenava
-                                </span>
-                            </Link>
-
+                        <motion.div
+                            className="order-2 lg:order-1"
+                            initial={{ opacity: 0, x: -50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
+                        >
                             {/* Headline with Typewriter Effect */}
                             <TypewriterText
                                 text="Jalani Kehamilan dengan Tenang Bersama Prenava"
@@ -259,25 +329,23 @@ export default function LandingPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 2, duration: 0.6 }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#f77a8f';
-                                    e.currentTarget.style.color = '#FFFFFF';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#F88A9D';
-                                    e.currentTarget.style.color = '#FFFFFF';
-                                }}
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
                             >
                                 Dapatkan Aplikasi Sekarang
                             </motion.button>
-                        </div>
+                        </motion.div>
 
-                        {/* Right Column - Phone Mockups */}
-                        <div className="order-1 lg:order-2 relative flex items-center justify-center min-h-[500px] lg:min-h-[600px]">
+                        {/* Right Column - Phone Mockup */}
+                        <motion.div
+                            className="order-1 lg:order-2 relative flex items-center w-[120%] justify-center min-h-[500px] lg:min-h-[600px]"
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
+                        >
                             <motion.div
-                                initial={{ opacity: 0, y: 50 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
+                                animate={{ y: [0, -10, 0] }}
+                                transition={{ duration: 6, repeat: Infinity }}
                             >
                                 <img
                                     src={mockupImage}
@@ -285,10 +353,204 @@ export default function LandingPage() {
                                     className="w-full max-w-3xl lg:max-w-4xl drop-shadow-2xl"
                                 />
                             </motion.div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </section>
+
+            {/* Features Section */}
+            <motion.section
+                id="features"
+                className="py-20 px-6 bg-gradient-to-b from-gray-50 to-white"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true }}
+            >
+                <div className="max-w-6xl mx-auto">
+                    <motion.div
+                        className="mb-16"
+                        initial={{ opacity: 0, y: -20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        viewport={{ once: true }}
+                    >
+                        <h2 className="text-4xl font-bold text-gray-900 mb-4" id="about">
+                            Level Up Cara Ibu Pantau Si Kecil
+                        </h2>
+                        <p className="text-gray-600 text-lg">Fitur-fitur unggulan untuk kesehatan ibu hamil</p>
+                    </motion.div>
+
+                    {/* Features Grid */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <FeatureCard
+                            icon={HeartPulse}
+                            title="Deteksi Dini yang Cerdas"
+                            description="Cari dan temukan berbagai masalah kesehatan teknologi AI yang akurat dan mudah digunakan."
+                            delay={0}
+                        />
+                        <FeatureCard
+                            icon={EnvironmentOutlined}
+                            title="Terhubung ke Bidan Terdekat"
+                            description="Cari dan temukan berbagai profesional di sekitar Anda dengan navigasi yang mudah dan cepat."
+                            delay={0.1}
+                        />
+                        <FeatureCard
+                            icon={HeartOutlined}
+                            title="Penjaga Kesehatan Mental"
+                            description="Pantau kesejahteraan emosional Ibu dengan skrining suasana hati yang divalidasi secara medis untuk mencegah depresi pascapersalinan."
+                            delay={0.2}
+                        />
+                        <FeatureCard
+                            icon={SafetyOutlined}
+                            title="Pencegahan Stunting Dini"
+                            description="Analisis perkembangan janin secara berkala untuk memastikan tumbuh kembang optimal bayi Anda."
+                            delay={0.3}
+                        />
+                        <FeatureCard
+                            icon={Droplets}
+                            title="Deteksi Anemia"
+                            description="Pantau gejala anemia secara instan melalui pemindaian mata berbasis AI untuk memastikan Ibu tetap bertenaga setiap hari."
+                            delay={0.4}
+                        />
+                        <FeatureCard
+                            icon={YogaIcon}
+                            title="Panduan Olahraga Aman"
+                            description="Dapatkan rekomendasi aktivitas fisik yang dipersonalisasi sesuai usia kehamilan dan kondisi Anda."
+                            delay={0.5}
+                        />
+                    </div>
+                </div>
+            </motion.section>
+
+            {/* CTA Section 1 - Slanted Background */}
+            <motion.section
+                className="py-20 px-6 overflow-hidden relative"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true }}
+            >
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        {/* Left - Pink Background */}
+                        <motion.div
+                            className="rounded-3xl p-12 text-white relative overflow-hidden"
+                            style={{ backgroundColor: '#F88A9D' }}
+                            initial={{ opacity: 0, x: -50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.6 }}
+                            viewport={{ once: true }}
+                        >
+                            <motion.div
+                                className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full"
+                                animate={{ y: [0, 20, 0] }}
+                                transition={{ duration: 8, repeat: Infinity }}
+                            />
+                            <h3 className="text-3xl font-bold mb-4 relative z-10">
+                                Pendampingan Lengkap di Setiap Langkah Kehamilan
+                            </h3>
+                            <p className="text-pink-100 mb-8 relative z-10">
+                                Kami mendampingi Anda dan janin mulai dari trimester pertama hingga pasca persalinan.
+                            </p>
+                            <motion.button
+                                onClick={showModal}
+                                className="px-8 py-3 rounded-xl font-semibold hover:shadow-xl transition-all relative z-10"
+                                style={{ backgroundColor: '#FFFFFF', color: '#F88A9D' }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                Dapatkan Aplikasi Sekarang
+                            </motion.button>
+                        </motion.div>
+
+                        {/* Right - Image */}
+                        <motion.div
+                            className="flex justify-center"
+                            initial={{ opacity: 0, x: 50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.6 }}
+                            viewport={{ once: true }}
+                        >
+                            <motion.div
+                                animate={{ y: [0, -15, 0] }}
+                                transition={{ duration: 6, repeat: Infinity }}
+                            >
+                                <img
+                                    src={mockup2Image}
+                                    alt="Prenava Features"
+                                    className="w-full max-w-sm drop-shadow-2xl"
+                                />
+                            </motion.div>
+                        </motion.div>
+                    </div>
+                </div>
+            </motion.section>
+
+            {/* CTA Section 2 - Bottom */}
+            <motion.section
+                className="py-20 px-6"
+                style={{ backgroundColor: '#F88A9D' }}
+                id="catalog"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true }}
+            >
+                <div className="max-w-4xl mx-auto text-center text-white">
+                    <motion.h2
+                        className="text-4xl font-bold mb-6 px-8 py-4 rounded-2xl inline-block"
+                        initial={{ opacity: 0, y: -20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        viewport={{ once: true }}
+                    >
+                        Ibu Sehat, Janin Kuat, Jalani Kehamilan dengan Tenang Bersama Prenava
+                    </motion.h2>
+                    <motion.button
+                        onClick={showModal}
+                        className="bg-white px-10 py-4 rounded-xl font-semibold hover:shadow-xl transition-all"
+                        style={{ color: '#F88A9D' }}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        viewport={{ once: true }}
+                    >
+                        Dapatkan Aplikasi Sekarang
+                    </motion.button>
+                </div>
+            </motion.section>
+
+            {/* Footer */}
+            <motion.footer
+                className="bg-gray-900 text-white py-12 px-6"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true }}
+            >
+                <div className="max-w-6xl mx-auto">
+                    <div className="mb-8">
+                        <div className="flex items-center gap-2 mb-4">
+                            <img src={logoUrl} alt="Prenava Logo" className="w-8 h-8" />
+                            <span className="font-bold text-lg">Prenava</span>
+                        </div>
+                        <p className="text-gray-400">
+                            Pendamping setia ibu di setiap langkah perjalanan kehamilan.
+                        </p>
+                    </div>
+
+                    <div className="border-t border-gray-800 pt-8">
+                        <p className="text-gray-400 text-sm">
+                            Hubungi Kami:<br />
+                            📞 +62 851-5624-0040<br />
+                            📧 prenava.official@gmail.com
+                        </p>
+                    </div>
+                </div>
+            </motion.footer>
 
             {/* Subscription Plans Modal */}
             <Modal

@@ -10,6 +10,12 @@ import {
   CreateBannerResponse,
   UpdateBannerBody,
   UpdateBannerResponse,
+  RekomendasiGerakanResponse,
+  SingleRekomendasiResponse,
+  CreateRekomendasiBody,
+  UpdateRekomendasiBody,
+  HistoryLogResponse,
+  HistoryLogFilters,
 } from './admin.types';
 
 // Lightweight types for admin detail views
@@ -176,5 +182,60 @@ export const toggleBannerStatus = async (bannerId: number, isActive: number) => 
   const { data } = await api.post(`/api/banner/update/${bannerId}`, {
     is_active: isActive,
   });
+  return data;
+};
+
+// Rekomendasi Gerakan (Sport Recommendations) API functions
+// Uses the admin CRUD group: /api/recomendation/sport/
+export const getRekomendasiGerakan = async () => {
+  const { data } = await api.get<RekomendasiGerakanResponse>('/api/recomendation/sport');
+  return data;
+};
+
+export const getRekomendasiById = async (activity: string) => {
+  const { data } = await api.get<SingleRekomendasiResponse>(`/api/recomendation/sport/${encodeURIComponent(activity)}`);
+  return data;
+};
+
+export const createRekomendasiGerakan = async (body: CreateRekomendasiBody) => {
+  const formData = new FormData();
+  formData.append('activity', body.activity);
+  formData.append('video_link', body.video_link);
+  formData.append('long_text', body.long_text);
+  if (body.picture_1) formData.append('picture_1', body.picture_1);
+  if (body.picture_2) formData.append('picture_2', body.picture_2);
+  if (body.picture_3) formData.append('picture_3', body.picture_3);
+
+  const { data } = await api.post<SingleRekomendasiResponse>('/api/recomendation/sport', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
+};
+
+export const updateRekomendasiGerakan = async (activity: string, body: UpdateRekomendasiBody) => {
+  const formData = new FormData();
+  formData.append('_method', 'PUT'); // Laravel method spoofing
+  if (body.activity) formData.append('activity', body.activity);
+  if (body.video_link) formData.append('video_link', body.video_link);
+  if (body.long_text) formData.append('long_text', body.long_text);
+  if (body.picture_1) formData.append('picture_1', body.picture_1);
+  if (body.picture_2) formData.append('picture_2', body.picture_2);
+  if (body.picture_3) formData.append('picture_3', body.picture_3);
+  if (body.is_active !== undefined) formData.append('is_active', body.is_active.toString());
+
+  const { data } = await api.post<SingleRekomendasiResponse>(`/api/recomendation/sport/${encodeURIComponent(activity)}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
+};
+
+export const deleteRekomendasiGerakan = async (activity: string) => {
+  const { data } = await api.delete(`/api/recomendation/sport/${encodeURIComponent(activity)}`);
+  return data;
+};
+
+// History Log API functions
+export const getHistoryLogs = async (filters?: HistoryLogFilters): Promise<HistoryLogResponse> => {
+  const { data } = await api.get<HistoryLogResponse>('/api/admin/history-log', { params: filters });
   return data;
 };
