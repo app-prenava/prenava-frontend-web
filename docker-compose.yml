@@ -7,5 +7,5 @@ services:
       dockerfile: Dockerfile
     container_name: prenava_frontend
     ports:
-      - "3000:80" # Map host port 3000 to nginx port 80
+      - "3005:80" # Map host port 3000 to nginx port 80
     restart: unless-stopped
