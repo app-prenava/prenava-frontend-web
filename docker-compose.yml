@@ -1,10 +1,11 @@
+version: '3.8'
+
 services:
-  prenava-frontend:
-    build: .
-    container_name: prenava-frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: prenava_frontend
     ports:
-      - "3000:80"
+      - "3000:80" # Map host port 3000 to nginx port 80
     restart: unless-stopped
-    # If using environment variables, uncomment and map them below
-    # environment:
-    #   - VITE_API_BASE_URL=http://your-backend-url/api
