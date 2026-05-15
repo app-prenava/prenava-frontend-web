@@ -14,6 +14,7 @@ interface DataType extends RekomendasiGerakan {
 
 interface ConfirmDialogState {
     isOpen: boolean;
+    itemCode: string;
     itemName: string;
 }
 
@@ -25,6 +26,7 @@ export default function RekomendasiOlahragaPage() {
     const [searchText, setSearchText] = useState('');
     const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
         isOpen: false,
+        itemCode: '',
         itemName: '',
     });
     const [actionLoading, setActionLoading] = useState(false);
@@ -60,7 +62,8 @@ export default function RekomendasiOlahragaPage() {
         let filtered = items;
         if (searchText) {
             filtered = filtered.filter(item =>
-                item.activity.toLowerCase().includes(searchText.toLowerCase())
+                item.code.toLowerCase().includes(searchText.toLowerCase()) ||
+                item.name.toLowerCase().includes(searchText.toLowerCase())
             );
         }
         setFilteredItems(filtered);
@@ -70,9 +73,10 @@ export default function RekomendasiOlahragaPage() {
         setSearchText(value);
     };
 
-    const handleDelete = (name: string) => {
+    const handleDelete = (code: string, name: string) => {
         setConfirmDialog({
             isOpen: true,
+            itemCode: code,
             itemName: name,
         });
     };
@@ -93,9 +97,9 @@ export default function RekomendasiOlahragaPage() {
     const confirmAction = async () => {
         try {
             setActionLoading(true);
-            await deleteRekomendasiGerakan(confirmDialog.itemName);
-            setItems(prev => prev.filter(item => item.activity !== confirmDialog.itemName));
-            setConfirmDialog({ isOpen: false, itemName: '' });
+            await deleteRekomendasiGerakan(confirmDialog.itemCode);
+            setItems(prev => prev.filter(item => item.code !== confirmDialog.itemCode));
+            setConfirmDialog({ isOpen: false, itemCode: '', itemName: '' });
         } catch (error: any) {
             console.error('Failed to delete:', error);
             alert(error?.response?.data?.message || `Gagal menghapus: ${error}`);
@@ -105,12 +109,12 @@ export default function RekomendasiOlahragaPage() {
     };
 
     const cancelAction = () => {
-        setConfirmDialog({ isOpen: false, itemName: '' });
+        setConfirmDialog({ isOpen: false, itemCode: '', itemName: '' });
     };
 
     const getImageUrl = (path: string | null) => {
         if (!path) return null;
-        return `${import.meta.env.VITE_API_BASE}/storage/${path}`;
+        return `${import.meta.env.VITE_API_BASE}${path}`;
     };
 
     return (
@@ -162,11 +166,19 @@ export default function RekomendasiOlahragaPage() {
                     }}
                 >
                     <Column
+                        title="Kode"
+                        dataIndex="code"
+                        key="code"
+                        render={(code: string) => (
+                            <div className="font-medium text-sm">{code}</div>
+                        )}
+                    />
+                    <Column
                         title="Nama Aktivitas"
-                        dataIndex="activity"
-                        key="activity"
-                        render={(activity: string) => (
-                            <div className="font-medium">{activity}</div>
+                        dataIndex="name"
+                        key="name"
+                        render={(name: string) => (
+                            <div className="font-medium">{name}</div>
                         )}
                     />
                     <Column
@@ -175,12 +187,7 @@ export default function RekomendasiOlahragaPage() {
                         key="video_link"
                         render={(link: string) => (
                             link ? (
-                                <a
-                                    href={link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                                >
+                                <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">
                                     {link.length > 50 ? link.substring(0, 50) + '...' : link}
                                 </a>
                             ) : (
@@ -203,14 +210,14 @@ export default function RekomendasiOlahragaPage() {
                                     type="text"
                                     icon={<EditOutlined />}
                                     title="Edit"
-                                    onClick={() => navigate(`/admin/edit-rekomendasi/${encodeURIComponent(record.activity)}`)}
+                                    onClick={() => navigate(`/admin/edit-rekomendasi/${encodeURIComponent(record.code)}`)}
                                 />
                                 <Button
                                     type="text"
                                     danger
                                     icon={<DeleteOutlined />}
                                     title="Hapus"
-                                    onClick={() => handleDelete(record.activity)}
+                                    onClick={() => handleDelete(record.code, record.name)}
                                 />
                             </Space>
                         )}
@@ -265,8 +272,11 @@ export default function RekomendasiOlahragaPage() {
 
                         <Card bordered>
                             <div className="grid grid-cols-3 gap-y-3">
+                                <div className="col-span-1 text-gray-600">Kode</div>
+                                <div className="col-span-2">: {detail?.code || '-'}</div>
+
                                 <div className="col-span-1 text-gray-600">Nama Aktivitas</div>
-                                <div className="col-span-2">: {detail?.activity || '-'}</div>
+                                <div className="col-span-2">: {detail?.name || '-'}</div>
 
                                 <div className="col-span-1 text-gray-600">Link Video</div>
                                 <div className="col-span-2">
