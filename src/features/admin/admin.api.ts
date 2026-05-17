@@ -185,54 +185,211 @@ export const toggleBannerStatus = async (bannerId: number, isActive: number) => 
   return data;
 };
 
-// Rekomendasi Gerakan (Sport Recommendations) API functions
-// Uses the admin CRUD group: /api/recomendation/sport/
-export const getRekomendasiGerakan = async () => {
-  const { data } = await api.get<RekomendasiGerakanResponse>('/api/recomendation/sport');
-  return data;
-};
+// ============================================
+// REKOMENDASI GERAKAN API
+// ============================================
 
-export const getRekomendasiById = async (activity: string) => {
-  const { data } = await api.get<SingleRekomendasiResponse>(`/api/recomendation/sport/${encodeURIComponent(activity)}`);
-  return data;
-};
+export const getRekomendasiGerakan =
+  async () => {
+    const { data } =
+      await api.get<RekomendasiGerakanResponse>(
+        '/api/recomendation/sport'
+      );
 
-export const createRekomendasiGerakan = async (body: CreateRekomendasiBody) => {
-  const formData = new FormData();
-  formData.append('activity', body.activity);
-  formData.append('video_link', body.video_link);
-  formData.append('long_text', body.long_text);
-  if (body.picture_1) formData.append('picture_1', body.picture_1);
-  if (body.picture_2) formData.append('picture_2', body.picture_2);
-  if (body.picture_3) formData.append('picture_3', body.picture_3);
+    return data;
+  };
 
-  const { data } = await api.post<SingleRekomendasiResponse>('/api/recomendation/sport', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-  return data;
-};
+export const getRekomendasiById =
+  async (code: string) => {
+    const { data } =
+      await api.get<SingleRekomendasiResponse>(
+        `/api/recomendation/sport/${encodeURIComponent(
+          code
+        )}`
+      );
 
-export const updateRekomendasiGerakan = async (activity: string, body: UpdateRekomendasiBody) => {
-  const formData = new FormData();
-  formData.append('_method', 'PUT'); // Laravel method spoofing
-  if (body.activity) formData.append('activity', body.activity);
-  if (body.video_link) formData.append('video_link', body.video_link);
-  if (body.long_text) formData.append('long_text', body.long_text);
-  if (body.picture_1) formData.append('picture_1', body.picture_1);
-  if (body.picture_2) formData.append('picture_2', body.picture_2);
-  if (body.picture_3) formData.append('picture_3', body.picture_3);
-  if (body.is_active !== undefined) formData.append('is_active', body.is_active.toString());
+    return data;
+  };
 
-  const { data } = await api.post<SingleRekomendasiResponse>(`/api/recomendation/sport/${encodeURIComponent(activity)}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-  return data;
-};
+export const getRekomendasiByCode =
+  async (code: string) => {
+    const { data } =
+      await api.get<SingleRekomendasiResponse>(
+        `/api/recomendation/sport/${encodeURIComponent(
+          code
+        )}`
+      );
 
-export const deleteRekomendasiGerakan = async (activity: string) => {
-  const { data } = await api.delete(`/api/recomendation/sport/${encodeURIComponent(activity)}`);
-  return data;
-};
+    return data;
+  };
+
+export const createRekomendasiGerakan =
+  async (
+    body: CreateRekomendasiBody
+  ) => {
+    const formData = new FormData();
+
+    formData.append('code', body.code);
+    formData.append('name', body.name);
+    formData.append(
+      'video_link',
+      body.video_link
+    );
+
+    if (body.long_text) {
+      formData.append(
+        'long_text',
+        body.long_text
+      );
+    }
+
+    if (body.picture_1) {
+      formData.append(
+        'picture_1',
+        body.picture_1
+      );
+    }
+
+    if (body.picture_2) {
+      formData.append(
+        'picture_2',
+        body.picture_2
+      );
+    }
+
+    if (body.picture_3) {
+      formData.append(
+        'picture_3',
+        body.picture_3
+      );
+    }
+
+    const { data } =
+      await api.post<SingleRekomendasiResponse>(
+        '/api/recomendation/sport',
+        formData,
+        {
+          headers: {
+            'Content-Type':
+              'multipart/form-data',
+          },
+        }
+      );
+
+    return data;
+  };
+
+// ============================================
+// UPDATE REKOMENDASI
+// ============================================
+
+export const updateRekomendasiGerakan =
+  async (
+    code: string,
+    body: UpdateRekomendasiBody
+  ) => {
+    const formData = new FormData();
+
+    formData.append('_method', 'PUT');
+
+    if (body.code) {
+      formData.append('code', body.code);
+    }
+
+    if (body.name) {
+      formData.append('name', body.name);
+    }
+
+    if (body.video_link) {
+      formData.append(
+        'video_link',
+        body.video_link
+      );
+    }
+
+    if (body.long_text !== undefined) {
+      formData.append(
+        'long_text',
+        body.long_text
+      );
+    }
+
+    // upload new images
+    if (body.picture_1) {
+      formData.append(
+        'picture_1',
+        body.picture_1
+      );
+    }
+
+    if (body.picture_2) {
+      formData.append(
+        'picture_2',
+        body.picture_2
+      );
+    }
+
+    if (body.picture_3) {
+      formData.append(
+        'picture_3',
+        body.picture_3
+      );
+    }
+
+    const { data } =
+      await api.post<SingleRekomendasiResponse>(
+        `/api/recomendation/sport/${encodeURIComponent(
+          code
+        )}`,
+        formData,
+        {
+          headers: {
+            'Content-Type':
+              'multipart/form-data',
+          },
+        }
+      );
+
+    return data;
+  };
+
+// ============================================
+// DELETE REKOMENDASI
+// ============================================
+
+export const deleteRekomendasiGerakan =
+  async (code: string) => {
+    const { data } = await api.delete(
+      `/api/recomendation/sport/${encodeURIComponent(
+        code
+      )}`
+    );
+
+    return data;
+  };
+
+// ============================================
+// DELETE SPORT IMAGES
+// ============================================
+
+export const deleteSportImages =
+  async (
+    code: string,
+    pictures: string[]
+  ) => {
+    const { data } = await api.delete(
+      `/api/recomendation/sport/${encodeURIComponent(
+        code
+      )}/images`,
+      {
+        data: {
+          pictures,
+        },
+      }
+    );
+
+    return data;
+  };
 
 // History Log API functions
 export const getHistoryLogs = async (filters?: HistoryLogFilters): Promise<HistoryLogResponse> => {

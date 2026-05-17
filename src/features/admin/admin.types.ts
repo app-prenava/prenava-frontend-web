@@ -102,13 +102,13 @@ export type UpdateBannerResponse = {
 // Rekomendasi Gerakan (Sport Recommendations) types
 export type RekomendasiGerakan = {
   id: number;
-  activity: string;
-  video_link: string;
-  long_text: string;
+  code: string;          // Unique code identifier (e.g., 'prenatal_yoga')
+  name: string;          // Display name
+  video_link: string | null;
+  long_text: string | null;
   picture_1: string | null;
   picture_2: string | null;
   picture_3: string | null;
-  is_active: number;
   created_at: string;
   updated_at: string;
 };
@@ -126,22 +126,23 @@ export type SingleRekomendasiResponse = {
 };
 
 export type CreateRekomendasiBody = {
-  activity: string;
+  code: string;
+  name: string;
   video_link: string;
-  long_text: string;
+  long_text?: string;
   picture_1?: File;
   picture_2?: File;
   picture_3?: File;
 };
 
 export type UpdateRekomendasiBody = {
-  activity?: string;
+  code?: string;
+  name?: string;
   video_link?: string;
   long_text?: string;
   picture_1?: File;
   picture_2?: File;
   picture_3?: File;
-  is_active?: number;
 };
 
 // History Log types
@@ -172,4 +173,95 @@ export type HistoryLogFilters = {
   start_date?: string;
   end_date?: string;
   search?: string;
+};
+
+
+// ============================================
+// Generic API Response Types
+// ============================================
+
+export type ApiResponse<T> = {
+  status: 'success' | 'error';
+  message: string;
+  data?: T;
+  error?: string;
+};
+
+export type PaginatedResponse<T> = {
+  status: 'success';
+  message: string;
+  data: T[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  };
+};
+
+// ============================================
+// Common Types
+// ============================================
+
+export type SuccessResponse<T> = {
+  status: 'success';
+  message: string;
+  data: T;
+};
+
+export type ErrorResponse = {
+  status: 'error';
+  message: string;
+  error?: string;
+  errors?: Record<string, string[]>;
+};
+
+export type BaseEntity = {
+  id: number;
+  created_at: string;
+  updated_at: string;
+};
+
+// ============================================
+// Filter/Query Types
+// ============================================
+
+export type PaginationParams = {
+  page?: number;
+  per_page?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+};
+
+export type DateRange = {
+  start_date?: string; // ISO format: YYYY-MM-DD
+  end_date?: string;   // ISO format: YYYY-MM-DD
+};
+
+// ============================================
+// Status Types
+// ============================================
+
+export type StatusCode = 'success' | 'error' | 'pending' | 'processing';
+
+export type ActiveStatus = 0 | 1; // 0 = inactive, 1 = active
+
+// ============================================
+// Export Type Combinations (for convenience)
+// ============================================
+
+/**
+ * Utility type for extracting data from API responses
+ * Usage: ExtractData<GetAllUsersResponse> = User[]
+ */
+export type ExtractData<T> = T extends SuccessResponse<infer U> ? U : never;
+
+/**
+ * Utility type for API request/response pair
+ */
+export type ApiEndpoint<TRequest, TResponse> = {
+  request: TRequest;
+  response: TResponse;
 };
