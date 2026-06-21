@@ -6,10 +6,16 @@ import api from '@/lib/apiClient';
 
 import {
     getRekomendasiByCode,
+    getRekomendasiGerakan,
     updateRekomendasiGerakan,
 } from '../admin.api';
 
-import { UpdateRekomendasiBody } from '../admin.types';
+import {
+    UpdateRekomendasiBody,
+    RISK_LEVELS,
+    RISK_LEVEL_LABELS,
+    RiskLevel,
+} from '../admin.types';
 
 type ImageSlot = {
     file: File | null;
@@ -26,9 +32,14 @@ export default function EditRekomendasiPage() {
     const [form, setForm] = useState({
         code: '',
         name: '',
+        category: '',
+        risk_level_high: '' as RiskLevel | '',
+        risk_level_low: '' as RiskLevel | '',
         video_link: '',
         long_text: '',
     });
+
+    const [existingCategories, setExistingCategories] = useState<string[]>([]);
 
     const [images, setImages] = useState<
         [ImageSlot, ImageSlot, ImageSlot]
@@ -80,6 +91,9 @@ export default function EditRekomendasiPage() {
             setForm({
                 code: data.code || '',
                 name: data.name || '',
+                category: data.category || '',
+                risk_level_high: data.risk_level_high || '',
+                risk_level_low: data.risk_level_low || '',
                 video_link: data.video_link || '',
                 long_text: data.long_text || '',
             });
@@ -108,6 +122,23 @@ export default function EditRekomendasiPage() {
     };
 
     // =========================================================
+    // FETCH EXISTING CATEGORIES (buat saran datalist)
+    // =========================================================
+
+    useEffect(() => {
+        getRekomendasiGerakan()
+            .then((res) => {
+                const cats = Array.from(
+                    new Set(res.data.map((d) => d.category).filter(Boolean))
+                );
+                setExistingCategories(cats);
+            })
+            .catch(() => {
+                // gagal ambil saran kategori bukan error fatal
+            });
+    }, []);
+
+    // =========================================================
     // CLEANUP OBJECT URL
     // =========================================================
 
@@ -127,7 +158,7 @@ export default function EditRekomendasiPage() {
 
     const handleChange = (
         e: React.ChangeEvent<
-            HTMLInputElement | HTMLTextAreaElement
+            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
         >
     ) => {
         const { name, value } = e.target;
@@ -313,6 +344,13 @@ export default function EditRekomendasiPage() {
                 return;
             }
 
+            if (!form.category.trim()) {
+                setError(
+                    'Kategori harus diisi.'
+                );
+                return;
+            }
+
             if (!form.video_link.trim()) {
                 setError(
                     'Link video harus diisi.'
@@ -374,11 +412,20 @@ export default function EditRekomendasiPage() {
             const body: UpdateRekomendasiBody =
                 {
                     name: form.name,
+                    category: form.category,
                     video_link:
                         form.video_link,
                     long_text:
                         form.long_text,
                 };
+
+            if (form.risk_level_high) {
+                body.risk_level_high = form.risk_level_high;
+            }
+
+            if (form.risk_level_low) {
+                body.risk_level_low = form.risk_level_low;
+            }
 
             // upload new image
             if (images[0].file) {
@@ -511,6 +558,66 @@ export default function EditRekomendasiPage() {
                             placeholder="Masukan nama aktivitas"
                             className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:outline-none"
                         />
+                    </FormRow>
+
+                    {/* CATEGORY */}
+                    <FormRow label="Kategori">
+                        <input
+                            list="category-options"
+                            name="category"
+                            value={form.category}
+                            onChange={handleChange}
+                            disabled={saving}
+                            placeholder="contoh: cardio, strength, flexibility"
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:outline-none"
+                        />
+                        <datalist id="category-options">
+                            {existingCategories.map((cat) => (
+                                <option key={cat} value={cat} />
+                            ))}
+                        </datalist>
+                    </FormRow>
+
+                    {/* RISK LEVEL HIGH */}
+                    <FormRow label="Risiko Tinggi">
+                        <select
+                            name="risk_level_high"
+                            value={form.risk_level_high}
+                            onChange={handleChange}
+                            disabled={saving}
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:outline-none"
+                        >
+                            <option value="">Belum diklasifikasi</option>
+                            {RISK_LEVELS.map((level) => (
+                                <option key={level} value={level}>
+                                    {RISK_LEVEL_LABELS[level]}
+                                </option>
+                            ))}
+                        </select>
+                        <p className="mt-1 text-xs text-gray-500">
+                            Klasifikasi untuk ibu hamil dengan risiko tinggi
+                        </p>
+                    </FormRow>
+
+                    {/* RISK LEVEL LOW */}
+                    <FormRow label="Risiko Rendah">
+                        <select
+                            name="risk_level_low"
+                            value={form.risk_level_low}
+                            onChange={handleChange}
+                            disabled={saving}
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:outline-none"
+                        >
+                            <option value="">Belum diklasifikasi</option>
+                            {RISK_LEVELS.map((level) => (
+                                <option key={level} value={level}>
+                                    {RISK_LEVEL_LABELS[level]}
+                                </option>
+                            ))}
+                        </select>
+                        <p className="mt-1 text-xs text-gray-500">
+                            Klasifikasi untuk ibu hamil dengan risiko rendah
+                        </p>
                     </FormRow>
 
                     {/* VIDEO */}

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { createRekomendasiGerakan } from '../admin.api';
-import { CreateRekomendasiBody } from '../admin.types';
+import { createRekomendasiGerakan, getRekomendasiGerakan } from '../admin.api';
+import { CreateRekomendasiBody, RISK_LEVELS, RISK_LEVEL_LABELS, RiskLevel } from '../admin.types';
 
 type ImageSlot = {
     file: File | null;
@@ -15,9 +15,14 @@ export default function CreateRekomendasiPage() {
     const [form, setForm] = useState({
         code: '',
         name: '',
+        category: '',
+        risk_level_high: '' as RiskLevel | '',
+        risk_level_low: '' as RiskLevel | '',
         video_link: '',
         long_text: '',
     });
+
+    const [existingCategories, setExistingCategories] = useState<string[]>([]);
 
     const [images, setImages] = useState<[ImageSlot, ImageSlot, ImageSlot]>([
         { file: null, preview: null },
@@ -29,8 +34,21 @@ export default function CreateRekomendasiPage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
+    useEffect(() => {
+        getRekomendasiGerakan()
+            .then((res) => {
+                const cats = Array.from(
+                    new Set(res.data.map((d) => d.category).filter(Boolean))
+                );
+                setExistingCategories(cats);
+            })
+            .catch(() => {
+                // gagal ambil saran kategori bukan error fatal
+            });
+    }, []);
+
     const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
     ) => {
         const { name, value } = e.target;
 
@@ -146,6 +164,12 @@ export default function CreateRekomendasiPage() {
             return;
         }
 
+        if (!form.category.trim()) {
+            setError('Kategori harus diisi.');
+            setSaving(false);
+            return;
+        }
+
         if (!form.video_link.trim()) {
             setError('Link video harus diisi.');
             setSaving(false);
@@ -162,9 +186,13 @@ export default function CreateRekomendasiPage() {
             const body: CreateRekomendasiBody = {
                 code: form.code,
                 name: form.name,
+                category: form.category,
                 video_link: form.video_link,
                 long_text: form.long_text,
             };
+
+            if (form.risk_level_high) body.risk_level_high = form.risk_level_high;
+            if (form.risk_level_low) body.risk_level_low = form.risk_level_low;
 
             if (images[0].file) body.picture_1 = images[0].file;
             if (images[1].file) body.picture_2 = images[1].file;
@@ -255,6 +283,63 @@ export default function CreateRekomendasiPage() {
                             placeholder="Masukan nama gerakan"
                             className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:outline-none"
                         />
+                    </FormRow>
+
+                    <FormRow label="Kategori">
+                        <input
+                            list="category-options"
+                            name="category"
+                            value={form.category}
+                            onChange={handleChange}
+                            disabled={saving}
+                            placeholder="contoh: cardio, strength, flexibility"
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:outline-none"
+                        />
+                        <datalist id="category-options">
+                            {existingCategories.map((cat) => (
+                                <option key={cat} value={cat} />
+                            ))}
+                        </datalist>
+                    </FormRow>
+
+                    <FormRow label="Risiko Tinggi">
+                        <select
+                            name="risk_level_high"
+                            value={form.risk_level_high}
+                            onChange={handleChange}
+                            disabled={saving}
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:outline-none"
+                        >
+                            <option value="">Belum diklasifikasi</option>
+                            {RISK_LEVELS.map((level) => (
+                                <option key={level} value={level}>
+                                    {RISK_LEVEL_LABELS[level]}
+                                </option>
+                            ))}
+                        </select>
+                        <p className="mt-1 text-xs text-gray-500">
+                            Klasifikasi untuk ibu hamil dengan risiko tinggi
+                        </p>
+                    </FormRow>
+
+                    <FormRow label="Risiko Rendah">
+                        <select
+                            name="risk_level_low"
+                            value={form.risk_level_low}
+                            onChange={handleChange}
+                            disabled={saving}
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:outline-none"
+                        >
+                            <option value="">Belum diklasifikasi</option>
+                            {RISK_LEVELS.map((level) => (
+                                <option key={level} value={level}>
+                                    {RISK_LEVEL_LABELS[level]}
+                                </option>
+                            ))}
+                        </select>
+                        <p className="mt-1 text-xs text-gray-500">
+                            Klasifikasi untuk ibu hamil dengan risiko rendah
+                        </p>
                     </FormRow>
 
                     <FormRow label="Link Video">

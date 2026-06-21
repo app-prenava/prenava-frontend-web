@@ -231,6 +231,19 @@ export const createRekomendasiGerakan =
 
     formData.append('code', body.code);
     formData.append('name', body.name);
+
+    if (body.category) {
+    formData.append('category', body.category);
+    }
+
+    if (body.risk_level_high) {
+        formData.append('risk_level_high', body.risk_level_high);
+    }
+
+    if (body.risk_level_low) {
+        formData.append('risk_level_low', body.risk_level_low);
+    }
+
     formData.append(
       'video_link',
       body.video_link
@@ -298,6 +311,18 @@ export const updateRekomendasiGerakan =
 
     if (body.name) {
       formData.append('name', body.name);
+    }
+
+    if (body.category) {
+    formData.append('category', body.category);
+    }
+
+    if (body.risk_level_high) {
+        formData.append('risk_level_high', body.risk_level_high);
+    }
+
+    if (body.risk_level_low) {
+        formData.append('risk_level_low', body.risk_level_low);
     }
 
     if (body.video_link) {

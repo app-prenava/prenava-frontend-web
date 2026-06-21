@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Space, Table, Button, Input, Modal, Spin, Card } from 'antd';
-import { SearchOutlined, PlusOutlined, FilterOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Space, Table, Button, Input, Modal, Spin, Card, message } from 'antd';
+import { SearchOutlined, PlusOutlined, FilterOutlined, EyeOutlined, EditOutlined, DeleteOutlined, SyncOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import api from '@/lib/apiClient';
 import { getRekomendasiGerakan, deleteRekomendasiGerakan } from '../admin.api';
-import { RekomendasiGerakan } from '../admin.types';
+import { RekomendasiGerakan, RISK_LEVEL_LABELS } from '../admin.types';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 const { Column } = Table;
@@ -33,6 +34,7 @@ export default function RekomendasiOlahragaPage() {
     const [detailOpen, setDetailOpen] = useState(false);
     const [detailLoading, setDetailLoading] = useState(false);
     const [detail, setDetail] = useState<RekomendasiGerakan | null>(null);
+    const [syncing, setSyncing] = useState(false);
 
     useEffect(() => {
         fetchItems();
@@ -117,6 +119,20 @@ export default function RekomendasiOlahragaPage() {
         return `${import.meta.env.VITE_API_BASE}${path}`;
     };
 
+    const handleSyncMl = async () => {
+        setSyncing(true);
+        try {
+            const { data } = await api.post('/api/recomendation/sport-sync');
+            message.success(data?.message || 'Berhasil menyelaraskan data ke ml-service.');
+        } catch (err: any) {
+            message.error(
+                err?.response?.data?.message || 'Gagal menyelaraskan data ke ml-service.'
+            );
+        } finally {
+            setSyncing(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -125,14 +141,24 @@ export default function RekomendasiOlahragaPage() {
                     <h1 className="text-2xl font-semibold text-gray-900">Rekomendasi Gerakan</h1>
                     <p className="text-gray-600">Kelola semua rekomendasi gerakan olahraga</p>
                 </div>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
-                    onClick={() => navigate('/admin/create-rekomendasi')}
-                >
-                    Tambah Gerakan
-                </Button>
+                <Space>
+                    <Button
+                        icon={<SyncOutlined spin={syncing} />}
+                        loading={syncing}
+                        style={{ backgroundColor: '#FAAD14', borderColor: '#FAAD14', color: '#000' }}
+                        onClick={handleSyncMl}
+                    >
+                        Selaraskan Gerakan
+                    </Button>
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
+                        onClick={() => navigate('/admin/create-rekomendasi')}
+                    >
+                        Tambah Gerakan
+                    </Button>
+                </Space>
             </div>
 
             {/* Search and Filter Bar */}
@@ -277,6 +303,15 @@ export default function RekomendasiOlahragaPage() {
 
                                 <div className="col-span-1 text-gray-600">Nama Aktivitas</div>
                                 <div className="col-span-2">: {detail?.name || '-'}</div>
+
+                                <div className="col-span-1 text-gray-600">Kategori</div>
+                                <div className="col-span-2">: {detail?.category || '-'}</div>
+
+                                <div className="col-span-1 text-gray-600">Risiko Tinggi</div>
+                                <div className="col-span-2">: {detail?.risk_level_high ? RISK_LEVEL_LABELS[detail.risk_level_high] : '-'}</div>
+
+                                <div className="col-span-1 text-gray-600">Risiko Rendah</div>
+                                <div className="col-span-2">: {detail?.risk_level_low ? RISK_LEVEL_LABELS[detail.risk_level_low] : '-'}</div>
 
                                 <div className="col-span-1 text-gray-600">Link Video</div>
                                 <div className="col-span-2">

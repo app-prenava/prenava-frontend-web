@@ -99,19 +99,6 @@ export type UpdateBannerResponse = {
   data: Banner;
 };
 
-// Rekomendasi Gerakan (Sport Recommendations) types
-export type RekomendasiGerakan = {
-  id: number;
-  code: string;          // Unique code identifier (e.g., 'prenatal_yoga')
-  name: string;          // Display name
-  video_link: string | null;
-  long_text: string | null;
-  picture_1: string | null;
-  picture_2: string | null;
-  picture_3: string | null;
-  created_at: string;
-  updated_at: string;
-};
 
 export type RekomendasiGerakanResponse = {
   status: 'success';
@@ -125,9 +112,40 @@ export type SingleRekomendasiResponse = {
   data: RekomendasiGerakan;
 };
 
+export const RISK_LEVELS = [
+  'highly_recommended', 'allowed_with_caution', 'avoid',
+] as const;
+
+export type RiskLevel = typeof RISK_LEVELS[number];
+
+export const RISK_LEVEL_LABELS: Record<RiskLevel, string> = {
+  highly_recommended: 'Sangat Direkomendasikan',
+  allowed_with_caution: 'Boleh dengan Catatan',
+  avoid: 'Hindari',
+};
+
+export type RekomendasiGerakan = {
+  id: number;
+  code: string;
+  name: string;
+  category: string;
+  risk_level_high: RiskLevel | null;
+  risk_level_low: RiskLevel | null;
+  video_link: string | null;
+  long_text: string | null;
+  picture_1: string | null;
+  picture_2: string | null;
+  picture_3: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type CreateRekomendasiBody = {
   code: string;
   name: string;
+  category: string;
+  risk_level_high?: RiskLevel | '';
+  risk_level_low?: RiskLevel | '';
   video_link: string;
   long_text?: string;
   picture_1?: File;
@@ -138,6 +156,9 @@ export type CreateRekomendasiBody = {
 export type UpdateRekomendasiBody = {
   code?: string;
   name?: string;
+  category?: string;
+  risk_level_high?: RiskLevel | '';
+  risk_level_low?: RiskLevel | '';
   video_link?: string;
   long_text?: string;
   picture_1?: File;
