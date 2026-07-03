@@ -186,6 +186,14 @@ export type HistoryLogResponse = {
   status: 'success';
   message: string;
   data: HistoryLog[];
+  pagination?: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+    from: number | null;
+    to: number | null;
+  };
 };
 
 export type HistoryLogFilters = {
@@ -194,6 +202,8 @@ export type HistoryLogFilters = {
   start_date?: string;
   end_date?: string;
   search?: string;
+  per_page?: number;
+  page?: number;
 };
 
 
