@@ -10,8 +10,6 @@ import {
     LogoutOutlined,
     EditOutlined,
     PlusCircleOutlined,
-    MobileOutlined,
-    GlobalOutlined,
     ClockCircleOutlined,
     LockOutlined,
     HeartOutlined,
@@ -76,29 +74,61 @@ export default function HistoryLogPage() {
     const [selectedRole, setSelectedRole] = useState<string>('all');
     const [selectedAction, setSelectedAction] = useState<string>('all');
     const [dateRange, setDateRange] = useState<[string, string] | null>(null);
+    const [pagination, setPagination] = useState({
+        current: 1,
+        pageSize: 15,
+        total: 0,
+    });
 
     useEffect(() => {
         fetchLogs();
-    }, []);
+    }, [pagination.current, pagination.pageSize, searchText, selectedRole, selectedAction, dateRange]);
 
     const fetchLogs = async () => {
         try {
             setLoading(true);
-            const result = await getHistoryLogs();
+            
+            const filters: any = {
+                page: pagination.current,
+                per_page: pagination.pageSize,
+            };
+
+            if (selectedRole !== 'all') {
+                filters.role = selectedRole;
+            }
+
+            if (selectedAction !== 'all') {
+                filters.activity_type = selectedAction;
+            }
+
+            if (searchText) {
+                filters.search = searchText;
+            }
+
+            if (dateRange) {
+                filters.start_date = dateRange[0];
+                filters.end_date = dateRange[1];
+            }
+
+            const result = await getHistoryLogs(filters);
             console.log('--- DEBUG HISTORY LOG ---');
             console.log('Total data diterima:', result.data.length);
-            console.table(result.data.slice(0, 10).map(l => ({ 
-                id: l.id, 
-                user: l.user_name, 
-                action: l.action, 
-                activity_type: l.activity_type 
-            })));
+            console.log('Pagination info:', result.pagination);
             
             const logsWithKey = result.data.map((log) => ({
                 ...log,
                 key: log.id,
             }));
             setLogs(logsWithKey);
+            
+            if (result.pagination) {
+                // Limit total to 100 records max
+                const maxTotal = Math.min(result.pagination.total, 100);
+                setPagination(prev => ({
+                    ...prev,
+                    total: maxTotal,
+                }));
+            }
         } catch (error) {
             console.error('Failed to fetch history logs:', error);
         } finally {
@@ -107,50 +137,20 @@ export default function HistoryLogPage() {
     };
 
     const filteredLogs = useMemo(() => {
-        let filtered = logs;
-
-        if (selectedRole !== 'all') {
-            filtered = filtered.filter(log => log.user_role === selectedRole);
-        }
-
-        if (selectedAction !== 'all') {
-            const targetLabel = ACTION_CONFIG[selectedAction]?.label;
-            filtered = filtered.filter(log => {
-                const actionKey = log.activity_type || log.action || 'unknown_action';
-                const logLabel = ACTION_CONFIG[actionKey]?.label || 
-                    (log.activity_label || actionKey.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()));
-                return logLabel === targetLabel;
-            });
-        }
-
-        if (searchText) {
-            const s = searchText.toLowerCase();
-            filtered = filtered.filter(log =>
-                (log.user_name?.toLowerCase().includes(s)) ||
-                (log.user_email?.toLowerCase().includes(s)) ||
-                (log.description?.toLowerCase().includes(s))
-            );
-        }
-
-        if (dateRange) {
-            const [start, end] = dateRange;
-            filtered = filtered.filter(log => {
-                const logDate = new Date(log.created_at).toISOString().split('T')[0];
-                return logDate >= start && logDate <= end;
-            });
-        }
-
-        return filtered;
-    }, [logs, selectedRole, selectedAction, searchText, dateRange]);
+        // Server-side filtering is already applied, just return the logs
+        return logs;
+    }, [logs]);
 
     const stats = useMemo(() => {
+        // Use pagination total for accurate count
+        const total = pagination.total || logs.length;
         const uniqueUsers = new Set(logs.map(l => l.user_id)).size;
         const todayCount = logs.filter(l => {
             const today = new Date().toISOString().split('T')[0];
             return new Date(l.created_at).toISOString().split('T')[0] === today;
         }).length;
-        return { total: logs.length, uniqueUsers, todayCount };
-    }, [logs]);
+        return { total, uniqueUsers, todayCount };
+    }, [logs, pagination.total]);
 
     const getActionTag = (log: any) => {
         const actionKey = log.activity_type || log.action || 'unknown_action';
@@ -167,7 +167,7 @@ export default function HistoryLogPage() {
     };
 
     const handleExportCSV = () => {
-        const headers = ['No', 'User', 'Email', 'Role', 'Aktivitas', 'Deskripsi', 'IP Address', 'Device', 'Waktu'];
+        const headers = ['No', 'User', 'Email', 'Role', 'Aktivitas', 'Deskripsi', 'Waktu'];
         const rows = filteredLogs.map((log, i) => [
             i + 1,
             log.user_name || '-',
@@ -175,8 +175,6 @@ export default function HistoryLogPage() {
             log.user_role || '-',
             log.action,
             log.description || '-',
-            log.ip_address || '-',
-            log.device || '-',
             new Date(log.created_at).toLocaleString('id-ID'),
         ]);
 
@@ -232,35 +230,11 @@ export default function HistoryLogPage() {
             title: 'Deskripsi',
             dataIndex: 'description',
             key: 'description',
-            width: 220,
+            width: 300,
             ellipsis: true,
             render: (desc: string) => (
                 <Tooltip title={desc}>
                     <span className="text-gray-600">{desc || '-'}</span>
-                </Tooltip>
-            ),
-        },
-        {
-            title: 'IP Address',
-            dataIndex: 'ip_address',
-            key: 'ip_address',
-            width: 140,
-            render: (ip: string) => (
-                <span className="text-gray-500 font-mono text-xs">{ip || '-'}</span>
-            ),
-        },
-        {
-            title: 'Device',
-            dataIndex: 'device',
-            key: 'device',
-            width: 150,
-            ellipsis: true,
-            render: (device: string) => (
-                <Tooltip title={device}>
-                    <div className="flex items-center gap-1">
-                        <MobileOutlined className="text-gray-400" />
-                        <span className="text-gray-500 text-xs">{device || '-'}</span>
-                    </div>
                 </Tooltip>
             ),
         },
@@ -426,11 +400,20 @@ export default function HistoryLogPage() {
                     loading={loading}
                     scroll={{ x: 1200 }}
                     pagination={{
-                        pageSize: 15,
+                        current: pagination.current,
+                        pageSize: pagination.pageSize,
+                        total: pagination.total,
                         showSizeChanger: true,
-                        pageSizeOptions: ['10', '15', '25', '50'],
+                        pageSizeOptions: ['10', '15', '25', '50', '100'],
                         showQuickJumper: true,
                         showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total} log`,
+                        onChange: (page, pageSize) => {
+                            setPagination(prev => ({
+                                ...prev,
+                                current: page,
+                                pageSize: pageSize || prev.pageSize,
+                            }));
+                        },
                     }}
                     locale={{
                         emptyText: (
