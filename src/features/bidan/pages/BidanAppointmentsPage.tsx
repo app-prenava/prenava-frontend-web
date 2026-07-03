@@ -43,6 +43,8 @@ const statusConfig: Record<AppointmentStatus, { color: string; label: string }> 
 export default function BidanAppointmentsPage() {
   const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  const [selectedCompleteAppt, setSelectedCompleteAppt] = useState<Appointment | null>(null);
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
 
   const [acceptForm] = Form.useForm();
@@ -107,21 +109,21 @@ export default function BidanAppointmentsPage() {
     }
   };
 
-  const handleComplete = async (appt: Appointment) => {
-    Modal.confirm({
-      title: 'Selesaikan Konsultasi?',
-      content: 'Apakah Anda yakin konsultasi dengan pasien ini telah selesai?',
-      okText: 'Ya, Selesai',
-      cancelText: 'Batal',
-      onOk: async () => {
-        try {
-          await completeMutation.mutateAsync(appt.appointment_id);
-          message.success('Konsultasi ditandai selesai.');
-        } catch (error: any) {
-          message.error(error?.response?.data?.message || 'Gagal menyelesaikan konsultasi.');
-        }
-      },
-    });
+  const handleComplete = (appt: Appointment) => {
+    setSelectedCompleteAppt(appt);
+    setIsCompleteModalOpen(true);
+  };
+
+  const submitComplete = async () => {
+    if (!selectedCompleteAppt) return;
+    try {
+      await completeMutation.mutateAsync(selectedCompleteAppt.appointment_id);
+      message.success('Konsultasi ditandai selesai.');
+      setIsCompleteModalOpen(false);
+      setSelectedCompleteAppt(null);
+    } catch (error: any) {
+      message.error(error?.response?.data?.message || 'Gagal menyelesaikan konsultasi.');
+    }
   };
 
   const getPatientName = (record: Appointment): string => {
@@ -294,6 +296,23 @@ export default function BidanAppointmentsPage() {
             <TextArea rows={4} placeholder="Jelaskan alasan penolakan jadwal ini (cth: Sudah penuh, Bidang tidak sesuai...)" />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Complete Modal */}
+      <Modal
+        title="Selesaikan Konsultasi?"
+        open={isCompleteModalOpen}
+        onCancel={() => setIsCompleteModalOpen(false)}
+        okText="Ya, Selesai"
+        cancelText="Batal"
+        onOk={submitComplete}
+        confirmLoading={completeMutation.isPending}
+      >
+      <p>
+        Apakah Anda yakin konsultasi dengan{' '}
+          <strong>{selectedCompleteAppt ? getPatientName(selectedCompleteAppt) : ''}</strong>{' '}
+          telah selesai?
+      </p>
       </Modal>
     </div>
   );
