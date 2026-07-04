@@ -141,6 +141,44 @@ export interface AnemiaAnalytics {
   };
 }
 
+export interface StuntingPrediction {
+  status: string;
+  probability: number;
+  stunting_risk: string; // "Rendah", "Sedang", "Tinggi"
+  threshold_used: number;
+  prediction_class: number;
+}
+
+export interface StuntingHistoryRecord {
+  id: number;
+  user_id?: number;
+  user_name?: string;
+  date: string;
+  status: string;
+  riskLevel: number; // 0 = Rendah, 1 = Tinggi (numeric mapping from backend)
+  score: number;
+  user?: {
+    user_id: number;
+    name: string;
+    email: string;
+  };
+  [key: string]: any;
+}
+
+export interface StuntingHistoryResponse {
+  success: boolean;
+  message?: string;
+  data: StuntingHistoryRecord[] | null;
+}
+
+export interface StuntingAnalytics {
+  totalPredictions: number;
+  riskCategories: {
+    rendah: number;
+    tinggi: number;
+  };
+}
+
 // ============================================
 // Health History API
 // ============================================
@@ -152,31 +190,23 @@ export const getHealthHistory = async (): Promise<HealthHistoryResponse> => {
     status: data.status,
     message: data.message,
     recordCount: data.data?.length || 0,
-    records: data.data,
   });
   
-  if (data.data && data.data.length > 0) {
-    console.log('[API] Total records:', data.data.length);
-    console.log('[API] First record structure:', {
-      id: data.data[0].id,
-      user_id: data.data[0].user_id,
-      allKeys: Object.keys(data.data[0]),
-    });
-    
-    // Check what fields actually exist
-    console.log('[API] Checking field existence in first 3 records:');
-    data.data.slice(0, 3).forEach((record, idx) => {
-      console.log(`[API] Record ${idx}:`, {
-        hasDepressionPrediction: 'depression_prediction' in record,
-        hasAnemiaPrediction: 'anemia_detection' in record,
-        hasDepressionPredictor: 'depression_predictor' in record,
-        hasAnemiaDetector: 'anemia_detector' in record,
-        depression_prediction: record.depression_prediction,
-        anemia_detection: record.anemia_detection,
-        allFieldsInRecord: Object.keys(record),
-      });
-    });
-  }
+  return data;
+};
+
+// ============================================
+// Stunting History API
+// ============================================
+
+export const getStuntingHistory = async (): Promise<StuntingHistoryResponse> => {
+  console.log('[API] Fetching stunting history from /api/stunting/history');
+  const { data } = await api.get<StuntingHistoryResponse>('/api/stunting/history');
+  console.log('[API] Stunting history response:', {
+    success: data.success,
+    message: data.message,
+    recordCount: data.data?.length || 0,
+  });
   
   return data;
 };
@@ -351,6 +381,52 @@ function averageExpressionScores(allScores: ExpressionScores[]): ExpressionScore
   });
 
   return avgScores;
+}
+
+// ============================================
+// Stunting Analytics Aggregation
+// ============================================
+
+export const aggregateStuntingAnalytics = (records: StuntingHistoryRecord[]): StuntingAnalytics => {
+  console.log('[STUNTING] Starting aggregation with', records.length, 'records');
+  
+  let rendah = 0;
+  let tinggi = 0;
+
+  records.forEach((record, index) => {
+    console.log(`[STUNTING] Record ${index}:`, {
+      id: record.id,
+      riskLevel: record.riskLevel,
+      type: typeof record.riskLevel,
+    });
+
+    if (record.riskLevel === null || record.riskLevel === undefined) {
+      console.log(`[STUNTING] Record ${index}: No riskLevel field, skipping`);
+      return;
+    }
+
+    // Map numeric risk levels to categories: 0 = Rendah, 1 = Tinggi
+    // riskLevel is always numeric from backend mapping
+    if (record.riskLevel === 0) {
+      rendah++;
+      console.log(`[STUNTING] Record ${index}: Marked as RENDAH. Total: ${rendah}`);
+    } else if (record.riskLevel === 1) {
+      tinggi++;
+      console.log(`[STUNTING] Record ${index}: Marked as TINGGI. Total: ${tinggi}`);
+    } else {
+      console.log(`[STUNTING] Record ${index}: Risk level doesn't match expected values (riskLevel: ${record.riskLevel}). Expected 0 or 1.`);
+    }
+  });
+
+  console.log('[STUNTING] Aggregation complete:', { rendah, tinggi });
+
+  return {
+    totalPredictions: records.length,
+    riskCategories: {
+      rendah,
+      tinggi,
+    },
+  };
 }
 
 export type BidanProfile = {
