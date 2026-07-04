@@ -4,9 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, Skeleton, Alert, Button, Empty } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import BidanLayout from './components/BidanLayout';
-import { getHealthHistory, aggregateDepressionAnalytics, aggregateAnemiaAnalytics } from './bidan.api';
+import { getHealthHistory, aggregateDepressionAnalytics, aggregateAnemiaAnalytics, getStuntingHistory, aggregateStuntingAnalytics } from './bidan.api';
 import DepressionAnalyticsCard from './DepressionAnalyticsCard.tsx';
 import AnemiaAnalyticsCard from './AnemiaAnalyticsCard.tsx';
+import StuntingAnalyticsCard from './StuntingAnalyticsCard.tsx';
 
 export default function BidanDashboard() {
   const {
@@ -17,6 +18,17 @@ export default function BidanDashboard() {
   } = useQuery({
     queryKey: ['healthHistory'],
     queryFn: getHealthHistory,
+    staleTime: 5 * 60 * 1000,
+    retry: 3,
+  });
+
+  const {
+    data: stuntingHistoryResponse,
+    isLoading: stuntingLoading,
+    error: stuntingError,
+  } = useQuery({
+    queryKey: ['stuntingHistory'],
+    queryFn: getStuntingHistory,
     staleTime: 5 * 60 * 1000,
     retry: 3,
   });
@@ -35,6 +47,15 @@ export default function BidanDashboard() {
         console.log('[DASHBOARD] Computing anemia analytics from', healthHistoryResponse.data.length, 'records');
         const result = aggregateAnemiaAnalytics(healthHistoryResponse.data);
         console.log('[DASHBOARD] Anemia analytics result:', result);
+        return result;
+      })()
+    : undefined;
+
+  const stuntingAnalytics = stuntingHistoryResponse?.data
+    ? (() => {
+        console.log('[DASHBOARD] Computing stunting analytics from', stuntingHistoryResponse.data?.length || 0, 'records');
+        const result = aggregateStuntingAnalytics(stuntingHistoryResponse.data || []);
+        console.log('[DASHBOARD] Stunting analytics result:', result);
         return result;
       })()
     : undefined;
@@ -139,6 +160,17 @@ export default function BidanDashboard() {
             <AnemiaAnalyticsCard
               data={anemiaAnalytics}
               error={error}
+            />
+          )}
+
+          {stuntingLoading ? (
+            <Card>
+              <Skeleton active paragraph={{ rows: 6 }} />
+            </Card>
+          ) : (
+            <StuntingAnalyticsCard
+              data={stuntingAnalytics}
+              error={stuntingError}
             />
           )}
         </div>
