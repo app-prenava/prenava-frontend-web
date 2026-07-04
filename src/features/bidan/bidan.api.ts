@@ -58,6 +58,300 @@ export const getIbuHamilUsers = async (): Promise<GetIbuHamilUsersResponse> => {
   };
 };
 
+// ============================================
+// Health History & Analytics Types
+// ============================================
+
+export interface ExpressionScores {
+  Sad: number;
+  Fear: number;
+  Angry: number;
+  Happy: number;
+  Disgust: number;
+  Neutral: number;
+  Surprise: number;
+}
+
+export interface FatigueAnalysis {
+  score: number;
+  probabilities: {
+    Fatigue: number;
+    NonFatigue: number;
+  };
+}
+
+export interface DepressionPrediction {
+  level: string;
+  score: number;
+  fatigue: FatigueAnalysis;
+  expression: {
+    score: number;
+    probabilities: ExpressionScores;
+  };
+  face_detected: boolean;
+  face_confidence: number;
+  success: boolean;
+  disclaimer: string;
+}
+
+export interface AnemiaDetection {
+  label: string;
+  confidence: number;
+  threshold_used: number;
+  probability_anemia: number;
+  probability_non_anemia: number;
+}
+
+export interface HealthHistoryRecord {
+  id: number;
+  user_id: number;
+  user_name?: string;
+  type: 'depression' | 'anemia'; // Unified table: type field
+  result: string; // JSON string containing prediction data
+  created_at: string;
+  updated_at?: string;
+  // Legacy fields (for backwards compatibility)
+  depression_prediction?: DepressionPrediction | string;
+  anemia_detection?: AnemiaDetection | string;
+  recommendations?: any;
+  [key: string]: any;
+}
+
+export interface HealthHistoryResponse {
+  status: 'success' | 'error';
+  message: string;
+  data: HealthHistoryRecord[];
+}
+
+// Aggregated Analytics Types
+export interface DepressionAnalytics {
+  summary: {
+    safe: number;
+    detected: number;
+  };
+  expressionScores?: ExpressionScores;
+  overallScore?: number;
+}
+
+export interface AnemiaAnalytics {
+  categories: {
+    anemia_ringan: number;
+    anemia: number;
+    anemia_sedang: number;
+  };
+}
+
+// ============================================
+// Health History API
+// ============================================
+
+export const getHealthHistory = async (): Promise<HealthHistoryResponse> => {
+  console.log('[API] Fetching health history from /api/health/history');
+  const { data } = await api.get<HealthHistoryResponse>('/api/health/history');
+  console.log('[API] Health history response:', {
+    status: data.status,
+    message: data.message,
+    recordCount: data.data?.length || 0,
+    records: data.data,
+  });
+  
+  if (data.data && data.data.length > 0) {
+    console.log('[API] Total records:', data.data.length);
+    console.log('[API] First record structure:', {
+      id: data.data[0].id,
+      user_id: data.data[0].user_id,
+      allKeys: Object.keys(data.data[0]),
+    });
+    
+    // Check what fields actually exist
+    console.log('[API] Checking field existence in first 3 records:');
+    data.data.slice(0, 3).forEach((record, idx) => {
+      console.log(`[API] Record ${idx}:`, {
+        hasDepressionPrediction: 'depression_prediction' in record,
+        hasAnemiaPrediction: 'anemia_detection' in record,
+        hasDepressionPredictor: 'depression_predictor' in record,
+        hasAnemiaDetector: 'anemia_detector' in record,
+        depression_prediction: record.depression_prediction,
+        anemia_detection: record.anemia_detection,
+        allFieldsInRecord: Object.keys(record),
+      });
+    });
+  }
+  
+  return data;
+};
+
+// ============================================
+// Analytics Aggregation Functions
+// ============================================
+
+export const aggregateDepressionAnalytics = (records: HealthHistoryRecord[]): DepressionAnalytics => {
+  console.log('[DEPRESSION] Starting aggregation with', records.length, 'records');
+  
+  let safe = 0;
+  let detected = 0;
+  const allExpressionScores: ExpressionScores[] = [];
+  const allScores: number[] = [];
+
+  // Filter for depression records only (type === 'depression')
+  const depressionRecords = records.filter(r => r.type === 'depression');
+  console.log('[DEPRESSION] Filtered to', depressionRecords.length, 'depression records from', records.length, 'total');
+
+  depressionRecords.forEach((record, index) => {
+    // Parse the result field (JSON string)
+    console.log(`[DEPRESSION] Record ${index}:`, {
+      type: record.type,
+      hasResult: !!record.result,
+      result: record.result,
+    });
+
+    if (!record.result) {
+      console.log(`[DEPRESSION] Record ${index}: No result field, skipping`);
+      return;
+    }
+
+    let pred: any = record.result;
+    
+    // Parse if it's a string
+    if (typeof record.result === 'string') {
+      console.log(`[DEPRESSION] Record ${index}: result is a string, parsing...`);
+      try {
+        pred = JSON.parse(record.result);
+        console.log(`[DEPRESSION] Record ${index}: Successfully parsed`, pred);
+      } catch (e) {
+        console.error(`[DEPRESSION] Record ${index}: Failed to parse JSON`, e);
+        return;
+      }
+    }
+
+    console.log(`[DEPRESSION] Record ${index}: Parsed prediction object:`, pred);
+
+    // Aggregate depression levels based on actual level text
+    // Levels can be: "Indikator depresi tidak signifikan" (safe) or "Terdapat beberapa indikator depresi" (detected)
+    const level = (pred.level || pred.depression_level || '').toLowerCase();
+    console.log(`[DEPRESSION] Record ${index}: Level field = "${level}"`);
+    
+    // Check if it contains "indikator depresi" AND is NOT "tidak signifikan"
+    const isDepressed = level.includes('indikator depresi') && !level.includes('tidak signifikan');
+    console.log(`[DEPRESSION] Record ${index}: Is depressed? ${isDepressed}`);
+    
+    if (isDepressed) {
+      detected++;
+      console.log(`[DEPRESSION] Record ${index}: Marked as DETECTED. Total detected: ${detected}`);
+    } else {
+      safe++;
+      console.log(`[DEPRESSION] Record ${index}: Marked as SAFE. Total safe: ${safe}`);
+    }
+
+    // Collect expression scores and overall scores
+    if (pred.expression?.probabilities) {
+      allExpressionScores.push(pred.expression.probabilities);
+      console.log(`[DEPRESSION] Record ${index}: Added expression scores`);
+    }
+    if (pred.score) {
+      allScores.push(pred.score);
+      console.log(`[DEPRESSION] Record ${index}: Added score ${pred.score}`);
+    }
+  });
+
+  console.log('[DEPRESSION] Aggregation complete:', { safe, detected, totalScores: allScores.length });
+
+  // Calculate average expression scores
+  const avgExpressionScores = averageExpressionScores(allExpressionScores);
+  const avgScore = allScores.length > 0 ? allScores.reduce((a, b) => a + b) / allScores.length : 0;
+
+  console.log('[DEPRESSION] Final result:', { safe, detected, avgScore, hasExpressionScores: !!avgExpressionScores });
+
+  return {
+    summary: { safe, detected },
+    expressionScores: avgExpressionScores,
+    overallScore: avgScore,
+  };
+};
+
+export const aggregateAnemiaAnalytics = (records: HealthHistoryRecord[]): AnemiaAnalytics => {
+  console.log('[ANEMIA] Starting aggregation with', records.length, 'records');
+  
+  let anemia = 0;
+  let nonAnemia = 0;
+
+  // Filter for anemia records only (type === 'anemia')
+  const anemiaRecords = records.filter(r => r.type === 'anemia');
+  console.log('[ANEMIA] Filtered to', anemiaRecords.length, 'anemia records from', records.length, 'total');
+
+  anemiaRecords.forEach((record, index) => {
+    // Parse the result field (JSON string)
+    console.log(`[ANEMIA] Record ${index}:`, {
+      type: record.type,
+      hasResult: !!record.result,
+      result: record.result,
+    });
+
+    if (!record.result) {
+      console.log(`[ANEMIA] Record ${index}: No result field, skipping`);
+      return;
+    }
+
+    let det: any = record.result;
+    
+    // Parse if it's a string
+    if (typeof record.result === 'string') {
+      console.log(`[ANEMIA] Record ${index}: result is a string, parsing...`);
+      try {
+        det = JSON.parse(record.result);
+        console.log(`[ANEMIA] Record ${index}: Successfully parsed`, det);
+      } catch (e) {
+        console.error(`[ANEMIA] Record ${index}: Failed to parse JSON`, e);
+        return;
+      }
+    }
+
+    console.log(`[ANEMIA] Record ${index}: Parsed detection object:`, det);
+
+    // Count based on label: must be exactly "non-anemia" (with hyphen or space) OR exactly "anemia"
+    const label = (det.label || '').toLowerCase().trim();
+    console.log(`[ANEMIA] Record ${index}: Label field = "${label}"`);
+    
+    if (label === 'anemia') {
+      anemia++;
+      console.log(`[ANEMIA] Record ${index}: Marked as ANEMIA. Total anemia: ${anemia}`);
+    } else if (label === 'non-anemia' || label === 'non anemia') {
+      nonAnemia++;
+      console.log(`[ANEMIA] Record ${index}: Marked as NON-ANEMIA. Total non-anemia: ${nonAnemia}`);
+    } else {
+      console.log(`[ANEMIA] Record ${index}: Label doesn't match any category (label: "${label}")`);
+    }
+  });
+
+  console.log('[ANEMIA] Aggregation complete:', { anemia, nonAnemia });
+  console.log('[ANEMIA] Final result:', { 
+    anemia_ringan: 0, 
+    anemia, 
+    anemia_sedang: nonAnemia 
+  });
+
+  return {
+    categories: {
+      anemia_ringan: 0,
+      anemia: anemia,
+      anemia_sedang: nonAnemia,
+    },
+  };
+};
+
+function averageExpressionScores(allScores: ExpressionScores[]): ExpressionScores | undefined {
+  if (allScores.length === 0) return undefined;
+
+  const emotions = ['Sad', 'Fear', 'Angry', 'Happy', 'Disgust', 'Neutral', 'Surprise'] as const;
+  const avgScores: any = {};
+
+  emotions.forEach(emotion => {
+    const scores = allScores.map(s => s[emotion] || 0);
+    avgScores[emotion] = scores.reduce((a, b) => a + b) / scores.length;
+  });
+
+  return avgScores;
+}
 
 export type BidanProfile = {
   tempat_praktik: string;
