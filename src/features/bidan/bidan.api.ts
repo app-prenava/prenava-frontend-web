@@ -466,3 +466,17 @@ export const updateBidanProfile = async (body: UpdateBidanProfileBody | FormData
   const { data } = await api.post<UpdateBidanProfileResponse>('/api/profile/update', body);
   return data;
 };
+
+export type UserDataAgeLmpResponse = {
+  status: string;
+  message: string;
+  data: {
+    gestational_age_distribution: { gestational_age_weeks: number; total: number }[];
+    age_distribution: { age: number; total: number }[];
+  };
+};
+
+export const getUserDataAgeLmp = async (): Promise<UserDataAgeLmpResponse> => {
+  const { data } = await api.get<UserDataAgeLmpResponse>('/api/show-data-age-lmp');
+  return data;
+};
