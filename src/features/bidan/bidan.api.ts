@@ -180,6 +180,34 @@ export interface StuntingAnalytics {
 }
 
 // ============================================
+// Age & Gestational Age Analytics Types
+// ============================================
+
+export interface AgeDistribution {
+  age: number;
+  total: number;
+}
+
+export interface GestationalAgeDistribution {
+  gestational_age_weeks: number;
+  total: number;
+}
+
+export interface AgeAndGestationalAnalyticsResponse {
+  status: string;
+  message: string;
+  data: {
+    gestational_age_distribution: GestationalAgeDistribution[];
+    age_distribution: AgeDistribution[];
+  };
+}
+
+export interface AgeAndGestationalAnalytics {
+  ageData: AgeDistribution[];
+  gestationalAgeData: GestationalAgeDistribution[];
+}
+
+// ============================================
 // Health History API
 // ============================================
 
@@ -206,6 +234,23 @@ export const getStuntingHistory = async (): Promise<StuntingHistoryResponse> => 
     success: data.success,
     message: data.message,
     recordCount: data.data?.length || 0,
+  });
+  
+  return data;
+};
+
+// ============================================
+// Age & Gestational Age API
+// ============================================
+
+export const getAgeAndGestationalAnalytics = async (): Promise<AgeAndGestationalAnalyticsResponse> => {
+  console.log('[API] Fetching age and gestational data from /api/show-data-age-lmp');
+  const { data } = await api.get<AgeAndGestationalAnalyticsResponse>('/api/show-data-age-lmp');
+  console.log('[API] Age and gestational response:', {
+    status: data.status,
+    message: data.message,
+    ageCount: data.data?.age_distribution?.length || 0,
+    gestationalCount: data.data?.gestational_age_distribution?.length || 0,
   });
   
   return data;
@@ -429,6 +474,25 @@ export const aggregateStuntingAnalytics = (records: StuntingHistoryRecord[]): St
   };
 }
 
+// ============================================
+// Age & Gestational Age Aggregation
+// ============================================
+
+export const aggregateAgeAnalytics = (response: AgeAndGestationalAnalyticsResponse): AgeAndGestationalAnalytics => {
+  console.log('[AGE] Starting age analytics aggregation');
+  
+  const ageData = response.data?.age_distribution || [];
+  const gestationalAgeData = response.data?.gestational_age_distribution || [];
+
+  console.log('[AGE] Age distribution:', ageData);
+  console.log('[GESTATIONAL_AGE] Gestational age distribution:', gestationalAgeData);
+
+  return {
+    ageData: ageData.sort((a, b) => a.age - b.age),
+    gestationalAgeData: gestationalAgeData.sort((a, b) => a.gestational_age_weeks - b.gestational_age_weeks),
+  };
+}
+
 export type BidanProfile = {
   tempat_praktik: string;
   alamat_praktik: string;
@@ -476,7 +540,15 @@ export type UserDataAgeLmpResponse = {
   };
 };
 
-export const getUserDataAgeLmp = async (): Promise<UserDataAgeLmpResponse> => {
-  const { data } = await api.get<UserDataAgeLmpResponse>('/api/show-data-age-lmp');
+export const getUserDataAgeLmp = async (): Promise<AgeAndGestationalAnalyticsResponse> => {
+  console.log('[API] Fetching age and gestational data from /api/show-data-age-lmp');
+  const { data } = await api.get<AgeAndGestationalAnalyticsResponse>('/api/show-data-age-lmp');
+  console.log('[API] Age and gestational response:', {
+    status: data.status,
+    message: data.message,
+    ageCount: data.data?.age_distribution?.length || 0,
+    gestationalCount: data.data?.gestational_age_distribution?.length || 0,
+  });
+  
   return data;
 };
