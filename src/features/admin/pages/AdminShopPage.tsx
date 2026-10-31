@@ -1,10 +1,48 @@
 import { useState, useEffect } from 'react';
-import { Table, Button, Image, message, Popconfirm, Space, Modal, Tag } from 'antd';
+import {
+  Table,
+  Button,
+  Image,
+  message,
+  Popconfirm,
+  Space,
+  Modal,
+  Tag,
+  Form,
+  Input,
+  Select,
+  Upload,
+  Card,
+  Tooltip,
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { DeleteOutlined, EyeOutlined, FileTextOutlined } from '@ant-design/icons';
+import type { UploadFile } from 'antd/es/upload/interface';
+import {
+  DeleteOutlined,
+  EyeOutlined,
+  FileTextOutlined,
+  PlusOutlined,
+  EditOutlined,
+  UploadOutlined,
+  StarFilled,
+  SearchOutlined,
+} from '@ant-design/icons';
 import AdminLayout from '../components/AdminLayout';
 import { shopApi } from '../shop.api';
 import { Shop, ShopLog } from '../shop.types';
+
+const CATEGORY_OPTIONS = [
+  'Pakaian Hamil',
+  'Suplemen',
+  'Bantal Hamil',
+  'Bantal Menyusui',
+  'Perawatan Kulit',
+  'Alat Kesehatan',
+  'Olahraga',
+  'Perlengkapan Bayi',
+  'Makanan & Minuman',
+  'Lainnya',
+];
 
 export default function AdminShopPage() {
   const [shops, setShops] = useState<Shop[]>([]);
@@ -15,7 +53,20 @@ export default function AdminShopPage() {
     per_page: 30,
     last_page: 1,
   });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Delete State
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
+
+  // Modal Create/Edit State
+  const [formModalOpen, setFormModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Shop | null>(null);
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [form] = Form.useForm();
+
+  // Logs Modal State
   const [logsModalOpen, setLogsModalOpen] = useState(false);
   const [logs, setLogs] = useState<ShopLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
@@ -29,35 +80,101 @@ export default function AdminShopPage() {
   const fetchShops = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await shopApi.getAllShops(page, 30);
-      console.log('Shop Response:', response);
-      
-      // Handle different response structures
+      const response = await shopApi.getAllShops(page, 50);
       const shopsData = response.data || [];
       const paginationData = {
         total: response.total || 0,
-        per_page: response.per_page || 30,
+        per_page: response.per_page || 50,
         last_page: response.last_page || 1,
       };
-      
+
       setShops(shopsData);
       setPagination(paginationData);
       setCurrentPage(response.current_page || 1);
-      
-      console.log('Shops data:', shopsData);
-      console.log('Pagination:', paginationData);
     } catch (error: any) {
       console.error('Error fetching shops:', error);
-      console.error('Error response:', error?.response);
-      
-      // Handle 403 Forbidden specifically
       if (error?.response?.status === 403) {
-        message.error('Akses ditolak. Pastikan Anda login sebagai Admin dan memiliki izin untuk mengakses data shop.');
+        message.error('Akses ditolak. Pastikan Anda memiliki izin role admin.');
       } else {
-        message.error(error?.response?.data?.message || error?.message || 'Gagal memuat data produk');
+        message.error(error?.response?.data?.message || 'Gagal memuat data produk');
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchShops(1);
+  }, []);
+
+  // Filtered Shops
+  const filteredShops = shops.filter((item) => {
+    const matchName = item.product_name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchCategory = selectedCategory ? item.category === selectedCategory : true;
+    return matchName && matchCategory;
+  });
+
+  // Open Form Modal for Create
+  const handleOpenCreateModal = () => {
+    setEditingProduct(null);
+    form.resetFields();
+    setFileList([]);
+    setFormModalOpen(true);
+  };
+
+  // Open Form Modal for Edit
+  const handleOpenEditModal = (product: Shop) => {
+    setEditingProduct(product);
+    form.setFieldsValue({
+      product_name: product.product_name,
+      category: product.category || 'Lainnya',
+      price: product.price,
+      url: product.url,
+      description: product.description,
+      photo_url: product.photo && product.photo.startsWith('http') ? product.photo : undefined,
+    });
+    setFileList([]);
+    setFormModalOpen(true);
+  };
+
+  // Submit Create / Edit Product
+  const handleFormSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      setFormSubmitting(true);
+
+      const formData = new FormData();
+      formData.append('product_name', values.product_name);
+      formData.append('price', String(values.price));
+      if (values.category) formData.append('category', values.category);
+      if (values.description) formData.append('description', values.description);
+      formData.append('url', values.url);
+
+      if (fileList.length > 0 && fileList[0].originFileObj) {
+        formData.append('photo', fileList[0].originFileObj);
+      } else if (values.photo_url) {
+        formData.append('photo_url', values.photo_url);
+      }
+
+      if (editingProduct) {
+        // Update
+        const res = await shopApi.updateShop(editingProduct.product_id, formData);
+        message.success(res.message || 'Produk berhasil diperbarui');
+      } else {
+        // Create
+        const res = await shopApi.createShop(formData);
+        message.success(res.message || 'Produk berhasil ditambahkan');
+      }
+
+      setFormModalOpen(false);
+      form.resetFields();
+      setFileList([]);
+      fetchShops(currentPage);
+    } catch (err: any) {
+      console.error('Error submitting form:', err);
+      message.error(err?.response?.data?.message || 'Gagal menyimpan produk. Periksa kembali form.');
+    } finally {
+      setFormSubmitting(false);
     }
   };
 
@@ -81,8 +198,6 @@ export default function AdminShopPage() {
     setLogsLoading(true);
     try {
       const response = await shopApi.getShopLogs(page, 50);
-      console.log('Shop Logs Response:', response);
-      
       const logsData = response.data || [];
       setLogs(logsData);
       setLogsPagination({
@@ -109,39 +224,31 @@ export default function AdminShopPage() {
     setLogs([]);
   };
 
-  const getActionBadge = (action: string) => {
-    const badges: Record<string, { color: string; label: string }> = {
-      create: { color: 'success', label: 'Create' },
-      update: { color: 'processing', label: 'Update' },
-      delete: { color: 'warning', label: 'Delete' },
-      admin_delete: { color: 'error', label: 'Admin Delete' },
-    };
-    return badges[action] || { color: 'default', label: action };
+  const formatPrice = (price: number | string) => {
+    const num = typeof price === 'string' ? parseInt(price.replace(/\D/g, ''), 10) : price;
+    if (isNaN(num)) return 'Rp 0';
+    return `Rp ${num.toLocaleString('id-ID')}`;
   };
-
-  useEffect(() => {
-    fetchShops(1);
-  }, []);
 
   const columns: ColumnsType<Shop> = [
     {
       title: 'ID',
       dataIndex: 'product_id',
       key: 'product_id',
-      width: 80,
+      width: 70,
     },
     {
       title: 'Foto',
       dataIndex: 'photo',
       key: 'photo',
-      width: 100,
+      width: 80,
       render: (photo: string) => (
         <Image
           src={photo}
           alt="Product"
-          width={60}
-          height={60}
-          style={{ objectFit: 'cover', borderRadius: '4px' }}
+          width={55}
+          height={55}
+          style={{ objectFit: 'cover', borderRadius: '8px' }}
           fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E"
         />
       ),
@@ -150,25 +257,49 @@ export default function AdminShopPage() {
       title: 'Nama Produk',
       dataIndex: 'product_name',
       key: 'product_name',
-      ellipsis: true,
+      render: (name: string, record: Shop) => (
+        <div className="flex flex-col">
+          <span className="font-semibold text-gray-900">{name}</span>
+          {record.description && (
+            <span className="text-xs text-gray-500 line-clamp-1">{record.description}</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Kategori',
+      dataIndex: 'category',
+      key: 'category',
+      width: 140,
+      render: (cat: string) => (
+        <Tag color="magenta" className="rounded-md font-medium text-xs">
+          {cat || 'Lainnya'}
+        </Tag>
+      ),
     },
     {
       title: 'Harga',
       dataIndex: 'price',
       key: 'price',
-      width: 150,
-      render: (price: number) => (
-        <span className="font-medium">Rp {price.toLocaleString('id-ID')}</span>
+      width: 130,
+      render: (price: number | string) => (
+        <span className="font-semibold text-gray-800">{formatPrice(price)}</span>
       ),
     },
     {
-      title: 'User ID',
-      dataIndex: 'user_id',
-      key: 'user_id',
-      width: 100,
+      title: 'Rating',
+      key: 'rating',
+      width: 110,
+      render: (_, record: Shop) => (
+        <div className="flex items-center gap-1 text-xs">
+          <StarFilled className="text-amber-400" />
+          <span className="font-bold text-gray-800">{record.average_rating || 0}</span>
+          <span className="text-gray-400">({record.rating_count || 0})</span>
+        </div>
+      ),
     },
     {
-      title: 'URL',
+      title: 'Link Toko',
       dataIndex: 'url',
       key: 'url',
       width: 100,
@@ -177,50 +308,45 @@ export default function AdminShopPage() {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-800"
+          className="text-rose-600 hover:text-rose-800 font-medium text-xs flex items-center gap-1"
         >
-          <EyeOutlined className="mr-1" />
-          Lihat
+          <EyeOutlined /> Lihat
         </a>
       ),
     },
     {
-      title: 'Tanggal',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      width: 120,
-      render: (date: string) => new Date(date).toLocaleDateString('id-ID'),
-    },
-    {
       title: 'Aksi',
       key: 'action',
-      width: 150,
+      width: 140,
       render: (_, record) => (
-        <Space size="middle">
-          <Button
-            type="text"
-            icon={<FileTextOutlined />}
-            title="Lihat Log"
-            onClick={handleOpenLogs}
-          />
+        <Space size="small">
+          <Tooltip title="Edit Produk">
+            <Button
+              type="text"
+              icon={<EditOutlined className="text-blue-600" />}
+              onClick={() => handleOpenEditModal(record)}
+            />
+          </Tooltip>
+
           <Popconfirm
             title="Hapus Produk"
-            description={`Apakah Anda yakin ingin menghapus "${record.product_name}"?`}
+            description={`Hapus produk "${record.product_name}"?`}
             onConfirm={() => handleDelete(record.product_id, record.product_name)}
-            okText="Ya, Hapus"
+            okText="Hapus"
             cancelText="Batal"
             okButtonProps={{
               danger: true,
               loading: deleteLoading === record.product_id,
             }}
           >
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              loading={deleteLoading === record.product_id}
-              title="Hapus Produk"
-            />
+            <Tooltip title="Hapus Produk">
+              <Button
+                type="text"
+                danger
+                icon={<DeleteOutlined />}
+                loading={deleteLoading === record.product_id}
+              />
+            </Tooltip>
           </Popconfirm>
         </Space>
       ),
@@ -229,22 +355,73 @@ export default function AdminShopPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+      <div className="space-y-6 pb-8">
+        {/* Header Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-gray-100">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-900">Manajemen Shop</h1>
-            <p className="text-gray-600 mt-2">
-              Total Produk: <span className="font-medium">{pagination.total}</span>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+              Manajemen Shop
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Kelola katalog produk rekomendasi dan perlengkapan ibu hamil. Total: <strong>{pagination.total}</strong> produk.
             </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              icon={<FileTextOutlined />}
+              onClick={handleOpenLogs}
+              className="rounded-xl flex items-center gap-1.5"
+            >
+              Audit Log
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={handleOpenCreateModal}
+              className="rounded-xl flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 border-0"
+            >
+              Tambah Produk
+            </Button>
           </div>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        {/* Filter & Search Controls */}
+        <Card className="rounded-2xl border-gray-100 shadow-sm">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+            <div className="w-full sm:w-80">
+              <Input
+                placeholder="Cari nama produk..."
+                prefix={<SearchOutlined className="text-gray-400" />}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                allowClear
+                className="rounded-xl"
+              />
+            </div>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <span className="text-xs text-gray-500 font-medium">Kategori:</span>
+              <Select
+                value={selectedCategory}
+                onChange={(val) => setSelectedCategory(val)}
+                className="w-48"
+                allowClear
+                placeholder="Semua Kategori"
+              >
+                {CATEGORY_OPTIONS.map((cat) => (
+                  <Select.Option key={cat} value={cat}>
+                    {cat}
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
+          </div>
+        </Card>
+
+        {/* Products Table */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <Table
             columns={columns}
-            dataSource={shops}
+            dataSource={filteredShops}
             rowKey="product_id"
             loading={loading}
             pagination={{
@@ -252,16 +429,101 @@ export default function AdminShopPage() {
               total: pagination.total,
               pageSize: pagination.per_page,
               showSizeChanger: false,
-              showTotal: (total, range) =>
-                `${range[0]}-${range[1]} dari ${total} produk`,
-              onChange: (page) => {
-                fetchShops(page);
-              },
+              showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total} produk`,
+              onChange: (page) => fetchShops(page),
             }}
             scroll={{ x: 1000 }}
           />
         </div>
       </div>
+
+      {/* Add / Edit Product Modal */}
+      <Modal
+        title={
+          <div className="text-lg font-bold text-gray-900 pb-2 border-b border-gray-100">
+            {editingProduct ? 'Edit Data Produk' : 'Tambah Produk Baru'}
+          </div>
+        }
+        open={formModalOpen}
+        onCancel={() => setFormModalOpen(false)}
+        onOk={handleFormSubmit}
+        confirmLoading={formSubmitting}
+        okText={editingProduct ? 'Simpan Perubahan' : 'Tambah Produk'}
+        cancelText="Batal"
+        width={650}
+        okButtonProps={{ className: 'bg-rose-600 hover:bg-rose-700' }}
+      >
+        <Form form={form} layout="vertical" className="mt-4">
+          <Form.Item
+            name="product_name"
+            label="Nama Produk"
+            rules={[{ required: true, message: 'Nama produk wajib diisi' }]}
+          >
+            <Input placeholder="Contoh: Pregnancy Pillow U-Shape" className="rounded-lg" />
+          </Form.Item>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Form.Item
+              name="category"
+              label="Kategori Produk"
+              rules={[{ required: true, message: 'Pilih kategori produk' }]}
+            >
+              <Select placeholder="Pilih Kategori" className="rounded-lg">
+                {CATEGORY_OPTIONS.map((cat) => (
+                  <Select.Option key={cat} value={cat}>
+                    {cat}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="price"
+              label="Harga Produk (Rp)"
+              rules={[{ required: true, message: 'Harga wajib diisi' }]}
+            >
+              <Input placeholder="Contoh: 250000" className="rounded-lg" />
+            </Form.Item>
+          </div>
+
+          <Form.Item
+            name="url"
+            label="Tautan Pembelian (URL Shopee / Tokopedia)"
+            rules={[
+              { required: true, message: 'URL pembelian wajib diisi' },
+              { type: 'url', message: 'Format URL tidak valid (harus menyertakan https://)' },
+            ]}
+          >
+            <Input placeholder="https://shopee.co.id/..." className="rounded-lg" />
+          </Form.Item>
+
+          <Form.Item name="description" label="Deskripsi Produk">
+            <Input.TextArea
+              rows={3}
+              placeholder="Jelaskan manfaat, keunggulan, dan kegunaan produk bagi ibu hamil..."
+              className="rounded-lg"
+            />
+          </Form.Item>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Form.Item label="Upload Foto Produk">
+              <Upload
+                beforeUpload={() => false}
+                fileList={fileList}
+                onChange={({ fileList }) => setFileList(fileList.slice(-1))}
+                maxCount={1}
+                accept="image/*"
+              >
+                <Button icon={<UploadOutlined />}>Pilih File Gambar</Button>
+              </Upload>
+            </Form.Item>
+
+            <Form.Item name="photo_url" label="Atau Gunakan URL Gambar Langsung">
+              <Input placeholder="https://.../gambar.png" className="rounded-lg" />
+            </Form.Item>
+          </div>
+        </Form>
+      </Modal>
 
       {/* Logs Modal */}
       <Modal
@@ -269,7 +531,7 @@ export default function AdminShopPage() {
         open={logsModalOpen}
         onCancel={handleCloseLogs}
         footer={null}
-        width={1200}
+        width={1000}
       >
         <Table
           columns={[
@@ -280,70 +542,28 @@ export default function AdminShopPage() {
               width: 80,
             },
             {
-              title: 'User ID',
-              dataIndex: 'user_id',
-              key: 'user_id',
-              width: 100,
-            },
-            {
-              title: 'Action',
+              title: 'Aksi',
               dataIndex: 'action',
               key: 'action',
-              width: 150,
-              render: (action: string) => {
-                const badge = getActionBadge(action);
-                return <Tag color={badge.color}>{badge.label}</Tag>;
+              width: 120,
+              render: (act: string) => {
+                const color = act.includes('delete') ? 'red' : act === 'create' ? 'green' : 'blue';
+                return <Tag color={color}>{act.toUpperCase()}</Tag>;
               },
             },
             {
-              title: 'Admin Action',
+              title: 'Oleh Admin',
               dataIndex: 'is_admin',
               key: 'is_admin',
-              width: 120,
-              render: (isAdmin: boolean) => (
-                <Tag color={isAdmin ? 'error' : 'default'}>
-                  {isAdmin ? 'Admin' : 'User'}
-                </Tag>
-              ),
+              width: 100,
+              render: (isAdmin: boolean) => (isAdmin ? <Tag color="gold">ADMIN</Tag> : <Tag>USER</Tag>),
             },
             {
-              title: 'Data Snapshot',
-              dataIndex: 'data_snapshot',
-              key: 'data_snapshot',
-              width: 300,
-              render: (snapshot: any) => {
-                if (!snapshot) return <span className="text-gray-400">-</span>;
-                
-                // Extract product name if available
-                const productName = snapshot.product_name || snapshot.name || 'N/A';
-                const price = snapshot.price ? `Rp ${snapshot.price.toLocaleString('id-ID')}` : 'N/A';
-                
-                return (
-                  <div className="max-w-xs">
-                    <div className="text-xs space-y-1">
-                      <div><span className="font-medium">Produk:</span> {productName}</div>
-                      <div><span className="font-medium">Harga:</span> {price}</div>
-                      <details className="mt-2">
-                        <summary className="cursor-pointer text-blue-600 hover:text-blue-800 text-xs">
-                          Lihat Detail Lengkap
-                        </summary>
-                        <pre className="text-xs bg-gray-50 p-2 rounded mt-2 overflow-auto max-h-40">
-                          {JSON.stringify(snapshot, null, 2)}
-                        </pre>
-                      </details>
-                    </div>
-                  </div>
-                );
-              },
-            },
-            {
-              title: 'Tanggal',
+              title: 'Waktu',
               dataIndex: 'created_at',
               key: 'created_at',
               width: 180,
-              render: (date: string) => (
-                <span>{new Date(date).toLocaleString('id-ID')}</span>
-              ),
+              render: (date: string) => new Date(date).toLocaleString('id-ID'),
             },
           ]}
           dataSource={logs}
@@ -353,17 +573,10 @@ export default function AdminShopPage() {
             current: logsPagination.current_page,
             total: logsPagination.total,
             pageSize: logsPagination.per_page,
-            showSizeChanger: false,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} dari ${total} log`,
-            onChange: (page) => {
-              fetchShopLogs(page);
-            },
+            onChange: (p) => fetchShopLogs(p),
           }}
-          scroll={{ x: 1000 }}
         />
       </Modal>
     </AdminLayout>
   );
 }
-

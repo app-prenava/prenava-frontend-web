@@ -2,7 +2,11 @@ export type Shop = {
   product_id: number;
   photo: string;
   product_name: string;
-  price: number;
+  category?: string;
+  description?: string;
+  price: number | string;
+  average_rating?: number;
+  rating_count?: number;
   user_id: number;
   url: string;
   created_at: string;
@@ -42,4 +46,3 @@ export type ShopLogsResponse = {
   current_page: number;
   last_page: number;
 };
-

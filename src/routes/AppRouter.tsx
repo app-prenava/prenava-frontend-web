@@ -31,6 +31,7 @@ import BidanTipManagerPage from '@/features/bidan/pages/TipManagerPage';
 import CatatanKunjunganList from '@/features/bidan/pages/CatatanKunjunganList';
 import CatatanKunjunganDetail from '@/features/bidan/pages/CatatanKunjunganDetail';
 import BidanAppointmentsPage from '@/features/bidan/pages/BidanAppointmentsPage';
+import BidanTriagePage from '@/features/bidan/pages/BidanTriagePage';
 // New Bidan Management Pages
 import SubscriptionPlansPage from '@/features/admin/pages/SubscriptionPlansPage';
 import BidanApplicationsPage from '@/features/admin/pages/BidanApplicationsPage';
@@ -248,6 +249,16 @@ export default function AppRouter() {
           element={
             <ProtectedBidan>
               <BidanDashboard />
+            </ProtectedBidan>
+          }
+        />
+        <Route
+          path="/bidan/triage"
+          element={
+            <ProtectedBidan>
+              <BidanLayout>
+                <BidanTriagePage />
+              </BidanLayout>
             </ProtectedBidan>
           }
         />

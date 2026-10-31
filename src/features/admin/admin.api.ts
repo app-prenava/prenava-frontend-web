@@ -421,3 +421,73 @@ export const getHistoryLogs = async (filters?: HistoryLogFilters): Promise<Histo
   const { data } = await api.get<HistoryLogResponse>('/api/admin/history-log', { params: filters });
   return data;
 };
+// ============================================
+// DASHBOARD STATS API
+// ============================================
+export interface DashboardStatsResponse {
+  status: string;
+  data: {
+    summary: {
+      total_users: number;
+      total_ibu_hamil: number;
+      total_bidan: number;
+      total_dinkes: number;
+      total_posts: number;
+      total_likes: number;
+      total_comments: number;
+      total_products: number;
+      total_reviews: number;
+      avg_rating: number;
+      total_kunjungan: number;
+      total_tips: number;
+      total_banners: number;
+      total_subscriptions: number;
+      pending_bidan_applications: number;
+    };
+    community: {
+      top_posts: Array<{
+        id: number;
+        judul: string;
+        deskripsi: string;
+        total_comments: number;
+        total_likes: number;
+        created_at: string;
+        author_name: string;
+      }>;
+      recent_comments: Array<{
+        id: number;
+        komentar: string;
+        created_at: string;
+        user_name: string;
+        post_title: string;
+      }>;
+    };
+    shop: {
+      categories: Array<{ category: string; total: number }>;
+      ratings: Array<{ rating: number; total: number }>;
+      top_products: Array<{
+        id: number;
+        product_name: string;
+        category: string;
+        price: string;
+        average_rating: string;
+        rating_count: number;
+        photo: string;
+      }>;
+    };
+    recent_logs: Array<{
+      id: number;
+      user_name: string;
+      user_role: string;
+      activity_type: string;
+      activity_label: string;
+      description: string;
+      created_at: string;
+    }>;
+  };
+}
+
+export const getDashboardStats = async (): Promise<DashboardStatsResponse> => {
+  const { data } = await api.get<DashboardStatsResponse>('/api/admin/dashboard-stats');
+  return data;
+};

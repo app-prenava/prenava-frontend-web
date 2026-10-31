@@ -8,18 +8,13 @@ export const shopApi = {
       const response = await api.get('/api/shop/all', {
         params: { page, data: perPage },
       });
-      console.log('Shop API Raw Response:', response);
-      console.log('Shop API Response Data:', response.data);
       
-      // Handle different response structures
       const responseData = response.data;
       
-      // If response has nested data structure
       if (responseData?.data && Array.isArray(responseData.data)) {
         return responseData as ShopResponse;
       }
       
-      // If response is direct array or has different structure
       if (Array.isArray(responseData)) {
         return {
           status: 'success',
@@ -33,20 +28,27 @@ export const shopApi = {
         };
       }
       
-      // Default: return as is
       return responseData as ShopResponse;
     } catch (error: any) {
       console.error('Shop API Error:', error);
-      console.error('Error Status:', error?.response?.status);
-      console.error('Error Message:', error?.response?.data);
-      
-      // Provide more detailed error information
-      if (error?.response?.status === 403) {
-        console.error('403 Forbidden - Check if user has admin role and proper permissions');
-      }
-      
       throw error;
     }
+  },
+
+  // Create shop product
+  createShop: async (formData: FormData): Promise<{ status: string; message: string; data?: any }> => {
+    const { data } = await api.post('/api/shop/create', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
+
+  // Update shop product
+  updateShop: async (productId: number, formData: FormData): Promise<{ status: string; message: string; data?: any }> => {
+    const { data } = await api.post(`/api/shop/update/${productId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
   },
 
   // Delete shop by ID (Admin)
@@ -63,4 +65,3 @@ export const shopApi = {
     return data;
   },
 };
-

@@ -8,7 +8,11 @@ type NavItem = {
 
 const navItems: NavItem[] = [
     { path: '/bidan', label: 'Dashboard', icon: '📊' },
-    { path: '/bidan/users', label: 'Users', icon: '👥' },
+    { path: '/bidan/triage', label: 'Triase Pasien (CDSS)', icon: '🚨' },
+    { path: '/bidan/appointments', label: 'Janji Temu', icon: '📅' },
+    { path: '/bidan/users', label: 'Data Pasien', icon: '👥' },
+    { path: '/catatan-kunjungan', label: 'Catatan Kunjungan', icon: '📋' },
+    { path: '/bidan/tips', label: 'Kelola Tips', icon: '💡' },
 ];
 
 export default function BidanSidebar() {
@@ -39,12 +43,12 @@ export default function BidanSidebar() {
                                 <Link
                                     to={item.path}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${isActive
-                                        ? 'bg-pink-100 text-pink-600 border-l-4 border-pink-500'
+                                        ? 'bg-pink-100 text-pink-600 border-l-4 border-pink-500 font-semibold'
                                         : 'text-gray-700 hover:bg-gray-100'
                                         }`}
                                 >
                                     <span className="text-xl">{item.icon}</span>
-                                    <span className="font-medium">{item.label}</span>
+                                    <span className="font-medium text-sm">{item.label}</span>
                                 </Link>
                             </li>
                         );
