@@ -88,12 +88,12 @@ export const getBidanForumThreads = async (params: {
   if (params.page) queryParams.append('page', params.page.toString());
   if (params.limit) queryParams.append('limit', params.limit.toString());
 
-  const response = await api.get(`/bidan/forum/threads?${queryParams.toString()}`);
+  const response = await api.get(`/api/bidan/forum/threads?${queryParams.toString()}`);
   return response.data;
 };
 
 export const getBidanThreadDetail = async (postId: number): Promise<{ status: string; data: ForumThreadDetail }> => {
-  const response = await api.get(`/bidan/forum/threads/${postId}`);
+  const response = await api.get(`/api/bidan/forum/threads/${postId}`);
   return response.data;
 };
 
@@ -101,7 +101,7 @@ export const replyBidanThread = async (
   postId: number,
   payload: BidanReplyPayload
 ): Promise<{ status: string; message: string; data: any }> => {
-  const response = await api.post(`/bidan/forum/threads/${postId}/reply`, payload);
+  const response = await api.post(`/api/bidan/forum/threads/${postId}/reply`, payload);
   return response.data;
 };
 
