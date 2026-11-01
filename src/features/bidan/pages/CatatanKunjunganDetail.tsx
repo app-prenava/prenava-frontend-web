@@ -1,16 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Input, Button, Table, Spin, message, Tag, Divider } from 'antd';
+import { Card, Input, Button, Spin, message, Tag } from 'antd';
 import {
-    CalendarOutlined,
     ArrowLeftOutlined,
     PrinterOutlined,
-    HeartOutlined,
     CheckCircleOutlined,
     ClockCircleOutlined,
-    AlertOutlined,
-    MedicineBoxOutlined,
-    UserOutlined,
+    SaveOutlined,
 } from '@ant-design/icons';
 import { getCatatanIbuDetail, updateCatatanIbu } from '../catatan.api';
 import type { CatatanIbu, UpdateCatatanIbuPayload } from '../catatan.types';
@@ -21,15 +17,13 @@ const monitoringQuestions = [
     { key: 'q1_demam', label: 'Demam lebih dari 2 hari' },
     { key: 'q2_pusing', label: 'Pusing / sakit kepala berat' },
     { key: 'q3_sulit_tidur', label: 'Sulit tidur / cemas berlebih' },
-    { key: 'q4_risiko_tb', label: 'Risiko TB atau batuk > 2 minggu' },
-    { key: 'q5_gerakan_bayi', label: 'Gerakan janin berkurang (<10x/12 jam)' },
-    { key: 'q6_nyeri_perut', label: 'Nyeri perut hebat' },
-    { key: 'q7_cairan_jalan_lahir', label: 'Cairan jalan lahir berbau / perdarahan' },
-    { key: 'q8_sakit_kencing', label: 'Sakit saat kencing / keputihan abnormal' },
-    { key: 'q9_diare', label: 'Diare berulang' },
+    { key: 'q4_risiko_tb', label: 'Batuk > 2 minggu / kontak penderita TB' },
+    { key: 'q5_gerakan_bayi', label: 'Gerakan janin berkurang (<10 kali per 12 jam)' },
+    { key: 'q6_nyeri_perut', label: 'Nyeri perut hebat / kram menetap' },
+    { key: 'q7_cairan_jalan_lahir', label: 'Cairan jalan lahir berbau / perdarahan aktif' },
+    { key: 'q8_sakit_kencing', label: 'Nyeri berkemih / keputihan abnormal' },
+    { key: 'q9_diare', label: 'Diare berulang berisiko dehidrasi' },
 ] as const;
-
-type QuestionKey = (typeof monitoringQuestions)[number]['key'];
 
 export default function CatatanKunjunganDetail() {
     const { catatan_id } = useParams<{ catatan_id: string }>();
@@ -40,7 +34,7 @@ export default function CatatanKunjunganDetail() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
-    // Editable fields
+    // Form fields
     const [hasilKunjungan, setHasilKunjungan] = useState('');
     const [therapyNotes, setTherapyNotes] = useState('');
     const [nextVisitDate, setNextVisitDate] = useState('');
@@ -72,10 +66,9 @@ export default function CatatanKunjunganDetail() {
             }
 
             if (!dataItem) {
-                throw new Error('Data catatan tidak ditemukan');
+                throw new Error('Data rekam medis tidak ditemukan');
             }
 
-            // Extract monitoring questions
             const extractedQuestions: Record<string, boolean> = {};
             if (Array.isArray(dataItem.pertanyaan)) {
                 dataItem.pertanyaan.forEach((p: any) => {
@@ -155,14 +148,13 @@ export default function CatatanKunjunganDetail() {
                 hemoglobin_gdl: hemoglobinGdl ? Number(hemoglobinGdl) : null,
             };
 
-            const updated = await updateCatatanIbu(Number(catatan_id), payload);
+            await updateCatatanIbu(Number(catatan_id), payload);
             message.success(
                 markAsCompleted
-                    ? 'Catatan berhasil diselesaikan & diperbarui!'
+                    ? 'Catatan berhasil diselesaikan dan disimpan'
                     : 'Perubahan catatan medis berhasil disimpan'
             );
 
-            // Re-sync local state
             setCatatan((prev) =>
                 prev
                     ? {
@@ -201,19 +193,34 @@ export default function CatatanKunjunganDetail() {
         }
     };
 
+    const formatShortDate = (dateStr?: string | null): string => {
+        if (!dateStr) return '-';
+        try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            return date.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+            });
+        } catch {
+            return dateStr;
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex flex-col justify-center items-center min-h-[400px] gap-3">
                 <Spin size="large" />
-                <span className="text-gray-400 text-sm">Memuat rekam medis kunjungan...</span>
+                <span className="text-gray-500 text-sm">Memuat rekam medis kunjungan...</span>
             </div>
         );
     }
 
     if (!catatan) {
         return (
-            <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                <p className="text-gray-600 font-medium">Rekam medis kunjungan tidak ditemukan.</p>
+            <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
+                <p className="text-gray-700 font-medium">Rekam medis kunjungan tidak ditemukan.</p>
                 <Button
                     type="primary"
                     onClick={() => navigate('/catatan-kunjungan')}
@@ -232,26 +239,59 @@ export default function CatatanKunjunganDetail() {
     const isFhrAbnormal =
         Number(fhrBpm) > 0 && (Number(fhrBpm) < 120 || Number(fhrBpm) > 160);
 
+    const todayOfficialDate = new Date().toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    });
+
     return (
         <div className="space-y-6">
-            {/* Print Stylesheet */}
+            {/* Print Stylesheet for Formal Healthcare Document */}
             <style>{`
                 @media print {
+                    @page {
+                        size: A4 portrait;
+                        margin: 15mm 15mm 15mm 15mm;
+                    }
                     body {
                         background: #ffffff !important;
-                        font-family: Arial, sans-serif !important;
+                        font-family: "Times New Roman", Times, Georgia, serif !important;
                         color: #000000 !important;
+                        font-size: 11pt !important;
+                        line-height: 1.35 !important;
                     }
-                    .no-print, header, aside, nav, .ant-btn {
+                    .no-print, header, aside, nav, .ant-btn, .ant-layout-header, .ant-layout-sider {
                         display: none !important;
                     }
                     .print-only {
                         display: block !important;
                     }
-                    .printable-card {
-                        border: 1px solid #ddd !important;
-                        box-shadow: none !important;
-                        padding: 0 !important;
+                    .print-table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                        margin-bottom: 12px !important;
+                    }
+                    .print-table th, .print-table td {
+                        border: 1px solid #1f2937 !important;
+                        padding: 5px 8px !important;
+                        font-size: 10pt !important;
+                        text-align: left !important;
+                    }
+                    .print-table th {
+                        background-color: #f3f4f6 !important;
+                        font-weight: bold !important;
+                    }
+                    .kop-garis-tebal {
+                        border-bottom: 2.5px solid #000000 !important;
+                        margin-bottom: 1.5px !important;
+                    }
+                    .kop-garis-tipis {
+                        border-bottom: 1px solid #000000 !important;
+                        margin-bottom: 16px !important;
+                    }
+                    .avoid-break {
+                        page-break-inside: avoid !important;
                     }
                 }
                 @media screen {
@@ -261,41 +301,26 @@ export default function CatatanKunjunganDetail() {
                 }
             `}</style>
 
-            {/* Header Screen */}
-            <div className="no-print flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+            {/* SCREEN VIEW: Unified Clean Page Header */}
+            <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
                 <div className="flex items-center gap-3">
                     <Button
                         icon={<ArrowLeftOutlined />}
                         onClick={() => navigate('/catatan-kunjungan')}
-                        className="rounded-xl"
                     >
                         Kembali
                     </Button>
                     <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-xl font-bold text-gray-900">
-                                Rekam Medis ANC: {catatan.nama_ibu}
+                        <div className="flex items-center gap-2.5">
+                            <h1 className="text-2xl font-bold text-gray-900 m-0">
+                                Rekam Medis: {catatan.nama_ibu}
                             </h1>
-                            <span
-                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                                    isCompleted
-                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                        : 'bg-amber-50 text-amber-700 border border-amber-200'
-                                }`}
-                            >
-                                {isCompleted ? (
-                                    <>
-                                        <CheckCircleOutlined /> Selesai
-                                    </>
-                                ) : (
-                                    <>
-                                        <ClockCircleOutlined /> Sedang Berlangsung
-                                    </>
-                                )}
-                            </span>
+                            <Tag color={isCompleted ? 'success' : 'warning'} className="font-medium text-xs m-0">
+                                {isCompleted ? 'Selesai' : 'Sedang Berlangsung'}
+                            </Tag>
                         </div>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                            ID Kunjungan #{catatan.catatan_id} &bull; {formatDate(catatan.tanggal_kunjungan)}
+                        <p className="text-sm text-gray-600 mt-1 mb-0">
+                            Nomor Kunjungan #{catatan.catatan_id} &bull; {formatDate(catatan.tanggal_kunjungan)}
                         </p>
                     </div>
                 </div>
@@ -305,17 +330,16 @@ export default function CatatanKunjunganDetail() {
                         icon={<PrinterOutlined />}
                         onClick={handlePrint}
                         size="large"
-                        className="rounded-xl border-gray-300 font-medium hover:text-[#FA6978] hover:border-[#FA6978]"
                     >
                         Cetak Resume Medis
                     </Button>
                     {!isCompleted && (
                         <Button
                             type="primary"
+                            icon={<CheckCircleOutlined />}
                             size="large"
                             loading={submitting}
                             onClick={() => handleUpdateCatatan(true)}
-                            className="rounded-xl font-medium"
                             style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
                         >
                             Selesaikan Kunjungan
@@ -324,245 +348,194 @@ export default function CatatanKunjunganDetail() {
                 </div>
             </div>
 
-            {/* Print Official Header */}
-            <div className="print-only border-b-2 border-gray-800 pb-4 mb-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-2xl font-black text-gray-900 tracking-tight">PRENAVA MATERNAL HEALTH</h2>
-                        <p className="text-xs text-gray-600">Pusat Layanan Kesehatan Ibu & Janin Terpadu</p>
-                        <p className="text-xs text-gray-500">Standar Pelayanan Antenatal Care (ANC) Terintegrasi CDSS Kemenkes RI</p>
-                    </div>
-                    <div className="text-right">
-                        <span className="text-xs font-bold uppercase tracking-wider px-2 py-1 bg-gray-100 border border-gray-300 rounded">
-                            Resume Asuhan Antenatal
-                        </span>
-                        <p className="text-xs text-gray-500 mt-1">ID Kunjungan: #{catatan.catatan_id}</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Patient Demographic Summary Card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 printable-card">
-                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <UserOutlined className="text-[#FA6978]" /> Identitas Pasien & Waktu Kunjungan
+            {/* SCREEN VIEW: Patient Summary Card */}
+            <div className="no-print bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-0">
+                    Informasi Pasien & Waktu Asuhan
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <span className="text-xs text-gray-500 block">Nama Pasien:</span>
-                        <span className="font-bold text-gray-900 text-base">{catatan.nama_ibu}</span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                    <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <span className="text-xs text-gray-500 block">Nama Ibu Hamil</span>
+                        <span className="font-semibold text-gray-900">{catatan.nama_ibu}</span>
                     </div>
-                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <span className="text-xs text-gray-500 block">Kontak / No Telepon:</span>
+                    <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <span className="text-xs text-gray-500 block">Kontak / Telepon</span>
                         <span className="font-semibold text-gray-800">
                             {catatan.user?.phone || catatan.user?.email || '-'}
                         </span>
                     </div>
-                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <span className="text-xs text-gray-500 block">Tanggal Kunjungan:</span>
+                    <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <span className="text-xs text-gray-500 block">Tanggal Kunjungan</span>
                         <span className="font-semibold text-gray-800">
-                            {formatDate(catatan.tanggal_kunjungan)}
+                            {formatShortDate(catatan.tanggal_kunjungan)}
                         </span>
                     </div>
-                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <span className="text-xs text-gray-500 block">Status Rekam Medis:</span>
-                        <span className="font-semibold text-gray-800 capitalize">
-                            {catatan.status_kunjungan === 'selesai' ? '✅ Lengkap & Selesai' : '⏳ Sedang Berlangsung'}
+                    <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <span className="text-xs text-gray-500 block">Status Rekam Medis</span>
+                        <span className="font-semibold text-gray-800">
+                            {catatan.status_kunjungan === 'selesai' ? 'Lengkap & Terverifikasi' : 'Asuhan Berjalan'}
                         </span>
                     </div>
                 </div>
             </div>
 
-            {/* Vital Signs Grid */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 printable-card space-y-4">
+            {/* SCREEN VIEW: Vital Signs */}
+            <div className="no-print bg-white rounded-xl border border-gray-200 p-5 space-y-4">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                        <HeartOutlined className="text-[#FA6978]" /> Tanda Vital & Pemeriksaan Fisik ANC
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-0">
+                        Tanda Vital & Pemeriksaan Fisik ANC
                     </h3>
                     {isBpHigh && (
-                        <span className="text-xs bg-red-100 text-red-700 font-bold px-2.5 py-1 rounded-full flex items-center gap-1 border border-red-200">
-                            <AlertOutlined /> Peringatan: Tensi Darah Tinggi (&ge;140/90 mmHg)
-                        </span>
+                        <Tag color="error" className="m-0 font-medium">
+                            Perhatian: Tensi Darah Tinggi (&ge;140/90 mmHg)
+                        </Tag>
                     )}
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                    {/* Tekanan Darah */}
-                    <div
-                        className={`p-4 rounded-2xl border text-center ${
-                            isBpHigh
-                                ? 'bg-red-50 border-red-300 text-red-900'
-                                : 'bg-gray-50 border-gray-100 text-gray-900'
-                        }`}
-                    >
+                    <div className={`p-4 rounded-xl border text-center ${isBpHigh ? 'bg-red-50 border-red-200 text-red-900' : 'bg-gray-50 border-gray-200'}`}>
                         <span className="text-xs text-gray-500 block font-medium">Tekanan Darah</span>
                         <div className="text-lg font-bold mt-1">
                             {systolicBp && diastolicBp ? `${systolicBp}/${diastolicBp}` : '-'}
                             <span className="text-xs font-normal text-gray-500 ml-1">mmHg</span>
                         </div>
-                        <span className="text-[10px] text-gray-500 block mt-0.5">
-                            {isBpHigh ? 'Hipertensi' : 'Normal'}
+                        <span className="text-[11px] text-gray-500 block mt-0.5">
+                            {isBpHigh ? 'Hipertensi' : 'Normotensif'}
                         </span>
                     </div>
 
-                    {/* Denyut Jantung Janin */}
-                    <div
-                        className={`p-4 rounded-2xl border text-center ${
-                            isFhrAbnormal
-                                ? 'bg-red-50 border-red-300 text-red-900'
-                                : 'bg-gray-50 border-gray-100 text-gray-900'
-                        }`}
-                    >
+                    <div className={`p-4 rounded-xl border text-center ${isFhrAbnormal ? 'bg-red-50 border-red-200 text-red-900' : 'bg-gray-50 border-gray-200'}`}>
                         <span className="text-xs text-gray-500 block font-medium">DJJ Janin</span>
-                        <div className="text-lg font-bold mt-1 text-pink-600">
+                        <div className="text-lg font-bold mt-1 text-[#FA6978]">
                             {fhrBpm || '-'}
                             <span className="text-xs font-normal text-gray-500 ml-1">bpm</span>
                         </div>
-                        <span className="text-[10px] text-gray-500 block mt-0.5">Norm: 120-160</span>
+                        <span className="text-[11px] text-gray-500 block mt-0.5">Rujukan: 120-160</span>
                     </div>
 
-                    {/* Berat Badan */}
-                    <div className="p-4 rounded-2xl border bg-gray-50 border-gray-100 text-gray-900 text-center">
+                    <div className="p-4 rounded-xl border bg-gray-50 border-gray-200 text-center">
                         <span className="text-xs text-gray-500 block font-medium">Berat Badan</span>
                         <div className="text-lg font-bold mt-1">
                             {weightKg || '-'}
                             <span className="text-xs font-normal text-gray-500 ml-1">kg</span>
                         </div>
-                        <span className="text-[10px] text-gray-500 block mt-0.5">Antropometri</span>
+                        <span className="text-[11px] text-gray-500 block mt-0.5">Antropometri</span>
                     </div>
 
-                    {/* Tinggi Fundus Uteri */}
-                    <div className="p-4 rounded-2xl border bg-gray-50 border-gray-100 text-gray-900 text-center">
+                    <div className="p-4 rounded-xl border bg-gray-50 border-gray-200 text-center">
                         <span className="text-xs text-gray-500 block font-medium">Tinggi Fundus</span>
                         <div className="text-lg font-bold mt-1">
                             {fundalHeightCm || '-'}
                             <span className="text-xs font-normal text-gray-500 ml-1">cm</span>
                         </div>
-                        <span className="text-[10px] text-gray-500 block mt-0.5">TFU Leopold</span>
+                        <span className="text-[11px] text-gray-500 block mt-0.5">TFU Leopold</span>
                     </div>
 
-                    {/* Hemoglobin */}
-                    <div
-                        className={`p-4 rounded-2xl border text-center ${
-                            isAnemic
-                                ? 'bg-red-50 border-red-300 text-red-900'
-                                : 'bg-gray-50 border-gray-100 text-gray-900'
-                        }`}
-                    >
+                    <div className={`p-4 rounded-xl border text-center ${isAnemic ? 'bg-red-50 border-red-200 text-red-900' : 'bg-gray-50 border-gray-200'}`}>
                         <span className="text-xs text-gray-500 block font-medium">Kadar Hb</span>
                         <div className="text-lg font-bold mt-1">
                             {hemoglobinGdl || '-'}
                             <span className="text-xs font-normal text-gray-500 ml-1">g/dL</span>
                         </div>
-                        <span className="text-[10px] text-gray-500 block mt-0.5">
-                            {isAnemic ? 'Risiko Anemia (<11)' : 'Normal (&ge;11)'}
+                        <span className="text-[11px] text-gray-500 block mt-0.5">
+                            {isAnemic ? 'Anemia (<11)' : 'Normal (&ge;11)'}
                         </span>
                     </div>
 
-                    {/* Jadwal Kontrol */}
-                    <div className="p-4 rounded-2xl border bg-pink-50/50 border-pink-100 text-gray-900 text-center">
+                    <div className="p-4 rounded-xl border bg-gray-50 border-gray-200 text-center">
                         <span className="text-xs text-gray-500 block font-medium">Kunjungan Ulang</span>
                         <div className="text-sm font-bold mt-1 text-[#FA6978]">
-                            {nextVisitDate ? nextVisitDate : 'Belum diatur'}
+                            {nextVisitDate ? formatShortDate(nextVisitDate) : 'Belum diatur'}
                         </div>
-                        <span className="text-[10px] text-gray-500 block mt-0.5">Rencana Kontrol</span>
+                        <span className="text-[11px] text-gray-500 block mt-0.5">Rencana Kontrol</span>
                     </div>
                 </div>
             </div>
 
-            {/* 9 Skrining Tanda Bahaya & Gejala Kemenkes */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 printable-card space-y-4">
-                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                    <AlertOutlined className="text-amber-500" /> Skrining 9 Gejala & Tanda Bahaya Kehamilan (KIA)
+            {/* SCREEN VIEW: 9 Screening Symptoms */}
+            <div className="no-print bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-0">
+                    Penapisan 9 Tanda Bahaya & Gejala Kehamilan (KIA Kemenkes)
                 </h3>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {monitoringQuestions.map((q) => {
                         const hasSymptom = !!monitoringData[q.key];
                         return (
                             <div
                                 key={q.key}
-                                className={`p-3 rounded-xl border flex items-center justify-between ${
+                                className={`p-3 rounded-lg border flex items-center justify-between text-xs ${
                                     hasSymptom
-                                        ? 'bg-red-50/70 border-red-200 text-red-900 font-semibold'
-                                        : 'bg-gray-50/70 border-gray-200/80 text-gray-700'
+                                        ? 'bg-red-50 border-red-200 text-red-900 font-medium'
+                                        : 'bg-gray-50 border-gray-200 text-gray-700'
                                 }`}
                             >
-                                <span className="text-xs">{q.label}</span>
-                                <span
-                                    className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                                        hasSymptom
-                                            ? 'bg-red-200 text-red-800'
-                                            : 'bg-emerald-100 text-emerald-800'
-                                    }`}
-                                >
-                                    {hasSymptom ? 'YA' : 'TIDAK'}
-                                </span>
+                                <span>{q.label}</span>
+                                <Tag color={hasSymptom ? 'error' : 'default'} className="m-0 text-xs font-semibold">
+                                    {hasSymptom ? 'Ya' : 'Tidak'}
+                                </Tag>
                             </div>
                         );
                     })}
                 </div>
             </div>
 
-            {/* Catatan Asuhan, Terapi, dan Rencana Medis */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 printable-card space-y-6">
+            {/* SCREEN VIEW: Clinical SOAP Notes & Therapy */}
+            <div className="no-print bg-white rounded-xl border border-gray-200 p-5 space-y-5">
                 <div>
-                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2 flex items-center gap-2">
-                        <MedicineBoxOutlined className="text-[#FA6978]" /> Catatan Klinis Asuhan Kebidanan (SOAP)
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2">
+                        Catatan Klinis Asuhan Kebidanan (SOAP)
                     </h3>
                     <TextArea
-                        rows={5}
+                        rows={4}
                         value={hasilKunjungan}
                         onChange={(e) => setHasilKunjungan(e.target.value)}
                         disabled={isCompleted}
-                        placeholder="Catatan pemeriksaan antenatal, diagnosis, serta edukasi gizi dan gaya hidup..."
-                        className={`rounded-xl text-sm ${isCompleted ? 'bg-gray-50 text-gray-800' : ''}`}
+                        placeholder="Tuliskan temuan klinis, hasil anamnesis, konseling, serta anjuran pola hidup..."
+                        className="rounded-lg text-sm"
                     />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            Terapi Obat / Suplemen Diberikan:
+                            Terapi Obat / Profilaksis Diberikan
                         </label>
                         <Input
                             value={therapyNotes}
                             onChange={(e) => setTherapyNotes(e.target.value)}
                             disabled={isCompleted}
-                            placeholder="Contoh: Tablet Fe 1x1 malam, Kalsium 1x500mg"
-                            className={`rounded-xl ${isCompleted ? 'bg-gray-50 text-gray-800' : ''}`}
+                            placeholder="Contoh: Tablet Tambah Darah (TTD) 1x1 malam, Kalsium 1x500mg"
+                            className="rounded-lg"
                         />
                     </div>
                     <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            Tanggal Kunjungan Ulang Direkomendasikan:
+                            Tanggal Kunjungan Ulang Direkomendasikan
                         </label>
                         <input
                             type="date"
                             value={nextVisitDate}
                             onChange={(e) => setNextVisitDate(e.target.value)}
                             disabled={isCompleted}
-                            className={`w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#FA6978] ${
-                                isCompleted ? 'bg-gray-50 text-gray-800' : ''
-                            }`}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#FA6978]"
                         />
                     </div>
                 </div>
 
-                {/* Save Draft Action */}
                 {!isCompleted && (
-                    <div className="no-print flex justify-end gap-3 pt-4 border-t border-gray-100">
+                    <div className="flex justify-end gap-3 pt-3 border-t border-gray-200">
                         <Button
+                            icon={<SaveOutlined />}
                             loading={submitting}
                             onClick={() => handleUpdateCatatan(false)}
-                            className="rounded-xl"
                         >
-                            Simpan Perubahan
+                            Simpan Draft
                         </Button>
                         <Button
                             type="primary"
+                            icon={<CheckCircleOutlined />}
                             loading={submitting}
                             onClick={() => handleUpdateCatatan(true)}
-                            className="rounded-xl font-medium"
                             style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
                         >
                             Selesaikan Kunjungan
@@ -571,20 +544,252 @@ export default function CatatanKunjunganDetail() {
                 )}
             </div>
 
-            {/* Official Signature Area for Print */}
-            <div className="print-only mt-12 pt-6 border-t border-gray-300">
-                <div className="grid grid-cols-2 text-center text-xs">
-                    <div>
-                        <p className="text-gray-500 mb-16">Pasien / Keluarga Pasien</p>
-                        <p className="font-bold border-t border-gray-400 mx-12 pt-1">
-                            ( {catatan.nama_ibu} )
-                        </p>
+            {/* ========================================================================= */}
+            {/* OFFICIAL PRINT TEMPLATE (ONLY VISIBLE ON PRINT / EXPORT TO PDF)             */}
+            {/* Standard Indonesian Antenatal Care Medical Resume (No AI Slop)            */}
+            {/* ========================================================================= */}
+            <div className="print-only">
+                {/* 1. Official Clinical Letterhead (Kop Surat Resmi) */}
+                <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '15pt', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                        KLINIK PRATAMA & LAYANAN KESEHATAN MATERNAL PRENAVA
                     </div>
-                    <div>
-                        <p className="text-gray-500 mb-16">Bidan Penanggung Jawab Asuhan</p>
-                        <p className="font-bold border-t border-gray-400 mx-12 pt-1">
-                            ( Bidan PRENAVA SIPB )
-                        </p>
+                    <div style={{ fontSize: '10pt', fontWeight: 'bold' }}>
+                        SURAT IZIN PRAKTIK BIDAN (SIPB) NOMOR: 446.1/029/SIPB/DPMPTSP/2026
+                    </div>
+                    <div style={{ fontSize: '9pt', color: '#374151' }}>
+                        Jl. Terusan Buah Batu No. 1, Kota Bandung, Jawa Barat 40257 &bull; Telp: (022) 756-4108 &bull; Email: rekam.medis@prenava.id
+                    </div>
+                </div>
+
+                {/* Double Border Separator */}
+                <div className="kop-garis-tebal" />
+                <div className="kop-garis-tipis" />
+
+                {/* 2. Document Title */}
+                <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+                    <div style={{ fontSize: '12pt', fontWeight: 'bold', textDecoration: 'underline' }}>
+                        LEMBAR RESUME MEDIS ASUHAN KEBIDANAN ANTENATAL (ANC)
+                    </div>
+                    <div style={{ fontSize: '9pt', color: '#4b5563', marginTop: '2px' }}>
+                        Nomor Registrasi: REG-ANC-2026-{String(catatan.catatan_id).padStart(5, '0')} &bull; Tanggal Pemeriksaan: {formatDate(catatan.tanggal_kunjungan)}
+                    </div>
+                </div>
+
+                {/* 3. Patient Demographics Table */}
+                <table className="print-table">
+                    <tbody>
+                        <tr>
+                            <td style={{ width: '22%', fontWeight: 'bold', backgroundColor: '#f9fafb' }}>Nama Pasien</td>
+                            <td style={{ width: '38%' }}>Ny. {catatan.nama_ibu}</td>
+                            <td style={{ width: '20%', fontWeight: 'bold', backgroundColor: '#f9fafb' }}>No. Rekam Medis</td>
+                            <td style={{ width: '20%' }}>RM-{String(catatan.user_id).padStart(5, '0')}</td>
+                        </tr>
+                        <tr>
+                            <td style={{ fontWeight: 'bold', backgroundColor: '#f9fafb' }}>Kontak / No. Telp</td>
+                            <td>{catatan.user?.phone || catatan.user?.email || '-'}</td>
+                            <td style={{ fontWeight: 'bold', backgroundColor: '#f9fafb' }}>Status Pelayanan</td>
+                            <td>{catatan.status_kunjungan === 'selesai' ? 'Lengkap & Terverifikasi' : 'Asuhan Berjalan'}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                {/* 4. Physical Examination & Vital Signs Table (Standard ANC) */}
+                <div style={{ fontWeight: 'bold', fontSize: '10pt', marginBottom: '4px' }}>
+                    I. HASIL PEMERIKSAAN FISIK & TANDA VITAL (ANTENATAL CARE)
+                </div>
+                <table className="print-table">
+                    <thead>
+                        <tr>
+                            <th style={{ width: '5%', textAlign: 'center' }}>No</th>
+                            <th style={{ width: '35%' }}>Parameter Pemeriksaan</th>
+                            <th style={{ width: '25%', textAlign: 'center' }}>Hasil Pengukuran</th>
+                            <th style={{ width: '20%', textAlign: 'center' }}>Nilai Rujukan Normal</th>
+                            <th style={{ width: '15%', textAlign: 'center' }}>Status Klinis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style={{ textAlign: 'center' }}>1</td>
+                            <td>Tekanan Darah (TD)</td>
+                            <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                                {systolicBp && diastolicBp ? `${systolicBp} / ${diastolicBp} mmHg` : '-'}
+                            </td>
+                            <td style={{ textAlign: 'center' }}>110-120 / 70-80 mmHg</td>
+                            <td style={{ textAlign: 'center' }}>
+                                {isBpHigh ? 'Hipertensi' : 'Normal'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style={{ textAlign: 'center' }}>2</td>
+                            <td>Denyut Jantung Janin (DJJ)</td>
+                            <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                                {fhrBpm ? `${fhrBpm} denyut/menit` : '-'}
+                            </td>
+                            <td style={{ textAlign: 'center' }}>120 - 160 denyut/menit</td>
+                            <td style={{ textAlign: 'center' }}>
+                                {isFhrAbnormal ? 'Abnormal' : 'Normal'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style={{ textAlign: 'center' }}>3</td>
+                            <td>Tinggi Fundus Uteri (TFU)</td>
+                            <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                                {fundalHeightCm ? `${fundalHeightCm} cm` : '-'}
+                            </td>
+                            <td style={{ textAlign: 'center' }}>Sesuai Usia Gestasi (Leopold)</td>
+                            <td style={{ textAlign: 'center' }}>Normal</td>
+                        </tr>
+                        <tr>
+                            <td style={{ textAlign: 'center' }}>4</td>
+                            <td>Berat Badan Ibu (BB)</td>
+                            <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                                {weightKg ? `${weightKg} kg` : '-'}
+                            </td>
+                            <td style={{ textAlign: 'center' }}>Kenaikan bertahap</td>
+                            <td style={{ textAlign: 'center' }}>Normal</td>
+                        </tr>
+                        <tr>
+                            <td style={{ textAlign: 'center' }}>5</td>
+                            <td>Kadar Hemoglobin (Hb)</td>
+                            <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                                {hemoglobinGdl ? `${hemoglobinGdl} g/dL` : '-'}
+                            </td>
+                            <td style={{ textAlign: 'center' }}>&ge; 11.0 g/dL</td>
+                            <td style={{ textAlign: 'center' }}>
+                                {isAnemic ? 'Anemia' : 'Normal'}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                {/* 5. 9 Danger Symptoms Screening Matrix */}
+                <div style={{ fontWeight: 'bold', fontSize: '10pt', marginBottom: '4px' }}>
+                    II. PENAPISAN 9 TANDA BAHAYA KEHAMILAN (STANDAR BUKU KIA KEMENKES RI)
+                </div>
+                <table className="print-table">
+                    <thead>
+                        <tr>
+                            <th style={{ width: '40%' }}>Tanda Bahaya / Gejala Klinis</th>
+                            <th style={{ width: '10%', textAlign: 'center' }}>Status</th>
+                            <th style={{ width: '40%' }}>Tanda Bahaya / Gejala Klinis</th>
+                            <th style={{ width: '10%', textAlign: 'center' }}>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1. Demam lebih dari 2 hari</td>
+                            <td style={{ textAlign: 'center', fontWeight: monitoringData.q1_demam ? 'bold' : 'normal' }}>
+                                {monitoringData.q1_demam ? 'YA' : 'TIDAK'}
+                            </td>
+                            <td>6. Nyeri perut hebat / kram menetap</td>
+                            <td style={{ textAlign: 'center', fontWeight: monitoringData.q6_nyeri_perut ? 'bold' : 'normal' }}>
+                                {monitoringData.q6_nyeri_perut ? 'YA' : 'TIDAK'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2. Pusing / sakit kepala berat</td>
+                            <td style={{ textAlign: 'center', fontWeight: monitoringData.q2_pusing ? 'bold' : 'normal' }}>
+                                {monitoringData.q2_pusing ? 'YA' : 'TIDAK'}
+                            </td>
+                            <td>7. Cairan jalan lahir berbau / perdarahan</td>
+                            <td style={{ textAlign: 'center', fontWeight: monitoringData.q7_cairan_jalan_lahir ? 'bold' : 'normal' }}>
+                                {monitoringData.q7_cairan_jalan_lahir ? 'YA' : 'TIDAK'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>3. Sulit tidur / cemas berlebih</td>
+                            <td style={{ textAlign: 'center', fontWeight: monitoringData.q3_sulit_tidur ? 'bold' : 'normal' }}>
+                                {monitoringData.q3_sulit_tidur ? 'YA' : 'TIDAK'}
+                            </td>
+                            <td>8. Nyeri berkemih / keputihan abnormal</td>
+                            <td style={{ textAlign: 'center', fontWeight: monitoringData.q8_sakit_kencing ? 'bold' : 'normal' }}>
+                                {monitoringData.q8_sakit_kencing ? 'YA' : 'TIDAK'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>4. Batuk &gt; 2 minggu / kontak TB</td>
+                            <td style={{ textAlign: 'center', fontWeight: monitoringData.q4_risiko_tb ? 'bold' : 'normal' }}>
+                                {monitoringData.q4_risiko_tb ? 'YA' : 'TIDAK'}
+                            </td>
+                            <td>9. Diare berulang</td>
+                            <td style={{ textAlign: 'center', fontWeight: monitoringData.q9_diare ? 'bold' : 'normal' }}>
+                                {monitoringData.q9_diare ? 'YA' : 'TIDAK'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>5. Gerakan janin berkurang (&lt;10x/12 jam)</td>
+                            <td style={{ textAlign: 'center', fontWeight: monitoringData.q5_gerakan_bayi ? 'bold' : 'normal' }}>
+                                {monitoringData.q5_gerakan_bayi ? 'YA' : 'TIDAK'}
+                            </td>
+                            <td style={{ backgroundColor: '#f9fafb' }}>-</td>
+                            <td style={{ backgroundColor: '#f9fafb', textAlign: 'center' }}>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                {/* 6. SOAP Clinical Notes & Therapy */}
+                <div style={{ fontWeight: 'bold', fontSize: '10pt', marginBottom: '4px' }}>
+                    III. CATATAN ASUHAN KEBIDANAN (SOAP) & REKOMENDASI TERAPI
+                </div>
+                <table className="print-table">
+                    <tbody>
+                        <tr>
+                            <td style={{ width: '25%', fontWeight: 'bold', backgroundColor: '#f9fafb' }}>Hasil Pemeriksaan & Asuhan</td>
+                            <td style={{ width: '75%' }}>
+                                {hasilKunjungan || 'Pemeriksaan kehamilan antenatal rutin dalam batas normal.'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style={{ fontWeight: 'bold', backgroundColor: '#f9fafb' }}>Terapi / Profilaksis Diberikan</td>
+                            <td>
+                                {therapyNotes || 'Edukasi nutrisi seimbang, konsumsi suplemen TTD sesuai anjuran, dan istirahat optimal.'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style={{ fontWeight: 'bold', backgroundColor: '#f9fafb' }}>Rencana Kunjungan Ulang</td>
+                            <td style={{ fontWeight: 'bold' }}>
+                                {nextVisitDate ? formatDate(nextVisitDate) : 'Sesuai jadwal kontrol buku KIA (1 bulan mendatang)'}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                {/* 7. Official Legal Signatures & Stamp */}
+                <div className="avoid-break" style={{ marginTop: '24px' }}>
+                    <div style={{ textAlign: 'right', fontSize: '10pt', marginBottom: '12px' }}>
+                        Bandung, {todayOfficialDate}
+                    </div>
+                    <table style={{ width: '100%', textAlign: 'center', fontSize: '10pt', border: 'none' }}>
+                        <tbody>
+                            <tr>
+                                <td style={{ width: '50%', paddingBottom: '70px', verticalAlign: 'top', border: 'none' }}>
+                                    <div>Pasien / Keluarga Pasien,</div>
+                                </td>
+                                <td style={{ width: '50%', paddingBottom: '70px', verticalAlign: 'top', border: 'none' }}>
+                                    <div>Bidan Penanggung Jawab Pelayanan,</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style={{ border: 'none' }}>
+                                    <div style={{ fontWeight: 'bold', textDecoration: 'underline' }}>
+                                        ( Ny. {catatan.nama_ibu} )
+                                    </div>
+                                    <div style={{ fontSize: '9pt', color: '#4b5563' }}>Tanda Tangan Pasien</div>
+                                </td>
+                                <td style={{ border: 'none' }}>
+                                    <div style={{ fontWeight: 'bold', textDecoration: 'underline' }}>
+                                        ( Bidan Prenava, S.Tr.Keb. )
+                                    </div>
+                                    <div style={{ fontSize: '9pt', color: '#4b5563' }}>SIPB: 446.1/029/SIPB/DPMPTSP/2026</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    {/* Official Footnote */}
+                    <div style={{ marginTop: '24px', paddingTop: '6px', borderTop: '1px dashed #9ca3af', fontSize: '8pt', color: '#6b7280', textAlign: 'center' }}>
+                        Dokumen ini adalah resume rekam medis elektronik resmi yang diterbitkan secara sah oleh Sistem Pelayanan Terpadu Prenava. Salinan dokumen ini berlaku sebagai arsip klinis pasien sesuai standar PMK Rekam Medis.
                     </div>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Card, Input, Select, Spin, Empty, Pagination, Button, Modal, message, Badge } from 'antd';
+import { Card, Input, Select, Spin, Empty, Pagination, Button, Modal, message, Tag } from 'antd';
 import {
     SearchOutlined,
     CalendarOutlined,
@@ -8,8 +8,6 @@ import {
     FileTextOutlined,
     UserOutlined,
     HeartOutlined,
-    CheckCircleOutlined,
-    ClockCircleOutlined,
     AlertOutlined,
 } from '@ant-design/icons';
 import { getCatatanIbuList, createCatatanIbu } from '../catatan.api';
@@ -21,12 +19,12 @@ const PAGE_SIZE = 9;
 
 const defaultSymptoms = [
     { id: 'q1_demam', label: 'Demam > 2 hari', desc: 'Suhu tubuh meningkat atau rasa menggigil' },
-    { id: 'q2_pusing', label: 'Pusing / Sakit Kepala Hebat', desc: 'Nyeri kepala menetap atau gangguan penglihatan' },
-    { id: 'q3_sulit_tidur', label: 'Sulit Tidur / Cemas Berlebih', desc: 'Kecemasan tinggi atau insomnia' },
-    { id: 'q4_risiko_tb', label: 'Batuk > 2 Minggu / Gejala TB', desc: 'Batuk lama atau kontak serumah TB' },
-    { id: 'q5_gerakan_bayi', label: 'Gerakan Janin Berkurang', desc: 'Kurang dari 10 gerakan per 12 jam (usia >24 mgg)' },
+    { id: 'q2_pusing', label: 'Pusing / Sakit Kepala Hebat', desc: 'Nyeri kepala menetap atau pandangan kabur' },
+    { id: 'q3_sulit_tidur', label: 'Sulit Tidur / Cemas Berlebih', desc: 'Kecemasan tinggi atau insomnia berkepanjangan' },
+    { id: 'q4_risiko_tb', label: 'Batuk > 2 Minggu / Gejala TB', desc: 'Batuk lama atau kontak serumah penderita TB' },
+    { id: 'q5_gerakan_bayi', label: 'Gerakan Janin Berkurang', desc: 'Kurang dari 10 gerakan per 12 jam (usia >24 minggu)' },
     { id: 'q6_nyeri_perut', label: 'Nyeri Perut Hebat', desc: 'Nyeri tekan atau kram perut bawah hebat' },
-    { id: 'q7_cairan_jalan_lahir', label: 'Cairan / Perdarahan Jalan Lahir', desc: 'Ketuban pecah dini atau perdarahan pervaginam' },
+    { id: 'q7_cairan_jalan_lahir', label: 'Cairan / Perdarahan Jalan Lahir', desc: 'Ketuban pecah dini atau perdarahan aktif' },
     { id: 'q8_sakit_kencing', label: 'Nyeri BAK / Keputihan Abnormal', desc: 'Disuria, keputihan berbau atau gatal' },
     { id: 'q9_diare', label: 'Diare Berulang', desc: 'BAB cair berulang berisiko dehidrasi' },
 ];
@@ -234,7 +232,7 @@ export default function CatatanKunjunganList() {
             };
 
             const res = await createCatatanIbu(payload);
-            message.success('Rekam kunjungan ANC berhasil dicatat & disinkronkan ke CDSS Triase!');
+            message.success('Rekam kunjungan ANC berhasil dicatat dan disinkronkan ke CDSS Triase');
             setIsCreateModalOpen(false);
             resetForm();
             await fetchCatatanList();
@@ -255,17 +253,14 @@ export default function CatatanKunjunganList() {
 
     return (
         <div className="space-y-6">
-            {/* Header section with CTA */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+            {/* Unified Clinical Header (No AI Slop left stripe, Single '+' icon) */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
                 <div>
-                    <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-7 bg-[#FA6978] rounded-full"></span>
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            Pencatatan Rekam Medis Kunjungan ANC
-                        </h1>
-                    </div>
-                    <p className="text-gray-500 mt-1 ml-4.5 text-sm">
-                        Dokumentasi asuhan kehamilan rutin, tanda vital klinis, dan integrasi otomatis dengan sistem triase CDSS.
+                    <h1 className="text-2xl font-bold text-gray-900 m-0">
+                        Rekam Medis Kunjungan Ibu Hamil (ANC)
+                    </h1>
+                    <p className="text-sm text-gray-600 mt-1 mb-0">
+                        Dokumentasi asuhan kehamilan rutin, tanda vital klinis, dan integrasi otomatis dengan sistem triase CDSS
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -274,17 +269,16 @@ export default function CatatanKunjunganList() {
                         icon={<PlusOutlined />}
                         size="large"
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="rounded-xl font-medium shadow-sm hover:scale-[1.02] transition-transform"
                         style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
                     >
-                        + Catat Kunjungan Baru
+                        Catat Kunjungan Baru
                     </Button>
                 </div>
             </div>
 
-            {/* Search and Filter Bar */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                <div className="flex flex-col md:flex-row items-center gap-4">
+            {/* Filter and Search Bar */}
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
                     <div className="flex-1 w-full">
                         <Input
                             placeholder="Cari berdasarkan nama ibu atau tanggal kunjungan..."
@@ -293,44 +287,45 @@ export default function CatatanKunjunganList() {
                             onChange={(e) => setSearchQuery(e.target.value)}
                             size="large"
                             allowClear
-                            className="rounded-xl"
                         />
                     </div>
-                    <div className="w-full md:w-64">
+                    <div className="w-full sm:w-64">
                         <Select
                             placeholder="Status Kunjungan"
                             value={statusFilter}
                             onChange={setStatusFilter}
                             size="large"
-                            className="w-full rounded-xl"
+                            className="w-full"
                             options={[
                                 { label: 'Semua Status Kunjungan', value: 'all' },
-                                { label: '✅ Selesai', value: 'selesai' },
-                                { label: '⏳ Sedang Berlangsung', value: 'sedang_berlangsung' },
+                                { label: 'Selesai', value: 'selesai' },
+                                { label: 'Sedang Berlangsung', value: 'sedang_berlangsung' },
                             ]}
                         />
                     </div>
                 </div>
             </div>
 
-            {/* Cards Grid */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            {/* Visit Records Content */}
+            <div className="space-y-4">
                 {loading ? (
-                    <div className="flex flex-col justify-center items-center py-20 gap-3">
+                    <div className="flex flex-col justify-center items-center py-20 gap-3 bg-white rounded-xl border border-gray-200">
                         <Spin size="large" />
-                        <span className="text-gray-400 text-sm">Memuat riwayat kunjungan medis...</span>
+                        <span className="text-gray-500 text-sm">Memuat riwayat kunjungan medis...</span>
                     </div>
                 ) : filteredList.length === 0 ? (
-                    <Empty
-                        description={
-                            <div className="text-gray-500 py-6">
-                                <p className="font-medium text-base">Tidak ada catatan kunjungan yang cocok</p>
-                                <p className="text-sm text-gray-400 mt-1">
-                                    Tekan tombol "+ Catat Kunjungan Baru" untuk merekam pemeriksaan ANC pasien.
-                                </p>
-                            </div>
-                        }
-                    />
+                    <div className="bg-white rounded-xl border border-gray-200 p-8">
+                        <Empty
+                            description={
+                                <div className="text-gray-600 py-4">
+                                    <p className="font-semibold text-base mb-1">Tidak ada catatan kunjungan yang cocok</p>
+                                    <p className="text-sm text-gray-500 mb-0">
+                                        Gunakan tombol "Catat Kunjungan Baru" untuk merekam pemeriksaan ANC pasien.
+                                    </p>
+                                </div>
+                            }
+                        />
+                    </div>
                 ) : (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -346,7 +341,7 @@ export default function CatatanKunjunganList() {
                                     <Card
                                         key={catatan.catatan_id}
                                         hoverable
-                                        className="rounded-2xl border border-gray-200/80 shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden group"
+                                        className="rounded-xl border border-gray-200 shadow-xs hover:border-[#FA6978] transition-all cursor-pointer"
                                         onClick={() => navigate(`/catatan-kunjungan/${catatan.catatan_id}`)}
                                         bodyStyle={{ padding: '20px' }}
                                     >
@@ -354,92 +349,81 @@ export default function CatatanKunjunganList() {
                                             {/* Header Card */}
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-11 h-11 rounded-xl bg-pink-50 border border-pink-100 flex items-center justify-center text-[#FA6978] font-bold text-base shrink-0 group-hover:scale-105 transition-transform">
+                                                    <div className="w-10 h-10 rounded-lg bg-pink-50 border border-pink-100 flex items-center justify-center text-[#FA6978] font-semibold text-sm shrink-0">
                                                         <UserOutlined />
                                                     </div>
                                                     <div>
-                                                        <h3 className="font-semibold text-gray-900 group-hover:text-[#FA6978] transition-colors line-clamp-1">
+                                                        <h3 className="font-semibold text-gray-900 line-clamp-1 mb-0">
                                                             {patientName}
                                                         </h3>
-                                                        <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5">
+                                                        <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
                                                             <CalendarOutlined />
                                                             <span>{formatDate(catatan.tanggal_kunjungan)}</span>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <span
-                                                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0 ${
-                                                        catatan.status_kunjungan === 'selesai'
-                                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                                            : 'bg-amber-50 text-amber-700 border border-amber-200'
-                                                    }`}
+                                                <Tag
+                                                    color={catatan.status_kunjungan === 'selesai' ? 'success' : 'warning'}
+                                                    className="font-medium text-xs m-0"
                                                 >
-                                                    {catatan.status_kunjungan === 'selesai' ? (
-                                                        <>
-                                                            <CheckCircleOutlined /> Selesai
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <ClockCircleOutlined /> Berlangsung
-                                                        </>
-                                                    )}
-                                                </span>
+                                                    {catatan.status_kunjungan === 'selesai' ? 'Selesai' : 'Berlangsung'}
+                                                </Tag>
                                             </div>
 
                                             {/* Vital Signs Preview */}
                                             {hasVitals ? (
-                                                <div className="grid grid-cols-2 gap-2 p-2.5 bg-gray-50 rounded-xl border border-gray-100 text-xs">
+                                                <div className="grid grid-cols-2 gap-2 p-2.5 bg-gray-50 rounded-lg border border-gray-200 text-xs">
                                                     {catatan.systolic_bp && catatan.diastolic_bp && (
-                                                        <div className="flex items-center gap-1.5 text-gray-700">
-                                                            <span className="font-medium text-gray-500">TD:</span>
+                                                        <div className="text-gray-700">
+                                                            <span className="text-gray-500 block">Tekanan Darah:</span>
                                                             <span className={catatan.systolic_bp >= 140 ? 'font-bold text-red-600' : 'font-semibold'}>
                                                                 {catatan.systolic_bp}/{catatan.diastolic_bp} mmHg
                                                             </span>
                                                         </div>
                                                     )}
                                                     {catatan.fetal_heart_rate_bpm && (
-                                                        <div className="flex items-center gap-1.5 text-gray-700">
-                                                            <span className="font-medium text-gray-500">DJJ:</span>
-                                                            <span className="font-semibold text-pink-600">
+                                                        <div className="text-gray-700">
+                                                            <span className="text-gray-500 block">DJJ Janin:</span>
+                                                            <span className="font-semibold text-gray-900">
                                                                 {catatan.fetal_heart_rate_bpm} bpm
                                                             </span>
                                                         </div>
                                                     )}
                                                     {catatan.weight_kg && (
-                                                        <div className="flex items-center gap-1.5 text-gray-700">
-                                                            <span className="font-medium text-gray-500">BB:</span>
-                                                            <span className="font-semibold">{catatan.weight_kg} kg</span>
+                                                        <div className="text-gray-700">
+                                                            <span className="text-gray-500 block">Berat Badan:</span>
+                                                            <span className="font-semibold text-gray-900">{catatan.weight_kg} kg</span>
                                                         </div>
                                                     )}
                                                     {catatan.hemoglobin_gdl && (
-                                                        <div className="flex items-center gap-1.5 text-gray-700">
-                                                            <span className="font-medium text-gray-500">Hb:</span>
-                                                            <span className={catatan.hemoglobin_gdl < 11 ? 'font-bold text-red-600' : 'font-semibold'}>
+                                                        <div className="text-gray-700">
+                                                            <span className="text-gray-500 block">Kadar Hb:</span>
+                                                            <span className={catatan.hemoglobin_gdl < 11 ? 'font-bold text-red-600' : 'font-semibold text-gray-900'}>
                                                                 {catatan.hemoglobin_gdl} g/dL
                                                             </span>
                                                         </div>
                                                     )}
                                                 </div>
                                             ) : (
-                                                <div className="p-2.5 bg-gray-50 rounded-xl text-xs text-gray-400 italic">
+                                                <div className="p-2.5 bg-gray-50 rounded-lg text-xs text-gray-500 italic">
                                                     Pemeriksaan fisik tanda vital belum tercatat lengkap
                                                 </div>
                                             )}
 
                                             {/* Clinical Notes Snippet */}
                                             {catatan.hasil_kunjungan && (
-                                                <div className="text-xs text-gray-600 line-clamp-2 bg-pink-50/30 p-2 rounded-lg border border-pink-100/50">
-                                                    <span className="font-medium text-gray-800">Catatan: </span>
+                                                <div className="text-xs text-gray-700 line-clamp-2 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                                                    <span className="font-semibold text-gray-900">Catatan: </span>
                                                     {catatan.hasil_kunjungan}
                                                 </div>
                                             )}
 
                                             {/* Footer Action */}
-                                            <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                                            <div className="pt-2 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
                                                 <span>ID Rekam: #{catatan.catatan_id}</span>
-                                                <span className="text-[#FA6978] font-medium group-hover:underline flex items-center gap-1">
-                                                    <FileTextOutlined /> Lihat / Resume &rarr;
+                                                <span className="text-[#FA6978] font-medium flex items-center gap-1">
+                                                    <FileTextOutlined /> Lihat Resume
                                                 </span>
                                             </div>
                                         </div>
@@ -470,18 +454,13 @@ export default function CatatanKunjunganList() {
             {/* Modal Catat Kunjungan Baru */}
             <Modal
                 title={
-                    <div className="flex items-center gap-2 text-gray-900 border-b border-gray-100 pb-3">
-                        <div className="w-8 h-8 rounded-lg bg-pink-100 text-[#FA6978] flex items-center justify-center font-bold">
-                            <PlusOutlined />
-                        </div>
-                        <div>
-                            <h3 className="text-base font-bold text-gray-900">
-                                Catat Rekam Medis Kunjungan ANC Baru
-                            </h3>
-                            <p className="text-xs font-normal text-gray-500">
-                                Dokumentasikan hasil pemeriksaan fisik, tanda vital, dan keluhan ibu hamil
-                            </p>
-                        </div>
+                    <div className="border-b border-gray-200 pb-3">
+                        <h3 className="text-base font-bold text-gray-900 mb-0">
+                            Catat Rekam Medis Kunjungan ANC Baru
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1 mb-0">
+                            Dokumentasikan hasil pemeriksaan fisik, tanda vital, dan keluhan ibu hamil
+                        </p>
                     </div>
                 }
                 open={isCreateModalOpen}
@@ -510,15 +489,15 @@ export default function CatatanKunjunganList() {
                         Simpan Rekam Medis
                     </Button>,
                 ]}
-                width={820}
+                width={800}
                 centered
                 destroyOnClose
             >
-                <div className="space-y-6 py-2 max-h-[75vh] overflow-y-auto px-1">
+                <div className="space-y-5 py-2 max-h-[72vh] overflow-y-auto px-1">
                     {/* Bagian 1: Identitas & Tanggal */}
-                    <div className="bg-gray-50/70 p-4 rounded-xl border border-gray-200/80 space-y-4">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-600 flex items-center gap-1.5">
-                            <UserOutlined /> Identitas Pasien & Waktu Kunjungan
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-4">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700 m-0">
+                            Identitas Pasien & Waktu Kunjungan
                         </h4>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -527,7 +506,7 @@ export default function CatatanKunjunganList() {
                                     Pilih Ibu Hamil <span className="text-red-500">*</span>
                                 </label>
                                 <Select
-                                    placeholder="Cari & pilih ibu hamil..."
+                                    placeholder="Cari dan pilih nama ibu hamil..."
                                     showSearch
                                     loading={loadingPatients}
                                     value={formUserId}
@@ -539,7 +518,7 @@ export default function CatatanKunjunganList() {
                                     }
                                     options={patients.map((p) => ({
                                         value: p.user_id,
-                                        label: `${p.name} (${p.email || p.profile?.no_telepon || p.no_telepon || 'No Telp -'})`,
+                                        label: `${p.name} (${p.email || p.profile?.no_telepon || p.no_telepon || 'No Kontak -'})`,
                                     }))}
                                 />
                             </div>
@@ -552,7 +531,7 @@ export default function CatatanKunjunganList() {
                                     type="date"
                                     value={formDate}
                                     onChange={(e) => setFormDate(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FA6978]"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#FA6978]"
                                 />
                             </div>
                         </div>
@@ -564,25 +543,25 @@ export default function CatatanKunjunganList() {
                             <Select
                                 value={formStatus}
                                 onChange={(val) => setFormStatus(val)}
-                                className="w-full md:w-60"
+                                className="w-full md:w-64"
                                 options={[
-                                    { label: '✅ Selesai (Pemeriksaan Lengkap)', value: 'selesai' },
-                                    { label: '⏳ Sedang Berlangsung (Perlu Tindak Lanjut)', value: 'sedang_berlangsung' },
+                                    { label: 'Selesai (Pemeriksaan Lengkap)', value: 'selesai' },
+                                    { label: 'Sedang Berlangsung (Perlu Tindak Lanjut)', value: 'sedang_berlangsung' },
                                 ]}
                             />
                         </div>
                     </div>
 
                     {/* Bagian 2: Tanda Vital & Pemeriksaan Fisik ANC */}
-                    <div className="p-4 rounded-xl border border-pink-100 bg-pink-50/20 space-y-4">
+                    <div className="p-4 rounded-xl border border-gray-200 bg-white space-y-4">
                         <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-[#FA6978] flex items-center gap-1.5">
-                                <HeartOutlined /> Tanda Vital & Pengukuran Fisik ANC (Buku KIA)
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-800 m-0 flex items-center gap-1.5">
+                                <HeartOutlined className="text-[#FA6978]" /> Tanda Vital & Pemeriksaan Fisik (Buku KIA)
                             </h4>
                             {isBpHigh && (
-                                <span className="text-xs bg-red-100 text-red-700 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
-                                    <AlertOutlined /> Waspada Hipertensi Gestasional (&ge;140/90)
-                                </span>
+                                <Tag color="error" className="m-0 font-medium text-xs">
+                                    Perhatian: Tensi Tinggi (&ge;140/90 mmHg)
+                                </Tag>
                             )}
                         </div>
 
@@ -640,7 +619,7 @@ export default function CatatanKunjunganList() {
                                 </label>
                                 <Input
                                     type="number"
-                                    placeholder="Normal: 120 - 160"
+                                    placeholder="Rujukan: 120 - 160"
                                     value={formFhr}
                                     onChange={(e) => setFormFhr(e.target.value)}
                                 />
@@ -660,15 +639,15 @@ export default function CatatanKunjunganList() {
                             </div>
                         </div>
 
-                        <p className="text-[11px] text-gray-500 italic">
+                        <p className="text-[11px] text-gray-500 mb-0">
                             * Data tanda vital akan otomatis memperbarui kalkulasi bobot risiko preeklamsia pada Algoritma CDSS Maternal Triage secara real-time.
                         </p>
                     </div>
 
                     {/* Bagian 3: 9 Skrining Tanda Bahaya (Kemenkes RI) */}
-                    <div className="bg-gray-50/70 p-4 rounded-xl border border-gray-200/80 space-y-3">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-1.5">
-                            <AlertOutlined /> 9 Skrining Tanda Bahaya & Gejala Klinis (Kemenkes)
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700 m-0 flex items-center gap-1.5">
+                            <AlertOutlined /> Penapisan 9 Tanda Bahaya & Gejala Klinis (Kemenkes)
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                             {defaultSymptoms.map((sym) => {
@@ -682,9 +661,9 @@ export default function CatatanKunjunganList() {
                                                 [sym.id]: !prev[sym.id],
                                             }))
                                         }
-                                        className={`p-2.5 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 select-none ${
+                                        className={`p-2.5 rounded-lg border cursor-pointer transition-all flex items-start gap-2.5 select-none ${
                                             isChecked
-                                                ? 'bg-red-50 border-red-300 text-red-900 shadow-xs'
+                                                ? 'bg-red-50 border-red-300 text-red-900'
                                                 : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
                                         }`}
                                     >
@@ -704,7 +683,7 @@ export default function CatatanKunjunganList() {
                         </div>
                     </div>
 
-                    {/* Bagian 4: Catatan & Terapi */}
+                    {/* Bagian 4: Catatan SOAP & Terapi */}
                     <div className="space-y-4">
                         <div>
                             <label className="block text-xs font-semibold text-gray-700 mb-1">
@@ -715,7 +694,7 @@ export default function CatatanKunjunganList() {
                                 placeholder="Tuliskan temuan klinis, hasil konseling, edukasi nutrisi, serta anjuran istirahat..."
                                 value={formHasil}
                                 onChange={(e) => setFormHasil(e.target.value)}
-                                className="rounded-xl"
+                                className="rounded-lg"
                             />
                         </div>
 
@@ -728,7 +707,7 @@ export default function CatatanKunjunganList() {
                                     placeholder="Contoh: TTD 1x1 tab malam, Kalsium 1x500mg"
                                     value={formTherapy}
                                     onChange={(e) => setFormTherapy(e.target.value)}
-                                    className="rounded-xl"
+                                    className="rounded-lg"
                                 />
                             </div>
 
@@ -740,7 +719,7 @@ export default function CatatanKunjunganList() {
                                     type="date"
                                     value={formNextVisit}
                                     onChange={(e) => setFormNextVisit(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FA6978]"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#FA6978]"
                                 />
                             </div>
                         </div>

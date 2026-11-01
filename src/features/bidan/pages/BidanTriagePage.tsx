@@ -541,19 +541,16 @@ Pengirim: Bidan Pemeriksa Prenava`;
 
   return (
     <div className="space-y-6">
-        {/* Calm Clinical Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-gray-200">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#FA6978]" />
-              <h1 className="text-2xl font-bold text-gray-900 m-0">
-                Triase Pasien & Dukungan Keputusan Klinis (CDSS)
-              </h1>
-            </div>
-            <p className="text-sm text-gray-500 mt-1 mb-0">
-              Klasifikasi risiko maternal otomatis berbasis fusi 4 dimensi (Stunting 35%, Anemia 30%, MAP 20%, Piring Gizi 15%) dan protokol edukasi pasien.
-            </p>
-          </div>
+      {/* Unified Clinical Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 m-0">
+            Triase Pasien & Dukungan Keputusan Klinis (CDSS)
+          </h1>
+          <p className="text-sm text-gray-600 mt-1 mb-0">
+            Klasifikasi risiko maternal otomatis berbasis fusi 4 dimensi (Stunting 35%, Anemia 30%, MAP 20%, Piring Gizi 15%) dan protokol edukasi pasien
+          </p>
+        </div>
           <div className="flex items-center gap-3">
             <Button
               icon={<RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />}

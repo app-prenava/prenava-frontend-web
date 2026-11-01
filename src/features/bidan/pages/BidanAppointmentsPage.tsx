@@ -27,6 +27,7 @@ import {
   WhatsAppOutlined,
   FormOutlined,
   CalendarOutlined,
+  PlusOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -412,25 +413,26 @@ export default function BidanAppointmentsPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* Unified Clinical Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 m-0">
+          <h1 className="text-2xl font-bold text-gray-900 m-0">
             Jadwal Janji Temu Ibu Hamil
           </h1>
-          <p className="text-gray-600 text-sm mt-1 m-0">
-            Kelola permohonan kunjungan dan konsultasi kesehatan ibu hamil
+          <p className="text-sm text-gray-600 mt-1 mb-0">
+            Kelola permohonan kunjungan tatap muka, konsultasi antenatal, dan rekam asuhan klinis
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Button
             type="primary"
             style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
-            icon={<CalendarOutlined />}
-            onClick={() => navigate('/catatan-kunjungan')}
+            icon={<PlusOutlined />}
+            size="large"
+            onClick={() => navigate('/catatan-kunjungan', { state: { openCreateModal: true } })}
           >
-            Buka Riwayat Rekam Medis (ANC)
+            Catat Kunjungan Baru
           </Button>
         </div>
       </div>

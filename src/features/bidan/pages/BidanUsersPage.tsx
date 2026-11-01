@@ -29,6 +29,7 @@ import {
   AlertOutlined,
   CalendarOutlined,
   UserOutlined,
+  PlusOutlined,
 } from '@ant-design/icons';
 import { getIbuHamilUsers, type IbuHamilUser } from '../bidan.api';
 
@@ -205,14 +206,14 @@ export default function BidanUsersPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* Unified Clinical Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 m-0">
+          <h1 className="text-2xl font-bold text-gray-900 m-0">
             Daftar Pasien Ibu Hamil
           </h1>
-          <p className="text-gray-600 text-sm mt-1 m-0">
+          <p className="text-sm text-gray-600 mt-1 mb-0">
             Pantau status kehamilan, riwayat skrining AI, dan kelola rekam medis pasien
           </p>
         </div>
@@ -220,16 +221,17 @@ export default function BidanUsersPage() {
           <Button
             type="primary"
             style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
-            icon={<FormOutlined />}
+            icon={<PlusOutlined />}
+            size="large"
             onClick={() => navigate('/catatan-kunjungan', { state: { openCreateModal: true } })}
           >
-            + Catat Kunjungan Baru
+            Catat Kunjungan Baru
           </Button>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 space-y-4">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
         <div className="flex flex-col md:flex-row items-center gap-4">
           <div className="flex-1 w-full">
             <Input
@@ -255,11 +257,11 @@ export default function BidanUsersPage() {
               className="w-full md:w-56"
               options={[
                 { label: 'Semua Status Risiko', value: 'all' },
-                { label: '🚨 Pasien dengan Risiko AI', value: 'any_risk' },
-                { label: '🩸 Risiko Anemia', value: 'anemia' },
-                { label: '🧠 Waspada Depresi', value: 'depression' },
-                { label: '👶 Risiko Stunting Janin', value: 'stunting' },
-                { label: '✅ Kondisi Sehat / Aman', value: 'safe' },
+                { label: 'Pasien dengan Risiko AI', value: 'any_risk' },
+                { label: 'Risiko Anemia', value: 'anemia' },
+                { label: 'Waspada Depresi', value: 'depression' },
+                { label: 'Risiko Stunting Janin', value: 'stunting' },
+                { label: 'Kondisi Sehat / Aman', value: 'safe' },
               ]}
             />
             <Select
@@ -282,7 +284,7 @@ export default function BidanUsersPage() {
       </div>
 
       {/* Cards Grid */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
         {loading ? (
           <div className="flex flex-col justify-center items-center py-20 space-y-3">
             <Spin size="large" />
@@ -350,32 +352,32 @@ export default function BidanUsersPage() {
                         {/* AI Screening Risk Badges */}
                         <div className="flex flex-wrap gap-1.5 mb-3 pt-2 border-t border-gray-100">
                           {hasAnemia ? (
-                            <Tag color="error" className="text-[11px]">
-                              🩸 Risiko Anemia
+                            <Tag color="error" className="text-[11px] font-medium">
+                              Risiko Anemia
                             </Tag>
                           ) : user.anemia_history && user.anemia_history.length > 0 ? (
                             <Tag color="success" className="text-[11px]">
-                              🩸 Anemia Normal
+                              Anemia Normal
                             </Tag>
                           ) : null}
 
                           {hasDepression ? (
-                            <Tag color="warning" className="text-[11px]">
-                              🧠 Waspada Depresi
+                            <Tag color="warning" className="text-[11px] font-medium">
+                              Waspada Depresi
                             </Tag>
                           ) : user.depression_history && user.depression_history.length > 0 ? (
                             <Tag color="blue" className="text-[11px]">
-                              🧠 Depresi Rendah
+                              Depresi Rendah
                             </Tag>
                           ) : null}
 
                           {hasStunting ? (
-                            <Tag color="purple" className="text-[11px]">
-                              👶 Risiko Stunting
+                            <Tag color="purple" className="text-[11px] font-medium">
+                              Risiko Stunting
                             </Tag>
                           ) : user.stunting_history && user.stunting_history.length > 0 ? (
                             <Tag color="green" className="text-[11px]">
-                              👶 Stunting Aman
+                              Stunting Aman
                             </Tag>
                           ) : null}
 
@@ -526,7 +528,7 @@ export default function BidanUsersPage() {
                     {/* Anemia Scan History */}
                     <div>
                       <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                        <span>🩸 Deteksi Skrining Anemia (Mata)</span>
+                        <span>Deteksi Skrining Anemia (Mata)</span>
                       </h4>
                       {selectedUser.anemia_history && selectedUser.anemia_history.length > 0 ? (
                         <Table
@@ -571,7 +573,7 @@ export default function BidanUsersPage() {
                     {/* Depression History */}
                     <div>
                       <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                        <span>🧠 Skrining Kesehatan Mental (EPDS)</span>
+                        <span>Skrining Kesehatan Mental (EPDS)</span>
                       </h4>
                       {selectedUser.depression_history && selectedUser.depression_history.length > 0 ? (
                         <Table
@@ -612,7 +614,7 @@ export default function BidanUsersPage() {
                     {/* Stunting History */}
                     <div>
                       <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                        <span>👶 Prediksi Risiko Stunting Janin</span>
+                        <span>Prediksi Risiko Stunting Janin</span>
                       </h4>
                       {selectedUser.stunting_history && selectedUser.stunting_history.length > 0 ? (
                         <Table
