@@ -3,12 +3,14 @@ import type {
     CatatanIbu,
     GetCatatanIbuListResponse,
     GetCatatanIbuDetailResponse,
+    CreateCatatanIbuPayload,
     UpdateCatatanIbuPayload,
     UpdateCatatanIbuResponse,
 } from './catatan.types';
 
-export const getCatatanIbuList = async (): Promise<GetCatatanIbuListResponse> => {
-    const res = await api.get<GetCatatanIbuListResponse>('/api/catatan-ibu');
+export const getCatatanIbuList = async (userId?: number): Promise<GetCatatanIbuListResponse> => {
+    const url = userId ? `/api/catatan-ibu?user_id=${userId}` : '/api/catatan-ibu';
+    const res = await api.get<GetCatatanIbuListResponse>(url);
 
     const raw = res?.data ?? {};
     const list: CatatanIbu[] = Array.isArray(raw?.data)
@@ -31,7 +33,7 @@ export const getCatatanIbuDetail = async (
 
     const raw = res?.data ?? {};
 
-    // Backend returns array - return as is for component to handle
+    // Backend returns array or object - normalize
     const data = Array.isArray(raw?.data)
         ? raw.data
         : Array.isArray(raw)
@@ -45,6 +47,17 @@ export const getCatatanIbuDetail = async (
     };
 };
 
+export const createCatatanIbu = async (
+    payload: CreateCatatanIbuPayload
+): Promise<UpdateCatatanIbuResponse> => {
+    const res = await api.post<UpdateCatatanIbuResponse>(
+        '/api/catatan-ibu',
+        payload
+    );
+
+    return res.data;
+};
+
 export const updateCatatanIbu = async (
     catatanId: number,
     payload: UpdateCatatanIbuPayload
@@ -56,4 +69,3 @@ export const updateCatatanIbu = async (
 
     return res.data;
 };
-

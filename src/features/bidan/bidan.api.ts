@@ -29,6 +29,11 @@ export type IbuHamilUser = {
   pendidikan_terakhir?: string | null;
   pekerjaan?: string | null;
   golongan_darah?: string | null;
+  photo_url?: string | null;
+  gestational_age_weeks?: number | null;
+  anemia_history?: any[];
+  depression_history?: any[];
+  stunting_history?: any[];
 };
 
 export type GetIbuHamilUsersResponse = {
