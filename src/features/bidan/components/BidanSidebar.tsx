@@ -9,6 +9,7 @@ type NavItem = {
 const navItems: NavItem[] = [
     { path: '/bidan', label: 'Dashboard', icon: '📊' },
     { path: '/bidan/triage', label: 'Triase Pasien (CDSS)', icon: '🚨' },
+    { path: '/bidan/forum', label: 'Forum Ibu Hamil', icon: '💬' },
     { path: '/bidan/appointments', label: 'Janji Temu', icon: '📅' },
     { path: '/bidan/users', label: 'Data Pasien', icon: '👥' },
     { path: '/catatan-kunjungan', label: 'Catatan Kunjungan', icon: '📋' },
