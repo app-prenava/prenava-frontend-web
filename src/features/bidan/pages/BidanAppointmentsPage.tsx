@@ -414,26 +414,15 @@ export default function BidanAppointmentsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Unified Clinical Header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 m-0">
-            Jadwal Janji Temu Ibu Hamil
+            Jadwal Janji Temu
           </h1>
           <p className="text-sm text-gray-600 mt-1 mb-0">
-            Kelola permohonan kunjungan tatap muka, konsultasi antenatal, dan rekam asuhan klinis
+            Daftar permohonan kunjungan dan konsultasi dari ibu hamil.
           </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button
-            type="primary"
-            style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
-            icon={<PlusOutlined />}
-            size="large"
-            onClick={() => navigate('/catatan-kunjungan', { state: { openCreateModal: true } })}
-          >
-            Catat Kunjungan Baru
-          </Button>
         </div>
       </div>
 

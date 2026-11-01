@@ -313,14 +313,14 @@ export default function CatatanKunjunganDetail() {
                     <div>
                         <div className="flex items-center gap-2.5">
                             <h1 className="text-2xl font-bold text-gray-900 m-0">
-                                Rekam Medis: {catatan.nama_ibu}
+                                Catatan Kunjungan: {catatan.nama_ibu}
                             </h1>
                             <Tag color={isCompleted ? 'success' : 'warning'} className="font-medium text-xs m-0">
                                 {isCompleted ? 'Selesai' : 'Sedang Berlangsung'}
                             </Tag>
                         </div>
                         <p className="text-sm text-gray-600 mt-1 mb-0">
-                            Nomor Kunjungan #{catatan.catatan_id} &bull; {formatDate(catatan.tanggal_kunjungan)}
+                            Kunjungan #{catatan.catatan_id} &bull; {formatDate(catatan.tanggal_kunjungan)}
                         </p>
                     </div>
                 </div>
@@ -342,7 +342,7 @@ export default function CatatanKunjunganDetail() {
                             onClick={() => handleUpdateCatatan(true)}
                             style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
                         >
-                            Selesaikan Kunjungan
+                            Tandai Selesai
                         </Button>
                     )}
                 </div>
@@ -351,7 +351,7 @@ export default function CatatanKunjunganDetail() {
             {/* SCREEN VIEW: Patient Summary Card */}
             <div className="no-print bg-white rounded-xl border border-gray-200 p-5 space-y-4">
                 <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-0">
-                    Informasi Pasien & Waktu Asuhan
+                    Informasi Pasien & Tanggal Kunjungan
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                     <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -371,9 +371,9 @@ export default function CatatanKunjunganDetail() {
                         </span>
                     </div>
                     <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <span className="text-xs text-gray-500 block">Status Rekam Medis</span>
+                        <span className="text-xs text-gray-500 block">Status Pemeriksaan</span>
                         <span className="font-semibold text-gray-800">
-                            {catatan.status_kunjungan === 'selesai' ? 'Lengkap & Terverifikasi' : 'Asuhan Berjalan'}
+                            {catatan.status_kunjungan === 'selesai' ? 'Selesai' : 'Sedang Berlangsung'}
                         </span>
                     </div>
                 </div>
@@ -383,11 +383,11 @@ export default function CatatanKunjunganDetail() {
             <div className="no-print bg-white rounded-xl border border-gray-200 p-5 space-y-4">
                 <div className="flex items-center justify-between">
                     <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-0">
-                        Tanda Vital & Pemeriksaan Fisik ANC
+                        Pemeriksaan Fisik & Tanda Vital
                     </h3>
                     {isBpHigh && (
                         <Tag color="error" className="m-0 font-medium">
-                            Perhatian: Tensi Darah Tinggi (&ge;140/90 mmHg)
+                            Tekanan Darah Tinggi (&ge;140/90 mmHg)
                         </Tag>
                     )}
                 </div>
@@ -400,17 +400,17 @@ export default function CatatanKunjunganDetail() {
                             <span className="text-xs font-normal text-gray-500 ml-1">mmHg</span>
                         </div>
                         <span className="text-[11px] text-gray-500 block mt-0.5">
-                            {isBpHigh ? 'Hipertensi' : 'Normotensif'}
+                            {isBpHigh ? 'Tinggi' : 'Normal'}
                         </span>
                     </div>
 
                     <div className={`p-4 rounded-xl border text-center ${isFhrAbnormal ? 'bg-red-50 border-red-200 text-red-900' : 'bg-gray-50 border-gray-200'}`}>
-                        <span className="text-xs text-gray-500 block font-medium">DJJ Janin</span>
+                        <span className="text-xs text-gray-500 block font-medium">Detak Jantung Janin</span>
                         <div className="text-lg font-bold mt-1 text-[#FA6978]">
                             {fhrBpm || '-'}
                             <span className="text-xs font-normal text-gray-500 ml-1">bpm</span>
                         </div>
-                        <span className="text-[11px] text-gray-500 block mt-0.5">Rujukan: 120-160</span>
+                        <span className="text-[11px] text-gray-500 block mt-0.5">Normal: 120-160</span>
                     </div>
 
                     <div className="p-4 rounded-xl border bg-gray-50 border-gray-200 text-center">
@@ -419,7 +419,7 @@ export default function CatatanKunjunganDetail() {
                             {weightKg || '-'}
                             <span className="text-xs font-normal text-gray-500 ml-1">kg</span>
                         </div>
-                        <span className="text-[11px] text-gray-500 block mt-0.5">Antropometri</span>
+                        <span className="text-[11px] text-gray-500 block mt-0.5">Ibu Hamil</span>
                     </div>
 
                     <div className="p-4 rounded-xl border bg-gray-50 border-gray-200 text-center">
@@ -438,16 +438,16 @@ export default function CatatanKunjunganDetail() {
                             <span className="text-xs font-normal text-gray-500 ml-1">g/dL</span>
                         </div>
                         <span className="text-[11px] text-gray-500 block mt-0.5">
-                            {isAnemic ? 'Anemia (<11)' : 'Normal (&ge;11)'}
+                            {isAnemic ? 'Kurang (<11)' : 'Cukup (&ge;11)'}
                         </span>
                     </div>
 
                     <div className="p-4 rounded-xl border bg-gray-50 border-gray-200 text-center">
-                        <span className="text-xs text-gray-500 block font-medium">Kunjungan Ulang</span>
+                        <span className="text-xs text-gray-500 block font-medium">Kontrol Ulang</span>
                         <div className="text-sm font-bold mt-1 text-[#FA6978]">
                             {nextVisitDate ? formatShortDate(nextVisitDate) : 'Belum diatur'}
                         </div>
-                        <span className="text-[11px] text-gray-500 block mt-0.5">Rencana Kontrol</span>
+                        <span className="text-[11px] text-gray-500 block mt-0.5">Jadwal Kembali</span>
                     </div>
                 </div>
             </div>
@@ -455,7 +455,7 @@ export default function CatatanKunjunganDetail() {
             {/* SCREEN VIEW: 9 Screening Symptoms */}
             <div className="no-print bg-white rounded-xl border border-gray-200 p-5 space-y-4">
                 <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-0">
-                    Penapisan 9 Tanda Bahaya & Gejala Kehamilan (KIA Kemenkes)
+                    Tanda Bahaya Kehamilan
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {monitoringQuestions.map((q) => {
@@ -483,14 +483,14 @@ export default function CatatanKunjunganDetail() {
             <div className="no-print bg-white rounded-xl border border-gray-200 p-5 space-y-5">
                 <div>
                     <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2">
-                        Catatan Klinis Asuhan Kebidanan (SOAP)
+                        Catatan Pemeriksaan & Anjuran Bidan
                     </h3>
                     <TextArea
                         rows={4}
                         value={hasilKunjungan}
                         onChange={(e) => setHasilKunjungan(e.target.value)}
                         disabled={isCompleted}
-                        placeholder="Tuliskan temuan klinis, hasil anamnesis, konseling, serta anjuran pola hidup..."
+                        placeholder="Tuliskan hasil pemeriksaan fisik, keluhan ibu, serta anjuran istirahat atau pola makan..."
                         className="rounded-lg text-sm"
                     />
                 </div>
@@ -498,7 +498,7 @@ export default function CatatanKunjunganDetail() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            Terapi Obat / Profilaksis Diberikan
+                            Obat atau Vitamin yang Diberikan
                         </label>
                         <Input
                             value={therapyNotes}
@@ -510,7 +510,7 @@ export default function CatatanKunjunganDetail() {
                     </div>
                     <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            Tanggal Kunjungan Ulang Direkomendasikan
+                            Tanggal Kontrol Berikutnya
                         </label>
                         <input
                             type="date"
@@ -529,7 +529,7 @@ export default function CatatanKunjunganDetail() {
                             loading={submitting}
                             onClick={() => handleUpdateCatatan(false)}
                         >
-                            Simpan Draft
+                            Simpan Catatan
                         </Button>
                         <Button
                             type="primary"
@@ -538,7 +538,7 @@ export default function CatatanKunjunganDetail() {
                             onClick={() => handleUpdateCatatan(true)}
                             style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
                         >
-                            Selesaikan Kunjungan
+                            Tandai Selesai
                         </Button>
                     </div>
                 )}

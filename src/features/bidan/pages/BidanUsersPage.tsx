@@ -207,26 +207,15 @@ export default function BidanUsersPage() {
 
   return (
     <div className="space-y-6">
-      {/* Unified Clinical Header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 m-0">
-            Daftar Pasien Ibu Hamil
+            Data Ibu Hamil
           </h1>
           <p className="text-sm text-gray-600 mt-1 mb-0">
-            Pantau status kehamilan, riwayat skrining AI, dan kelola rekam medis pasien
+            Daftar ibu hamil yang terdaftar dan riwayat hasil pemeriksaannya.
           </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button
-            type="primary"
-            style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
-            icon={<PlusOutlined />}
-            size="large"
-            onClick={() => navigate('/catatan-kunjungan', { state: { openCreateModal: true } })}
-          >
-            Catat Kunjungan Baru
-          </Button>
         </div>
       </div>
 
@@ -235,7 +224,7 @@ export default function BidanUsersPage() {
         <div className="flex flex-col md:flex-row items-center gap-4">
           <div className="flex-1 w-full">
             <Input
-              placeholder="Cari ibu hamil berdasarkan nama, email, no. telepon, atau alamat..."
+              placeholder="Cari nama ibu, email, nomor telepon, atau alamat..."
               prefix={<SearchOutlined className="text-gray-400" />}
               value={searchText}
               onChange={(e) => {
@@ -257,11 +246,11 @@ export default function BidanUsersPage() {
               className="w-full md:w-56"
               options={[
                 { label: 'Semua Status Risiko', value: 'all' },
-                { label: 'Pasien dengan Risiko AI', value: 'any_risk' },
+                { label: 'Pasien Berisiko (AI)', value: 'any_risk' },
                 { label: 'Risiko Anemia', value: 'anemia' },
                 { label: 'Waspada Depresi', value: 'depression' },
-                { label: 'Risiko Stunting Janin', value: 'stunting' },
-                { label: 'Kondisi Sehat / Aman', value: 'safe' },
+                { label: 'Risiko Stunting', value: 'stunting' },
+                { label: 'Kondisi Sehat', value: 'safe' },
               ]}
             />
             <Select
@@ -273,10 +262,10 @@ export default function BidanUsersPage() {
               size="large"
               className="w-full md:w-48"
               options={[
-                { label: 'Semua Trimester', value: 'all' },
-                { label: 'Trimester 1 (≤ 12 Mgg)', value: 't1' },
-                { label: 'Trimester 2 (13-27 Mgg)', value: 't2' },
-                { label: 'Trimester 3 (≥ 28 Mgg)', value: 't3' },
+                { label: 'Semua Usia Kehamilan', value: 'all' },
+                { label: 'Trimester 1 (sampai 12 minggu)', value: 't1' },
+                { label: 'Trimester 2 (13-27 minggu)', value: 't2' },
+                { label: 'Trimester 3 (28 minggu ke atas)', value: 't3' },
               ]}
             />
           </div>
@@ -434,7 +423,7 @@ export default function BidanUsersPage() {
                             onClick={() => handleNavigateToVisit(user)}
                             className="text-xs"
                           >
-                            Catat Rekis
+                            Catat Kunjungan
                           </Button>
                         </div>
                         <div className="flex items-center gap-2">

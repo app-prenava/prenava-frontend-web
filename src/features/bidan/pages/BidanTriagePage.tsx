@@ -541,14 +541,14 @@ Pengirim: Bidan Pemeriksa Prenava`;
 
   return (
     <div className="space-y-6">
-      {/* Unified Clinical Header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 m-0">
-            Triase Pasien & Dukungan Keputusan Klinis (CDSS)
+            Triase Pasien (CDSS)
           </h1>
           <p className="text-sm text-gray-600 mt-1 mb-0">
-            Klasifikasi risiko maternal otomatis berbasis fusi 4 dimensi (Stunting 35%, Anemia 30%, MAP 20%, Piring Gizi 15%) dan protokol edukasi pasien
+            Daftar prioritas pemeriksaan ibu hamil berdasarkan tingkat risiko kesehatan.
           </p>
         </div>
           <div className="flex items-center gap-3">

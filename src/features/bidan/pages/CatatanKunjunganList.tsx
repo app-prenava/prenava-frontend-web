@@ -18,15 +18,15 @@ const { TextArea } = Input;
 const PAGE_SIZE = 9;
 
 const defaultSymptoms = [
-    { id: 'q1_demam', label: 'Demam > 2 hari', desc: 'Suhu tubuh meningkat atau rasa menggigil' },
-    { id: 'q2_pusing', label: 'Pusing / Sakit Kepala Hebat', desc: 'Nyeri kepala menetap atau pandangan kabur' },
-    { id: 'q3_sulit_tidur', label: 'Sulit Tidur / Cemas Berlebih', desc: 'Kecemasan tinggi atau insomnia berkepanjangan' },
-    { id: 'q4_risiko_tb', label: 'Batuk > 2 Minggu / Gejala TB', desc: 'Batuk lama atau kontak serumah penderita TB' },
-    { id: 'q5_gerakan_bayi', label: 'Gerakan Janin Berkurang', desc: 'Kurang dari 10 gerakan per 12 jam (usia >24 minggu)' },
-    { id: 'q6_nyeri_perut', label: 'Nyeri Perut Hebat', desc: 'Nyeri tekan atau kram perut bawah hebat' },
-    { id: 'q7_cairan_jalan_lahir', label: 'Cairan / Perdarahan Jalan Lahir', desc: 'Ketuban pecah dini atau perdarahan aktif' },
-    { id: 'q8_sakit_kencing', label: 'Nyeri BAK / Keputihan Abnormal', desc: 'Disuria, keputihan berbau atau gatal' },
-    { id: 'q9_diare', label: 'Diare Berulang', desc: 'BAB cair berulang berisiko dehidrasi' },
+    { id: 'q1_demam', label: 'Demam lebih dari 2 hari', desc: 'Suhu tubuh terasa panas atau menggigil' },
+    { id: 'q2_pusing', label: 'Sakit kepala berat', desc: 'Pusing hebat yang tidak kunjung membaik' },
+    { id: 'q3_sulit_tidur', label: 'Sulit tidur atau cemas', desc: 'Gelisah atau sulit beristirahat dengan tenang' },
+    { id: 'q4_risiko_tb', label: 'Batuk lama (lebih 2 minggu)', desc: 'Batuk kering/berdahak lama atau kontak serumah penderita TB' },
+    { id: 'q5_gerakan_bayi', label: 'Gerakan janin berkurang', desc: 'Janin bergerak kurang dari 10 kali dalam 12 jam (usia >24 minggu)' },
+    { id: 'q6_nyeri_perut', label: 'Nyeri perut hebat', desc: 'Kram atau nyeri perut bagian bawah yang parah' },
+    { id: 'q7_cairan_jalan_lahir', label: 'Keluar cairan atau darah', desc: 'Cairan ketuban merembes atau ada flek/darah dari jalan lahir' },
+    { id: 'q8_sakit_kencing', label: 'Nyeri saat buang air kecil', desc: 'Terasa perih saat kencing atau keputihan yang gatal/berbau' },
+    { id: 'q9_diare', label: 'Diare berulang', desc: 'Buang air besar cair lebih dari 3 kali sehari' },
 ];
 
 export default function CatatanKunjunganList() {
@@ -106,7 +106,7 @@ export default function CatatanKunjunganList() {
             setCatatanList(list);
         } catch (error) {
             console.error('Failed to fetch catatan list:', error);
-            message.error('Gagal mengambil daftar rekam medis kunjungan');
+            message.error('Gagal mengambil daftar catatan kunjungan');
         } finally {
             setLoading(false);
         }
@@ -196,11 +196,11 @@ export default function CatatanKunjunganList() {
 
     const handleCreateVisit = async () => {
         if (!formUserId) {
-            message.warning('Silakan pilih ibu hamil terlebih dahulu');
+            message.warning('Pilih nama ibu hamil terlebih dahulu');
             return;
         }
         if (!formDate) {
-            message.warning('Silakan tentukan tanggal kunjungan');
+            message.warning('Tentukan tanggal kunjungan');
             return;
         }
 
@@ -226,13 +226,13 @@ export default function CatatanKunjunganList() {
                 q7_cairan_jalan_lahir: formSymptoms.q7_cairan_jalan_lahir,
                 q8_sakit_kencing: formSymptoms.q8_sakit_kencing,
                 q9_diare: formSymptoms.q9_diare,
-                hasil_kunjungan: formHasil.trim() || 'Pemeriksaan antenatal care (ANC) rutin.',
+                hasil_kunjungan: formHasil.trim() || 'Pemeriksaan kehamilan rutin.',
                 therapy_notes: formTherapy.trim() || null,
                 next_visit_date: formNextVisit || null,
             };
 
             const res = await createCatatanIbu(payload);
-            message.success('Rekam kunjungan ANC berhasil dicatat dan disinkronkan ke CDSS Triase');
+            message.success('Catatan kunjungan berhasil disimpan');
             setIsCreateModalOpen(false);
             resetForm();
             await fetchCatatanList();
@@ -253,14 +253,14 @@ export default function CatatanKunjunganList() {
 
     return (
         <div className="space-y-6">
-            {/* Unified Clinical Header (No AI Slop left stripe, Single '+' icon) */}
+            {/* Header Bersih & Natural */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 m-0">
-                        Rekam Medis Kunjungan Ibu Hamil (ANC)
+                        Catatan Kunjungan Ibu Hamil
                     </h1>
                     <p className="text-sm text-gray-600 mt-1 mb-0">
-                        Dokumentasi asuhan kehamilan rutin, tanda vital klinis, dan integrasi otomatis dengan sistem triase CDSS
+                        Riwayat pemeriksaan kehamilan, tanda vital, dan asuhan kebidanan.
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -271,17 +271,17 @@ export default function CatatanKunjunganList() {
                         onClick={() => setIsCreateModalOpen(true)}
                         style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
                     >
-                        Catat Kunjungan Baru
+                        Catat Kunjungan
                     </Button>
                 </div>
             </div>
 
-            {/* Filter and Search Bar */}
+            {/* Filter dan Pencarian */}
             <div className="bg-white rounded-xl border border-gray-200 p-4">
                 <div className="flex flex-col sm:flex-row items-center gap-4">
                     <div className="flex-1 w-full">
                         <Input
-                            placeholder="Cari berdasarkan nama ibu atau tanggal kunjungan..."
+                            placeholder="Cari nama ibu hamil atau tanggal kunjungan..."
                             prefix={<SearchOutlined className="text-gray-400" />}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -297,7 +297,7 @@ export default function CatatanKunjunganList() {
                             size="large"
                             className="w-full"
                             options={[
-                                { label: 'Semua Status Kunjungan', value: 'all' },
+                                { label: 'Semua Status', value: 'all' },
                                 { label: 'Selesai', value: 'selesai' },
                                 { label: 'Sedang Berlangsung', value: 'sedang_berlangsung' },
                             ]}
@@ -306,21 +306,21 @@ export default function CatatanKunjunganList() {
                 </div>
             </div>
 
-            {/* Visit Records Content */}
+            {/* Daftar Kunjungan Pasien */}
             <div className="space-y-4">
                 {loading ? (
                     <div className="flex flex-col justify-center items-center py-20 gap-3 bg-white rounded-xl border border-gray-200">
                         <Spin size="large" />
-                        <span className="text-gray-500 text-sm">Memuat riwayat kunjungan medis...</span>
+                        <span className="text-gray-500 text-sm">Memuat catatan kunjungan...</span>
                     </div>
                 ) : filteredList.length === 0 ? (
                     <div className="bg-white rounded-xl border border-gray-200 p-8">
                         <Empty
                             description={
                                 <div className="text-gray-600 py-4">
-                                    <p className="font-semibold text-base mb-1">Tidak ada catatan kunjungan yang cocok</p>
+                                    <p className="font-semibold text-base mb-1">Belum ada catatan kunjungan yang cocok</p>
                                     <p className="text-sm text-gray-500 mb-0">
-                                        Gunakan tombol "Catat Kunjungan Baru" untuk merekam pemeriksaan ANC pasien.
+                                        Tekan tombol "Catat Kunjungan" di kanan atas untuk membuat catatan baru.
                                     </p>
                                 </div>
                             }
@@ -346,7 +346,7 @@ export default function CatatanKunjunganList() {
                                         bodyStyle={{ padding: '20px' }}
                                     >
                                         <div className="flex flex-col h-full justify-between space-y-4">
-                                            {/* Header Card */}
+                                            {/* Header Card Pasien */}
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-lg bg-pink-50 border border-pink-100 flex items-center justify-center text-[#FA6978] font-semibold text-sm shrink-0">
@@ -371,7 +371,7 @@ export default function CatatanKunjunganList() {
                                                 </Tag>
                                             </div>
 
-                                            {/* Vital Signs Preview */}
+                                            {/* Ringkasan Tanda Vital */}
                                             {hasVitals ? (
                                                 <div className="grid grid-cols-2 gap-2 p-2.5 bg-gray-50 rounded-lg border border-gray-200 text-xs">
                                                     {catatan.systolic_bp && catatan.diastolic_bp && (
@@ -384,7 +384,7 @@ export default function CatatanKunjunganList() {
                                                     )}
                                                     {catatan.fetal_heart_rate_bpm && (
                                                         <div className="text-gray-700">
-                                                            <span className="text-gray-500 block">DJJ Janin:</span>
+                                                            <span className="text-gray-500 block">Detak Jantung Janin:</span>
                                                             <span className="font-semibold text-gray-900">
                                                                 {catatan.fetal_heart_rate_bpm} bpm
                                                             </span>
@@ -407,11 +407,11 @@ export default function CatatanKunjunganList() {
                                                 </div>
                                             ) : (
                                                 <div className="p-2.5 bg-gray-50 rounded-lg text-xs text-gray-500 italic">
-                                                    Pemeriksaan fisik tanda vital belum tercatat lengkap
+                                                    Tanda vital belum dicatat lengkap
                                                 </div>
                                             )}
 
-                                            {/* Clinical Notes Snippet */}
+                                            {/* Cuplikan Catatan Bidan */}
                                             {catatan.hasil_kunjungan && (
                                                 <div className="text-xs text-gray-700 line-clamp-2 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
                                                     <span className="font-semibold text-gray-900">Catatan: </span>
@@ -419,11 +419,11 @@ export default function CatatanKunjunganList() {
                                                 </div>
                                             )}
 
-                                            {/* Footer Action */}
+                                            {/* Aksi Bawah */}
                                             <div className="pt-2 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
-                                                <span>ID Rekam: #{catatan.catatan_id}</span>
+                                                <span>No. #{catatan.catatan_id}</span>
                                                 <span className="text-[#FA6978] font-medium flex items-center gap-1">
-                                                    <FileTextOutlined /> Lihat Resume
+                                                    <FileTextOutlined /> Buka Catatan
                                                 </span>
                                             </div>
                                         </div>
@@ -432,7 +432,7 @@ export default function CatatanKunjunganList() {
                             })}
                         </div>
 
-                        {/* Pagination */}
+                        {/* Paginasi */}
                         {filteredList.length > PAGE_SIZE && (
                             <div className="flex justify-center mt-8">
                                 <Pagination
@@ -442,7 +442,7 @@ export default function CatatanKunjunganList() {
                                     onChange={(page) => setCurrentPage(page)}
                                     showSizeChanger={false}
                                     showTotal={(total, range) =>
-                                        `${range[0]}-${range[1]} dari total ${total} catatan rekam medis`
+                                        `${range[0]}-${range[1]} dari ${total} catatan`
                                     }
                                 />
                             </div>
@@ -451,15 +451,15 @@ export default function CatatanKunjunganList() {
                 )}
             </div>
 
-            {/* Modal Catat Kunjungan Baru */}
+            {/* Modal Tambah Catatan Kunjungan */}
             <Modal
                 title={
                     <div className="border-b border-gray-200 pb-3">
                         <h3 className="text-base font-bold text-gray-900 mb-0">
-                            Catat Rekam Medis Kunjungan ANC Baru
+                            Tambah Catatan Kunjungan Ibu Hamil
                         </h3>
                         <p className="text-xs text-gray-500 mt-1 mb-0">
-                            Dokumentasikan hasil pemeriksaan fisik, tanda vital, dan keluhan ibu hamil
+                            Isi data pemeriksaan fisik dan keluhan saat kunjungan.
                         </p>
                     </div>
                 }
@@ -486,7 +486,7 @@ export default function CatatanKunjunganList() {
                         onClick={handleCreateVisit}
                         style={{ backgroundColor: '#FA6978', borderColor: '#FA6978' }}
                     >
-                        Simpan Rekam Medis
+                        Simpan Catatan
                     </Button>,
                 ]}
                 width={800}
@@ -494,10 +494,10 @@ export default function CatatanKunjunganList() {
                 destroyOnClose
             >
                 <div className="space-y-5 py-2 max-h-[72vh] overflow-y-auto px-1">
-                    {/* Bagian 1: Identitas & Tanggal */}
+                    {/* Bagian 1: Data Pasien & Tanggal */}
                     <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-4">
                         <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700 m-0">
-                            Identitas Pasien & Waktu Kunjungan
+                            Data Pasien & Tanggal Kunjungan
                         </h4>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -506,7 +506,7 @@ export default function CatatanKunjunganList() {
                                     Pilih Ibu Hamil <span className="text-red-500">*</span>
                                 </label>
                                 <Select
-                                    placeholder="Cari dan pilih nama ibu hamil..."
+                                    placeholder="Pilih nama ibu hamil..."
                                     showSearch
                                     loading={loadingPatients}
                                     value={formUserId}
@@ -518,7 +518,7 @@ export default function CatatanKunjunganList() {
                                     }
                                     options={patients.map((p) => ({
                                         value: p.user_id,
-                                        label: `${p.name} (${p.email || p.profile?.no_telepon || p.no_telepon || 'No Kontak -'})`,
+                                        label: `${p.name} (${p.email || p.profile?.no_telepon || p.no_telepon || 'Kontak belum ada'})`,
                                     }))}
                                 />
                             </div>
@@ -545,22 +545,22 @@ export default function CatatanKunjunganList() {
                                 onChange={(val) => setFormStatus(val)}
                                 className="w-full md:w-64"
                                 options={[
-                                    { label: 'Selesai (Pemeriksaan Lengkap)', value: 'selesai' },
-                                    { label: 'Sedang Berlangsung (Perlu Tindak Lanjut)', value: 'sedang_berlangsung' },
+                                    { label: 'Selesai', value: 'selesai' },
+                                    { label: 'Sedang Berlangsung', value: 'sedang_berlangsung' },
                                 ]}
                             />
                         </div>
                     </div>
 
-                    {/* Bagian 2: Tanda Vital & Pemeriksaan Fisik ANC */}
+                    {/* Bagian 2: Tanda Vital & Pemeriksaan Fisik */}
                     <div className="p-4 rounded-xl border border-gray-200 bg-white space-y-4">
                         <div className="flex items-center justify-between">
                             <h4 className="text-xs font-bold uppercase tracking-wider text-gray-800 m-0 flex items-center gap-1.5">
-                                <HeartOutlined className="text-[#FA6978]" /> Tanda Vital & Pemeriksaan Fisik (Buku KIA)
+                                <HeartOutlined className="text-[#FA6978]" /> Pemeriksaan Fisik & Tanda Vital
                             </h4>
                             {isBpHigh && (
                                 <Tag color="error" className="m-0 font-medium text-xs">
-                                    Perhatian: Tensi Tinggi (&ge;140/90 mmHg)
+                                    Tekanan Darah Tinggi (&ge;140/90 mmHg)
                                 </Tag>
                             )}
                         </div>
@@ -568,7 +568,7 @@ export default function CatatanKunjunganList() {
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                                    TD Sistolik (mmHg)
+                                    Tekanan Darah Sistolik (mmHg)
                                 </label>
                                 <Input
                                     type="number"
@@ -580,7 +580,7 @@ export default function CatatanKunjunganList() {
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                                    TD Diastolik (mmHg)
+                                    Tekanan Darah Diastolik (mmHg)
                                 </label>
                                 <Input
                                     type="number"
@@ -592,7 +592,7 @@ export default function CatatanKunjunganList() {
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                                    Berat Badan Pasien (kg)
+                                    Berat Badan (kg)
                                 </label>
                                 <Input
                                     type="number"
@@ -615,11 +615,11 @@ export default function CatatanKunjunganList() {
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                                    Denyut Jantung Janin / DJJ (bpm)
+                                    Detak Jantung Janin (bpm)
                                 </label>
                                 <Input
                                     type="number"
-                                    placeholder="Rujukan: 120 - 160"
+                                    placeholder="Normal: 120 - 160"
                                     value={formFhr}
                                     onChange={(e) => setFormFhr(e.target.value)}
                                 />
@@ -640,14 +640,14 @@ export default function CatatanKunjunganList() {
                         </div>
 
                         <p className="text-[11px] text-gray-500 mb-0">
-                            * Data tanda vital akan otomatis memperbarui kalkulasi bobot risiko preeklamsia pada Algoritma CDSS Maternal Triage secara real-time.
+                            * Data tekanan darah dan keluhan akan otomatis dicatat untuk memantau risiko kehamilan.
                         </p>
                     </div>
 
-                    {/* Bagian 3: 9 Skrining Tanda Bahaya (Kemenkes RI) */}
+                    {/* Bagian 3: Tanda Bahaya Kehamilan */}
                     <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
                         <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700 m-0 flex items-center gap-1.5">
-                            <AlertOutlined /> Penapisan 9 Tanda Bahaya & Gejala Klinis (Kemenkes)
+                            <AlertOutlined /> Tanda Bahaya Kehamilan
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                             {defaultSymptoms.map((sym) => {
@@ -683,15 +683,15 @@ export default function CatatanKunjunganList() {
                         </div>
                     </div>
 
-                    {/* Bagian 4: Catatan SOAP & Terapi */}
+                    {/* Bagian 4: Catatan Bidan & Terapi */}
                     <div className="space-y-4">
                         <div>
                             <label className="block text-xs font-semibold text-gray-700 mb-1">
-                                Hasil Pemeriksaan & Rekomendasi Asuhan Bidan (SOAP)
+                                Catatan Pemeriksaan & Anjuran Bidan
                             </label>
                             <TextArea
                                 rows={4}
-                                placeholder="Tuliskan temuan klinis, hasil konseling, edukasi nutrisi, serta anjuran istirahat..."
+                                placeholder="Tuliskan temuan fisik, keluhan ibu, serta anjuran istirahat atau pola makan..."
                                 value={formHasil}
                                 onChange={(e) => setFormHasil(e.target.value)}
                                 className="rounded-lg"
@@ -701,10 +701,10 @@ export default function CatatanKunjunganList() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                                    Resep Obat / Terapi (Tablet Tambah Darah / Kalsium)
+                                    Obat atau Vitamin yang Diberikan
                                 </label>
                                 <Input
-                                    placeholder="Contoh: TTD 1x1 tab malam, Kalsium 1x500mg"
+                                    placeholder="Contoh: Tablet Tambah Darah (TTD) 1x1 malam, Kalsium 1x500mg"
                                     value={formTherapy}
                                     onChange={(e) => setFormTherapy(e.target.value)}
                                     className="rounded-lg"
@@ -713,7 +713,7 @@ export default function CatatanKunjunganList() {
 
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                                    Jadwal Kunjungan Berikutnya
+                                    Tanggal Kontrol Berikutnya
                                 </label>
                                 <input
                                     type="date"
