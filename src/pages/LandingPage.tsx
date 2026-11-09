@@ -2,7 +2,19 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Card, Tag, Skeleton, Empty, Modal, Button, Form, Input, message } from 'antd';
-import { CheckCircleOutlined, CloseOutlined, HeartOutlined, EnvironmentOutlined, SafetyOutlined } from '@ant-design/icons';
+import { 
+    CheckCircleOutlined, 
+    CloseOutlined, 
+    HeartOutlined, 
+    EnvironmentOutlined, 
+    SafetyOutlined,
+    AndroidOutlined,
+    AppleOutlined,
+    DownloadOutlined,
+    GlobalOutlined,
+    PlayCircleOutlined,
+    CloudDownloadOutlined
+} from '@ant-design/icons';
 import { HeartPulse, Droplets } from 'lucide-react';
 import logoUrl from '@/assets/logo.png';
 import mockupImage from '@/assets/mockup.png';
@@ -106,6 +118,7 @@ function FeatureCard({ icon: Icon, title, description, delay }: { icon: any; tit
 
 export default function LandingPage() {
     const { data: plansData, isLoading: loadingPlans } = usePublicSubscriptionPlans();
+    const [isDownloadModalVisible, setIsDownloadModalVisible] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isFormModalVisible, setIsFormModalVisible] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
@@ -121,6 +134,10 @@ export default function LandingPage() {
             currency: 'IDR',
             minimumFractionDigits: 0,
         }).format(price);
+    };
+
+    const openDownloadModal = () => {
+        setIsDownloadModalVisible(true);
     };
 
     const showModal = () => {
@@ -248,7 +265,7 @@ export default function LandingPage() {
             >
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     <Link
-                        to="/login"
+                        to="/"
                         className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
                     >
                         <img src={logoUrl} alt="Prenava Logo" className="w-10 h-10" />
@@ -257,7 +274,7 @@ export default function LandingPage() {
                         </span>
                     </Link>
 
-                    <div className="hidden md:flex items-center gap-8">
+                    <div className="hidden md:flex items-center gap-6">
                         <motion.a
                             href="#about"
                             className="text-gray-700 hover:text-pink-500 transition-colors font-medium"
@@ -279,6 +296,28 @@ export default function LandingPage() {
                         >
                             Catalog
                         </motion.a>
+                        <motion.button
+                            onClick={showModal}
+                            className="text-gray-700 hover:text-pink-500 transition-colors font-medium cursor-pointer"
+                            whileHover={{ y: -2 }}
+                        >
+                            Kemitraan Bidan
+                        </motion.button>
+                        <motion.button
+                            onClick={openDownloadModal}
+                            className="px-4 py-2 rounded-xl font-medium border-2 border-[#F88A9D] text-[#F88A9D] hover:bg-pink-50 transition-all cursor-pointer text-sm"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            Dapatkan Aplikasi
+                        </motion.button>
+                        <Link
+                            to="/login"
+                            className="px-5 py-2.5 rounded-xl font-semibold text-white transition-all duration-300 shadow-sm hover:shadow hover:scale-105 text-sm"
+                            style={{ backgroundColor: '#F88A9D' }}
+                        >
+                            Login Portal
+                        </Link>
                     </div>
                 </div>
             </motion.nav>
@@ -323,7 +362,7 @@ export default function LandingPage() {
 
                             {/* CTA Button */}
                             <motion.button
-                                onClick={showModal}
+                                onClick={openDownloadModal}
                                 className="px-8 py-4 rounded-xl font-semibold text-white transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
                                 style={{ backgroundColor: '#F88A9D', color: '#FFFFFF' }}
                                 initial={{ opacity: 0, y: 20 }}
@@ -454,7 +493,7 @@ export default function LandingPage() {
                                 Kami mendampingi Anda dan janin mulai dari trimester pertama hingga pasca persalinan.
                             </p>
                             <motion.button
-                                onClick={showModal}
+                                onClick={openDownloadModal}
                                 className="px-8 py-3 rounded-xl font-semibold hover:shadow-xl transition-all relative z-10"
                                 style={{ backgroundColor: '#FFFFFF', color: '#F88A9D' }}
                                 whileHover={{ scale: 1.05 }}
@@ -508,8 +547,8 @@ export default function LandingPage() {
                         Ibu Sehat, Janin Kuat, Jalani Kehamilan dengan Tenang Bersama Prenava
                     </motion.h2>
                     <motion.button
-                        onClick={showModal}
-                        className="bg-white px-10 py-4 rounded-xl font-semibold hover:shadow-xl transition-all"
+                        onClick={openDownloadModal}
+                        className="bg-white px-10 py-4 rounded-xl font-semibold hover:shadow-xl transition-all cursor-pointer"
                         style={{ color: '#F88A9D' }}
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.95 }}
@@ -551,6 +590,137 @@ export default function LandingPage() {
                     </div>
                 </div>
             </motion.footer>
+
+            {/* Download App / PWA Modal */}
+            <Modal
+                title={
+                    <div className="text-center pt-2 pb-1">
+                        <span className="text-2xl font-bold text-gray-900">
+                            Dapatkan Aplikasi Prenava
+                        </span>
+                        <p className="text-gray-500 text-sm mt-1 font-normal">
+                            Pilih platform perangkat Anda untuk mulai memantau kesehatan kehamilan
+                        </p>
+                    </div>
+                }
+                open={isDownloadModalVisible}
+                onCancel={() => setIsDownloadModalVisible(false)}
+                footer={null}
+                width={700}
+                centered
+                closeIcon={<CloseOutlined className="text-gray-500 hover:text-gray-700" />}
+                styles={{
+                    body: { padding: '16px 24px 28px' }
+                }}
+            >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    {/* Android Card */}
+                    <div className="bg-gradient-to-br from-emerald-50/60 to-white rounded-2xl p-6 border-2 border-emerald-200/60 flex flex-col justify-between hover:shadow-lg transition-all">
+                        <div>
+                            <div className="w-12 h-12 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center text-2xl mb-4 font-bold">
+                                <AndroidOutlined />
+                            </div>
+                            <h4 className="text-lg font-bold text-gray-900 mb-1">
+                                Pengguna Android
+                            </h4>
+                            <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                                Pasang aplikasi langsung via Google Play Store resmi atau unduh file APK via Google Drive.
+                            </p>
+                            <div className="space-y-2 mb-6">
+                                <div className="flex items-center gap-2 text-xs text-gray-600">
+                                    <CheckCircleOutlined className="text-emerald-500" />
+                                    <span>Tersedia resmi di Google Play Store</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-gray-600">
+                                    <CheckCircleOutlined className="text-emerald-500" />
+                                    <span>File installer APK (.apk) via Google Drive</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-2.5">
+                            <Button
+                                type="primary"
+                                size="large"
+                                icon={<PlayCircleOutlined />}
+                                block
+                                onClick={() => {
+                                    const playStoreUrl = import.meta.env.VITE_PLAYSTORE_URL || 'https://play.google.com/store/apps/details?id=com.prenava.app';
+                                    window.open(playStoreUrl, '_blank');
+                                }}
+                                className="h-11 font-semibold text-sm rounded-xl flex items-center justify-center gap-2 shadow-sm"
+                                style={{
+                                    backgroundColor: '#10B981',
+                                    borderColor: '#10B981',
+                                }}
+                            >
+                                Unduh di Google Play Store
+                            </Button>
+                            <Button
+                                type="default"
+                                size="large"
+                                icon={<CloudDownloadOutlined />}
+                                block
+                                onClick={() => {
+                                    const gdriveUrl = import.meta.env.VITE_GDRIVE_APK_URL || 'https://drive.google.com/drive/folders/1prenava-apk-official';
+                                    window.open(gdriveUrl, '_blank');
+                                }}
+                                className="h-11 font-semibold text-sm rounded-xl border-emerald-300 text-emerald-700 hover:text-emerald-800 hover:border-emerald-500 hover:bg-emerald-50/50 flex items-center justify-center gap-2 transition-colors"
+                            >
+                                Unduh APK (Google Drive)
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* iOS / iPhone PWA Card */}
+                    <div className="bg-gradient-to-br from-pink-50/60 to-white rounded-2xl p-6 border-2 border-pink-200/60 flex flex-col justify-between hover:shadow-lg transition-all">
+                        <div>
+                            <div className="w-12 h-12 rounded-xl bg-pink-500/15 text-pink-500 flex items-center justify-center text-2xl mb-4 font-bold">
+                                <AppleOutlined />
+                            </div>
+                            <h4 className="text-lg font-bold text-gray-900 mb-1">
+                                Pengguna iPhone (iOS)
+                            </h4>
+                            <p className="text-gray-600 text-sm mb-3 leading-relaxed">
+                                Pasang aplikasi versi Web PWA langsung di layar utama iPhone Anda tanpa ribet.
+                            </p>
+                            
+                            {/* Steps */}
+                            <div className="bg-pink-50/70 rounded-xl p-3 border border-pink-100 mb-5 text-xs text-gray-700 space-y-1.5">
+                                <p className="font-semibold text-pink-600">
+                                    📱 Cara Pasang di iPhone:
+                                </p>
+                                <p>1. Klik tombol di bawah (buka di Safari)</p>
+                                <p>2. Ketuk ikon <strong>Bagikan (Share) ⎋</strong></p>
+                                <p>3. Pilih <strong>"Tambah ke Layar Utama" ➕</strong></p>
+                            </div>
+                        </div>
+                        <Button
+                            type="primary"
+                            size="large"
+                            icon={<GlobalOutlined />}
+                            block
+                            onClick={() => {
+                                const hostname = window.location.hostname;
+                                const isLocal = hostname === 'localhost' || 
+                                                hostname === '127.0.0.1' || 
+                                                /^192\.168\./.test(hostname) || 
+                                                /^10\./.test(hostname);
+                                const targetUrl = isLocal 
+                                    ? `http://${hostname}:8085` 
+                                    : (import.meta.env.VITE_PWA_URL || 'https://prenava.id/app/');
+                                window.open(targetUrl, '_blank');
+                            }}
+                            className="h-12 font-semibold text-base rounded-xl"
+                            style={{
+                                backgroundColor: '#F88A9D',
+                                borderColor: '#F88A9D',
+                            }}
+                        >
+                            Buka di iPhone (PWA)
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
 
             {/* Subscription Plans Modal */}
             <Modal
