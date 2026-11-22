@@ -418,14 +418,40 @@ const BidanApplicationsPage = () => {
                 {selectedApplication.phone}
               </Descriptions.Item>
               <Descriptions.Item label="No. STR">
-                {selectedApplication.str_number}
+                {selectedApplication.str_number || '-'}
               </Descriptions.Item>
               <Descriptions.Item label="No. SIP">
-                {selectedApplication.sip_number}
+                {selectedApplication.sip_number || '-'}
+              </Descriptions.Item>
+              <Descriptions.Item label="Wilayah" span={2}>
+                {[
+                  selectedApplication.district_name || selectedApplication.district,
+                  selectedApplication.regency_name || selectedApplication.city,
+                  selectedApplication.province_name || selectedApplication.province,
+                ]
+                  .filter(Boolean)
+                  .join(', ') || '-'}
               </Descriptions.Item>
               <Descriptions.Item label="Alamat Praktik" span={2}>
-                {selectedApplication.practice_address}
+                {selectedApplication.practice_address || selectedApplication.full_address || '-'}
               </Descriptions.Item>
+              {selectedApplication.lat != null && selectedApplication.lng != null && (
+                <Descriptions.Item label="Koordinat Lokasi" span={2}>
+                  {Number(selectedApplication.lat).toFixed(6)}, {Number(selectedApplication.lng).toFixed(6)}
+                </Descriptions.Item>
+              )}
+              {selectedApplication.document_url && (
+                <Descriptions.Item label="Dokumen Izin (STR/SIP)" span={2}>
+                  <a
+                    href={selectedApplication.document_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-pink-600 underline font-medium"
+                  >
+                    Lihat / Unduh Dokumen Sertifikat
+                  </a>
+                </Descriptions.Item>
+              )}
               <Descriptions.Item label="Tanggal Pengajuan">
                 {formatDate(selectedApplication.submitted_at)}
               </Descriptions.Item>

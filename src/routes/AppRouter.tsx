@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from '@/pages/LandingPage';
+import DaftarMitraPage from '@/pages/DaftarMitraPage';
 import LoginPage from '@/features/auth/LoginPage';
 import Protected from './Protected';
 import ProtectedAdmin from './ProtectedAdmin';
@@ -46,6 +47,7 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/daftar-mitra" element={<DaftarMitraPage />} />
         <Route path="/login" element={<LoginPage />} />
 
         {/* Admin Routes */}

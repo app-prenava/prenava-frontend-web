@@ -1,6 +1,7 @@
 import api from '@/lib/apiClient';
 import {
   CreateAccountBody,
+  CreateDinkesBody,
   CreateAccountResponse,
   GetAllUsersResponse,
   ResetPasswordBody,
@@ -47,7 +48,7 @@ export const createBidan = async (body: CreateAccountBody) => {
   return data;
 };
 
-export const createDinkes = async (body: CreateAccountBody) => {
+export const createDinkes = async (body: CreateDinkesBody) => {
   const { data } = await api.post<CreateAccountResponse>(
     '/api/admin/create/account/dinkes',
     body

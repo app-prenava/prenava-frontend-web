@@ -18,6 +18,7 @@ import {
   getBidanLocation,
   setBidanLocation,
   updateBidanLocation,
+  toggleBidanLocationActive,
   deleteBidanLocation,
   getBidansWithoutLocation,
   getPublicSubscriptionPlans,
@@ -241,8 +242,20 @@ export const useUpdateBidanLocation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ bidanId, data }: { bidanId: number; data: UpdateBidanLocationBody }) =>
-      updateBidanLocation(bidanId, data),
+    mutationFn: ({ locationId, data }: { locationId: number; data: UpdateBidanLocationBody }) =>
+      updateBidanLocation(locationId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.bidanLocations });
+      queryClient.invalidateQueries({ queryKey: ['bidanAccounts'] });
+    },
+  });
+};
+
+export const useToggleBidanLocationActive = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (locationId: number) => toggleBidanLocationActive(locationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.bidanLocations });
     },

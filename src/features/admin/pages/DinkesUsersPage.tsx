@@ -230,28 +230,20 @@ export default function DinkesUsersPage() {
             )}
           />
           <Column
-            title="Alamat"
-            dataIndex="address"
-            key="address"
-            render={() => (
-              <span className="text-gray-400">-</span>
-            )}
+            title="Provinsi"
+            dataIndex="province_name"
+            key="province_name"
+            render={(val?: string | null) =>
+              val ? <span>{val}</span> : <span className="text-gray-400">-</span>
+            }
           />
           <Column
-            title="Kota"
-            dataIndex="city"
-            key="city"
-            render={() => (
-              <span className="text-gray-400">-</span>
-            )}
-          />
-          <Column
-            title="Spesialisasi"
-            dataIndex="specialization"
-            key="specialization"
-            render={() => (
-              <span className="text-gray-400">-</span>
-            )}
+            title="Kabupaten / Kota"
+            dataIndex="regency_name"
+            key="regency_name"
+            render={(val?: string | null) =>
+              val ? <Tag color="blue">{val}</Tag> : <Tag color="warning">Belum diatur</Tag>
+            }
           />
           <Column
             title="Status"

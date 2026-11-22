@@ -46,13 +46,29 @@ export interface SubscriptionPlanResponse {
 // Bidan Application
 export interface BidanApplication {
   id: number;
+  bidan_application_id?: number;
   nama: string;
+  full_name?: string;
   email: string;
   phone: string;
   bidan_name: string;
+  spesialisasi?: string;
   str_number: string;
   sip_number: string;
   practice_address: string;
+  full_address?: string;
+  province?: string;
+  province_name?: string;
+  province_code?: string;
+  city?: string;
+  regency_name?: string;
+  regency_code?: string;
+  district?: string;
+  district_name?: string;
+  district_code?: string;
+  lat?: number | null;
+  lng?: number | null;
+  document_url?: string | null;
   plan_id: number;
   plan?: SubscriptionPlan;
   status: ApplicationStatus;
@@ -63,6 +79,10 @@ export interface BidanApplication {
   reviewed_by?: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface ApproveApplicationBody {
+  id: number;
 }
 
 export interface BidanApplicationsResponse {

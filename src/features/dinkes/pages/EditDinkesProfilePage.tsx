@@ -117,7 +117,7 @@ export default function EditDinkesProfilePage() {
             setSuccess(res?.message || 'Perubahan berhasil disimpan');
             setHasProfile(true);
             setTimeout(() => {
-        navigate('/bidan/profile', { state: { refresh: true } });
+        navigate('/dinkes/profile', { state: { refresh: true } });
       }, 1500);
         } catch (e: any) {
             console.error('Submit error:', e);

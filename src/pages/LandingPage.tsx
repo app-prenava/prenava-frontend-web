@@ -140,10 +140,6 @@ export default function LandingPage() {
         setIsDownloadModalVisible(true);
     };
 
-    const showModal = () => {
-        setIsModalVisible(true);
-    };
-
     const handleCancel = () => {
         setIsModalVisible(false);
     };
@@ -296,13 +292,12 @@ export default function LandingPage() {
                         >
                             Catalog
                         </motion.a>
-                        <motion.button
-                            onClick={showModal}
-                            className="text-gray-700 hover:text-pink-500 transition-colors font-medium cursor-pointer"
-                            whileHover={{ y: -2 }}
+                        <Link
+                            to="/daftar-mitra"
+                            className="text-gray-700 hover:text-pink-500 transition-colors font-medium"
                         >
                             Kemitraan Bidan
-                        </motion.button>
+                        </Link>
                         <motion.button
                             onClick={openDownloadModal}
                             className="px-4 py-2 rounded-xl font-medium border-2 border-[#F88A9D] text-[#F88A9D] hover:bg-pink-50 transition-all cursor-pointer text-sm"
@@ -360,19 +355,27 @@ export default function LandingPage() {
                                 Pemantauan dan layanan kesehatan ibu hamil
                             </motion.p>
 
-                            {/* CTA Button */}
-                            <motion.button
-                                onClick={openDownloadModal}
-                                className="px-8 py-4 rounded-xl font-semibold text-white transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
-                                style={{ backgroundColor: '#F88A9D', color: '#FFFFFF' }}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 2, duration: 0.6 }}
-                                whileHover={{ scale: 1.05, y: -2 }}
-                                whileTap={{ scale: 0.95 }}
-                            >
-                                Dapatkan Aplikasi Sekarang
-                            </motion.button>
+                            {/* CTA Buttons */}
+                            <div className="flex flex-wrap items-center gap-4">
+                                <motion.button
+                                    onClick={openDownloadModal}
+                                    className="px-8 py-4 rounded-xl font-semibold text-white transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
+                                    style={{ backgroundColor: '#F88A9D', color: '#FFFFFF' }}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 2, duration: 0.6 }}
+                                    whileHover={{ scale: 1.05, y: -2 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    Dapatkan Aplikasi Sekarang
+                                </motion.button>
+                                <Link
+                                    to="/daftar-mitra"
+                                    className="px-6 py-4 rounded-xl font-semibold border-2 border-[#F88A9D] text-[#F88A9D] hover:bg-pink-50 transition-all duration-300"
+                                >
+                                    Daftar Mitra Bidan
+                                </Link>
+                            </div>
                         </motion.div>
 
                         {/* Right Column - Phone Mockup */}

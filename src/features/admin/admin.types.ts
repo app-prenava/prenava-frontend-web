@@ -12,6 +12,11 @@ export type User = {
   alamat_praktik?: string | null;
   kota_tempat_praktik?: string | null;
   spesialisasi?: string | null;
+  // Region fields for Dinkes accounts
+  province_code?: string | null;
+  province_name?: string | null;
+  regency_code?: string | null;
+  regency_name?: string | null;
   // Alternative nested structure
   profile?: {
     alamat_praktik?: string | null;
@@ -30,6 +35,13 @@ export type CreateAccountBody = {
   name: string;
   email: string;
   password: string;
+};
+
+export type CreateDinkesBody = CreateAccountBody & {
+  province_code: string;
+  regency_code: string;
+  jabatan?: string;
+  nip?: string;
 };
 
 export type CreateAccountResponse = {

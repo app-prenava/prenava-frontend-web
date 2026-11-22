@@ -207,11 +207,32 @@ const CreateBidanFromApplicationPage = () => {
             <Descriptions.Item label="Nama Praktik">{application.bidan_name}</Descriptions.Item>
             <Descriptions.Item label="Email">{application.email}</Descriptions.Item>
             <Descriptions.Item label="No. Telepon">{application.phone}</Descriptions.Item>
-            <Descriptions.Item label="No. STR">{application.str_number}</Descriptions.Item>
-            <Descriptions.Item label="No. SIP">{application.sip_number}</Descriptions.Item>
-            <Descriptions.Item label="Alamat Praktik" span={2}>
-              {application.practice_address}
+            <Descriptions.Item label="No. STR">{application.str_number || '-'}</Descriptions.Item>
+            <Descriptions.Item label="No. SIP">{application.sip_number || '-'}</Descriptions.Item>
+            <Descriptions.Item label="Wilayah" span={2}>
+              {[
+                application.district_name || application.district,
+                application.regency_name || application.city,
+                application.province_name || application.province,
+              ]
+                .filter(Boolean)
+                .join(', ') || '-'}
             </Descriptions.Item>
+            <Descriptions.Item label="Alamat Praktik" span={2}>
+              {application.practice_address || application.full_address || '-'}
+            </Descriptions.Item>
+            {application.document_url && (
+              <Descriptions.Item label="Dokumen Izin" span={2}>
+                <a
+                  href={application.document_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-pink-600 underline font-medium"
+                >
+                  Lihat Dokumen STR/SIP
+                </a>
+              </Descriptions.Item>
+            )}
           </Descriptions>
         </Card>
 

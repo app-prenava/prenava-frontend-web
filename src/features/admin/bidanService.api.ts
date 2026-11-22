@@ -8,15 +8,12 @@ import type {
   BidanApplication,
   BidanApplicationsResponse,
   BidanApplicationResponse,
-  ApproveApplicationBody,
-  RejectApplicationBody,
   BidanAccount,
   BidanAccountsResponse,
   BidanAccountResponse,
   CreateBidanAccountBody,
   CreateBidanAccountResponse,
   BidanLocation,
-  BidanLocationsResponse,
   BidanLocationResponse,
   SetBidanLocationBody,
   UpdateBidanLocationBody,
@@ -78,7 +75,8 @@ export const approveApplication = async (id: number): Promise<BidanApplication> 
 
 export const rejectApplication = async (id: number, rejection_reason: string): Promise<BidanApplication> => {
   const response = await apiClient.patch<BidanApplicationResponse>(`/api/admin/bidan-applications/${id}/reject`, {
-    rejection_reason
+    reason: rejection_reason,
+    rejection_reason,
   });
   return response.data.data;
 };
@@ -130,8 +128,15 @@ export const setBidanLocation = async (bidanId: number, data: SetBidanLocationBo
   return response.data.data;
 };
 
-export const updateBidanLocation = async (bidanId: number, data: UpdateBidanLocationBody): Promise<BidanLocation> => {
-  const response = await apiClient.put<BidanLocationResponse>(`/api/admin/bidans/${bidanId}/location`, data);
+export const updateBidanLocation = async (locationId: number, data: UpdateBidanLocationBody): Promise<BidanLocation> => {
+  const response = await apiClient.put<BidanLocationResponse>(`/api/admin/bidan-locations/${locationId}`, data);
+  return response.data.data;
+};
+
+export const toggleBidanLocationActive = async (locationId: number): Promise<{ location_id: number; is_active: boolean }> => {
+  const response = await apiClient.patch<{ status: string; message: string; data: { location_id: number; is_active: boolean } }>(
+    `/api/admin/bidan-locations/${locationId}/toggle-active`
+  );
   return response.data.data;
 };
 
@@ -181,23 +186,53 @@ export interface SubscriptionApplicationBody {
 export interface SubscriptionApplicationResponse {
   data: {
     id: number;
-    full_name: string;
-    email: string;
-    phone: string;
+    application_id?: number;
+    full_name?: string;
+    email?: string;
+    phone?: string;
     bidan_name: string;
-    full_address: string;
-    subscription_plan_id: number;
+    full_address?: string;
+    subscription_plan_id?: number;
     status: 'pending' | 'approved' | 'rejected';
     submitted_at: string;
   };
 }
 
+export interface ApplicationStatusCheckResult {
+  application_id: number;
+  status: 'pending' | 'approved' | 'rejected';
+  full_name?: string;
+  bidan_name: string;
+  plan_name?: string;
+  province?: string;
+  city?: string;
+  district?: string;
+  submitted_at: string;
+  approved_at?: string | null;
+  rejected_at?: string | null;
+  rejection_reason?: string | null;
+}
+
 export const createSubscriptionApplication = async (
-  data: SubscriptionApplicationBody
+  data: SubscriptionApplicationBody | FormData
 ): Promise<SubscriptionApplicationResponse['data']> => {
+  const isFormData = data instanceof FormData;
   const response = await apiClient.post<SubscriptionApplicationResponse>(
     '/api/public/bidan-applications',
-    data
+    data,
+    isFormData
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : undefined
+  );
+  return response.data.data;
+};
+
+export const checkPublicApplicationStatus = async (
+  email: string
+): Promise<ApplicationStatusCheckResult> => {
+  const response = await apiClient.get<{ status: string; data: ApplicationStatusCheckResult }>(
+    '/api/public/bidan-applications/status',
+    { params: { email } }
   );
   return response.data.data;
 };

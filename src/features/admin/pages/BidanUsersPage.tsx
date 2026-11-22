@@ -347,7 +347,11 @@ export default function BidanUsersPage() {
             <div className="flex justify-center mb-6">
               {detail?.photo ? (
                 <img
-                  src={`${import.meta.env.VITE_API_BASE}/storage/${detail.photo}`}
+                  src={
+                    detail.photo.startsWith('http')
+                      ? detail.photo
+                      : `${import.meta.env.VITE_API_BASE}/storage/${detail.photo.replace(/^\/+/, '')}`
+                  }
                   className="w-40 h-40 rounded-full object-cover"
                   alt="Foto Bidan"
                 />
@@ -364,7 +368,10 @@ export default function BidanUsersPage() {
                 <div className="col-span-1 text-gray-600">Alamat Praktik</div>
                 <div className="col-span-2">: {detail?.alamat_praktik || '-'}</div>
 
-                <div className="col-span-1 text-gray-600">Kota</div>
+                <div className="col-span-1 text-gray-600">Provinsi</div>
+                <div className="col-span-2">: {detail?.provinsi_tempat_praktik || '-'}</div>
+
+                <div className="col-span-1 text-gray-600">Kota / Kabupaten</div>
                 <div className="col-span-2">: {detail?.kota_tempat_praktik || '-'}</div>
 
                 <div className="col-span-1 text-gray-600">Kecamatan</div>
@@ -375,6 +382,12 @@ export default function BidanUsersPage() {
 
                 <div className="col-span-1 text-gray-600">Spesialisasi</div>
                 <div className="col-span-2">: {detail?.spesialisasi || '-'}</div>
+
+                <div className="col-span-1 text-gray-600">No. STR</div>
+                <div className="col-span-2">: {detail?.str_number || '-'}</div>
+
+                <div className="col-span-1 text-gray-600">No. SIP</div>
+                <div className="col-span-2">: {detail?.sip_number || '-'}</div>
               </div>
             </Card>
           </div>

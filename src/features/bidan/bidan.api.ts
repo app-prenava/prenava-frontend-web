@@ -472,7 +472,9 @@ export type UserDataAgeLmpResponse = {
   message: string;
   data: {
     gestational_age_distribution: { gestational_age_weeks: number; total: number }[];
+    trimester_distribution?: { trimester: string; total: number }[];
     age_distribution: { age: number; total: number }[];
+    total_ibu_hamil?: number;
   };
 };
 
